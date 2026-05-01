@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LITAI v5.0 — AI SLR Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}</script>
+<style>
+:root{--bg:#0a0e17;--bg2:#111827;--bgc:#1a2235;--bgi:#0d1321;--bdr:#2a3a52;--t1:#e8edf5;--t2:#8899b4;--t3:#5a6a82;--bl:#3b82f6;--cy:#06b6d4;--em:#10b981;--vi:#8b5cf6;--am:#f59e0b;--ro:#f43f5e;--or:#f97316;--gp:linear-gradient(135deg,#3b82f6,#06b6d4);--ga:linear-gradient(135deg,#8b5cf6,#06b6d4);--r:12px;--rs:8px}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+.hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,14,23,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:8px}.logo-i{width:30px;height:30px;background:var(--gp);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff}.logo-t{font-family:'Playfair Display',serif;font-size:19px;font-weight:800;background:var(--gp);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.logo-v{font-size:9px;color:var(--cy);font-weight:600}
+.hdr-r{display:flex;align-items:center;gap:10px}.api-s{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t3)}.api-d{width:6px;height:6px;border-radius:50%;background:var(--em);box-shadow:0 0 6px rgba(16,185,129,.5)}.api-d.off{background:var(--ro)}
+.pipe{position:fixed;top:52px;left:0;right:0;z-index:99;background:var(--bg2);border-bottom:1px solid var(--bdr);padding:6px 12px;display:flex;align-items:center;gap:1px;overflow-x:auto}.ps{display:flex;align-items:center;gap:4px;padding:4px 8px;border-radius:14px;font-size:10px;font-weight:500;color:var(--t3);cursor:pointer;transition:.3s;white-space:nowrap}.ps.on{background:rgba(59,130,246,.15);color:var(--bl)}.ps.done{color:var(--em)}.ps .sn{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;border:1.5px solid currentColor}.ps.done .sn{background:var(--em);border-color:var(--em);color:#fff}.ps.on .sn{background:var(--bl);border-color:var(--bl);color:#fff}.pa{color:var(--t3);font-size:10px;opacity:.3}
+.main{margin-top:96px;padding:20px;max-width:1400px;margin-left:auto;margin-right:auto}.mod{display:none;animation:fi .4s ease}.mod.on{display:block}@keyframes fi{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}@keyframes sp{to{transform:rotate(360deg)}}
+.mh{margin-bottom:20px}.mh h1{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;margin-bottom:4px}.mh p{font-size:13px;color:var(--t2);max-width:700px;line-height:1.5}
+.badge{display:inline-flex;padding:2px 8px;border-radius:14px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}.bb{background:rgba(59,130,246,.12);color:var(--bl)}.bc{background:rgba(6,182,212,.12);color:var(--cy)}.bg{background:rgba(16,185,129,.12);color:var(--em)}.bv{background:rgba(139,92,246,.12);color:var(--vi)}.ba{background:rgba(245,158,11,.12);color:var(--am)}.br{background:rgba(244,63,94,.12);color:var(--ro)}.bo{background:rgba(249,115,22,.12);color:var(--or)}
+.card{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--r);padding:18px;margin-bottom:14px}.ct{font-size:14px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px}.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.fg{margin-bottom:14px}.fl{display:block;font-size:11px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+input[type="text"],input[type="number"],input[type="password"],textarea,select{width:100%;background:var(--bgi);border:1px solid var(--bdr);border-radius:var(--rs);padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--t1);outline:none;transition:.3s}input:focus,textarea:focus,select:focus{border-color:var(--bl);box-shadow:0 0 0 2px rgba(59,130,246,.12)}textarea{resize:vertical;min-height:60px;line-height:1.4}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:9px 18px;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:.3s}.bp{background:var(--gp);color:#fff;box-shadow:0 3px 12px rgba(59,130,246,.25)}.bp:hover{transform:translateY(-1px)}.bs{background:var(--bgc);color:var(--t1);border:1px solid var(--bdr)}.bac{background:var(--ga);color:#fff}.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important}.bg2{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.bsm{padding:6px 12px;font-size:11px}.blg{padding:12px 24px;font-size:14px}
+.sr{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}.sc{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;text-align:center}.sv{font-size:26px;font-weight:700;background:var(--gp);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.sl{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-top:2px}
+.tw{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bdr)}.dt{width:100%;border-collapse:collapse;font-size:11px}.dt th{text-align:left;padding:8px 10px;background:var(--bg2);border-bottom:2px solid var(--bdr);font-weight:600;color:var(--t2);text-transform:uppercase;font-size:9px;letter-spacing:.4px}.dt td{padding:8px 10px;border-bottom:1px solid var(--bdr);vertical-align:top}.dt tr:hover td{background:rgba(59,130,246,.04)}.mono{font-family:'DM Mono',monospace}
+.scrd{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:8px;transition:.3s}.scrd.si{border-left:4px solid var(--em)}.scrd.se{border-left:4px solid var(--ro);opacity:.65}.scrd.sm{border-left:4px solid var(--am)}.scrd-t{font-size:13px;font-weight:600;margin-bottom:4px;line-height:1.3}.scrd-m{font-size:10px;color:var(--t3);margin-bottom:3px}.scrd-j{font-size:10px;color:var(--cy);margin-bottom:6px}.hl-p{background:rgba(59,130,246,.22);padding:0 2px;border-radius:2px}.hl-i{background:rgba(16,185,129,.22);padding:0 2px;border-radius:2px}.hl-c{background:rgba(139,92,246,.22);padding:0 2px;border-radius:2px}.hl-o{background:rgba(245,158,11,.22);padding:0 2px;border-radius:2px}.scrd-a{font-size:11px;color:var(--t2);line-height:1.5;margin-bottom:8px}.scrd-r{font-size:10px;color:var(--t3);font-style:italic;margin-top:4px}.scrd-btns{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.sb{padding:4px 10px;border-radius:5px;border:1px solid;font-size:10px;font-weight:600;cursor:pointer;background:transparent;transition:.2s}.sb-i{border-color:var(--em);color:var(--em)}.sb-i:hover,.sb-i.on{background:var(--em);color:#fff}.sb-e{border-color:var(--ro);color:var(--ro)}.sb-e:hover,.sb-e.on{background:var(--ro);color:#fff}.sb-m{border-color:var(--am);color:var(--am)}.sb-m:hover,.sb-m.on{background:var(--am);color:#fff}
+.abg{display:inline-flex;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:600;margin-left:6px}.af{background:rgba(16,185,129,.12);color:var(--em)}.ap2{background:rgba(244,63,94,.12);color:var(--ro)}
+.bl2{font-size:10px;color:var(--cy);text-decoration:underline;cursor:pointer;margin-left:6px}.mab{display:inline-flex;padding:1px 6px;border-radius:8px;font-size:8px;font-weight:700;background:rgba(139,92,246,.12);color:var(--vi);margin-left:4px}
+.ap-pass{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:var(--rs);padding:3px 10px;font-size:10px;font-weight:600;color:var(--em)}.ap-fail{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);border-radius:var(--rs);padding:3px 10px;font-size:10px;font-weight:600;color:var(--ro)}.ap-review{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:var(--rs);padding:3px 10px;font-size:10px;font-weight:600;color:var(--am)}
+.rb{display:inline-block;padding:2px 7px;border-radius:8px;font-size:9px;font-weight:600}.rl{background:rgba(16,185,129,.12);color:var(--em)}.rm{background:rgba(245,158,11,.12);color:var(--am)}.rh{background:rgba(244,63,94,.12);color:var(--ro)}.ru{background:rgba(139,92,246,.12);color:var(--vi)}
+.tabs{display:flex;border-bottom:1px solid var(--bdr);margin-bottom:16px;gap:1px;overflow-x:auto}.tab{padding:7px 14px;border:none;background:none;color:var(--t3);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:.3s;white-space:nowrap}.tab.on{color:var(--bl);border-bottom-color:var(--bl)}.tc{display:none}.tc.on{display:block;animation:fi .3s ease}
+.pb{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;margin:8px 0}.pf{height:100%;background:var(--gp);border-radius:2px;transition:width .4s}.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--bdr);border-top-color:var(--bl);border-radius:50%;animation:sp .7s linear infinite}.aip{display:flex;align-items:center;gap:8px;padding:10px;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.18);border-radius:var(--r);margin:10px 0;font-size:11px;color:var(--bl)}
+.plt{background:#fff;border-radius:var(--r);padding:18px;margin:10px 0;overflow-x:auto}.rp{background:#fff;color:#1a1a1a;border-radius:var(--r);padding:36px;max-height:550px;overflow-y:auto;font-size:12px;line-height:1.7}.rp h1{font-size:20px;color:#111;margin-bottom:10px;font-family:'Playfair Display',serif}.rp h2{font-size:15px;color:#222;margin:18px 0 8px;border-bottom:2px solid #eee;padding-bottom:5px}.rp p{margin-bottom:9px;color:#333}.rp table{width:100%;border-collapse:collapse;margin:12px 0;font-size:10px}.rp table th,.rp table td{border:1px solid #ddd;padding:5px 8px;text-align:left}.rp table th{background:#f5f5f5;font-weight:600}
+.cb{background:var(--bgi);border:1px solid var(--bdr);border-radius:var(--rs);padding:12px;font-family:'DM Mono',monospace;font-size:11px;overflow-x:auto;white-space:pre-wrap;color:var(--cy);line-height:1.4}
+.eg{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}.ec{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:.3s}.ec:hover{border-color:var(--bl);transform:translateY(-2px)}.ei{font-size:28px;margin-bottom:6px}
+.cfg{position:fixed;top:52px;right:0;width:340px;height:calc(100vh - 52px);background:var(--bg2);border-left:1px solid var(--bdr);z-index:98;transform:translateX(100%);transition:transform .3s;padding:18px;overflow-y:auto}.cfg.open{transform:translateX(0)}
+.ntf{position:fixed;bottom:18px;right:18px;padding:10px 18px;border-radius:var(--r);font-size:12px;z-index:300;animation:su .3s ease;display:flex;align-items:center;gap:7px;box-shadow:0 16px 48px rgba(0,0,0,.4)}.ntf.ok{background:var(--em);color:#fff}.ntf.er{background:var(--ro);color:#fff}.ntf.in{background:var(--bl);color:#fff}@keyframes su{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.pico-g{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}.pico-c{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;text-align:center}.pico-l{font-family:'Playfair Display',serif;font-size:36px;font-weight:800;margin-bottom:1px}.pico-lb{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.db-tg{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.dbt{display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--bdr);border-radius:var(--rs);cursor:pointer;transition:.2s;font-size:11px}.dbt.on{border-color:var(--bl);background:rgba(59,130,246,.08);color:var(--bl)}
+.pleg{display:flex;gap:10px;margin:6px 0;font-size:10px;flex-wrap:wrap}.pleg span{display:flex;align-items:center;gap:3px}.pleg .d{width:10px;height:10px;border-radius:2px}
+.thresh-box{background:var(--bgi);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:14px}.thresh-title{font-size:12px;font-weight:600;margin-bottom:8px;color:var(--am)}
+/* MANUAL EDIT MODAL */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;align-items:center;justify-content:center}.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:24px;max-width:700px;width:95%;max-height:85vh;overflow-y:auto}
+.modal h2{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:16px}.modal .fg{margin-bottom:10px}
+.manual-tag{display:inline-flex;padding:2px 6px;border-radius:8px;font-size:8px;font-weight:700;background:rgba(245,158,11,.15);color:var(--am);margin-left:6px;vertical-align:middle}
+.warn-box{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:var(--r);padding:12px;margin:10px 0;font-size:11px;color:var(--am)}
+.inline-edit{background:var(--bgi);border:1px solid var(--bdr);border-radius:4px;padding:4px 8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--t1);width:70px;outline:none}.inline-edit:focus{border-color:var(--bl)}
+.del-btn{background:none;border:none;color:var(--ro);cursor:pointer;font-size:14px;padding:2px 6px;opacity:.6;transition:.2s}.del-btn:hover{opacity:1}
+/* ============ PDF VIEWER (Rayyan-style) ============ */
+.pdf-layout{display:grid;grid-template-columns:240px 1fr 280px;gap:0;height:600px;background:var(--bg);border-radius:var(--r);overflow:hidden;border:1px solid var(--bdr);margin:10px 0}
+.pdf-list{background:var(--bg2);border-right:1px solid var(--bdr);overflow-y:auto;padding:10px}
+.pdf-list-h{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.pdf-item{padding:9px 10px;border-radius:var(--rs);cursor:pointer;margin-bottom:4px;transition:.15s;background:var(--bgc);border:1px solid var(--bdr)}
+.pdf-item:hover{border-color:var(--bl)}
+.pdf-item.on{border-color:var(--bl);background:rgba(59,130,246,.08)}
+.pdf-item-t{font-size:10px;font-weight:600;color:var(--t1);line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pdf-item-m{font-size:8px;color:var(--t3);font-family:'DM Mono',monospace;display:flex;justify-content:space-between}
+.pdf-viewer{background:var(--bgi);overflow-y:auto;padding:14px;position:relative}
+.pdf-page{position:relative;margin:0 auto 14px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,.5);border-radius:3px;overflow:hidden;width:fit-content}
+.pdf-page canvas{display:block}
+.pdf-overlay{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none}
+.pdf-hl{position:absolute;mix-blend-mode:multiply;border-radius:2px;cursor:pointer;pointer-events:auto;transition:.15s}
+.pdf-hl.hl-p{background:rgba(59,130,246,.4)}
+.pdf-hl.hl-i{background:rgba(16,185,129,.4)}
+.pdf-hl.hl-c{background:rgba(139,92,246,.4)}
+.pdf-hl.hl-o{background:rgba(245,158,11,.4)}
+.pdf-hl.hl-num{background:rgba(244,63,94,.45);outline:1px dashed rgba(244,63,94,.6)}
+.pdf-hl:hover{filter:brightness(1.3);transform:scale(1.03)}
+.pdf-side{background:var(--bg2);border-left:1px solid var(--bdr);overflow-y:auto;padding:12px}
+.pdf-side h4{font-size:10px;color:var(--t1);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px}
+.pdf-match{padding:7px 9px;background:var(--bgc);border:1px solid var(--bdr);border-radius:6px;margin-bottom:5px;cursor:pointer;font-size:9px;line-height:1.4;color:var(--t2);transition:.15s}
+.pdf-match:hover{border-color:var(--bl);color:var(--t1)}
+.pdf-match .pg{font-family:'DM Mono',monospace;font-size:8px;color:var(--cy);margin-bottom:2px}
+.pdf-drop{border:2px dashed var(--bdr);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;transition:.2s;color:var(--t3)}
+.pdf-drop:hover{border-color:var(--bl);background:rgba(59,130,246,.03)}
+.pdf-drop.dragover{border-color:var(--bl);background:rgba(59,130,246,.06)}
+.pdf-tbar{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:5;font-size:10px;color:var(--t2)}
+.pdf-tbar button{background:var(--bgc);border:1px solid var(--bdr);color:var(--t2);width:24px;height:24px;border-radius:5px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px}
+.pdf-tbar button:hover{border-color:var(--bl);color:var(--t1)}
+/* Source-lock badges */
+.conf-badge{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:700;font-family:'DM Mono',monospace}
+.conf-high{background:rgba(16,185,129,.1);color:var(--em)}
+.conf-med{background:rgba(245,158,11,.1);color:var(--am)}
+.conf-low{background:rgba(244,63,94,.1);color:var(--ro)}
+.lock-icon{font-size:10px;cursor:pointer;opacity:.6;transition:.15s}.lock-icon:hover{opacity:1}.lock-icon.locked{color:var(--em);opacity:1}
+/* Rayyan-style access badges */
+.acc-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:5px 0 8px}
+.acc-tag{display:inline-flex;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.acc-free-tag{background:rgba(16,185,129,.15);color:var(--em);border:1px solid rgba(16,185,129,.3)}
+.acc-paid-tag{background:rgba(244,63,94,.1);color:var(--ro);border:1px solid rgba(244,63,94,.25)}
+.acc-link{font-size:9px;font-weight:600;text-decoration:none;padding:2px 7px;border-radius:6px;transition:.2s;white-space:nowrap}
+.acc-link-free{background:rgba(16,185,129,.08);color:var(--em);border:1px solid rgba(16,185,129,.2)}.acc-link-free:hover{background:rgba(16,185,129,.2)}
+.acc-link-paid{background:rgba(59,130,246,.08);color:var(--bl);border:1px solid rgba(59,130,246,.2)}.acc-link-paid:hover{background:rgba(59,130,246,.2)}
+.placeholder-row td{background:rgba(245,158,11,.04)!important}
+.placeholder-tag{display:inline-block;padding:1px 5px;border-radius:4px;font-size:8px;font-weight:700;background:rgba(245,158,11,.15);color:var(--am)}
+@media(max-width:768px){.main{padding:10px}.mh h1{font-size:20px}.pico-g{grid-template-columns:repeat(2,1fr)}.sr{grid-template-columns:repeat(2,1fr)}.pdf-layout{grid-template-columns:1fr;height:auto}}
+</style>
+</head>
+<body>
+<header class="hdr">
+<div class="logo"><div class="logo-i">Li</div><span class="logo-t">LITAI</span><span class="logo-v">v5.0</span></div>
+<div class="hdr-r"><div class="api-s"><div class="api-d" id="apiD"></div><span id="apiT">Connected</span></div><button class="btn bsm bs" onclick="document.getElementById('cfg').classList.toggle('open')">⚙</button><button class="btn bsm bp" onclick="location.reload()">+ New</button></div>
+</header>
+<nav class="pipe" id="pipe"></nav>
+<div class="cfg" id="cfg">
+<h3 style="margin-bottom:14px">⚙ Settings</h3>
+<div class="fg"><label class="fl">Claude API Key</label><input type="password" id="apiK" placeholder="sk-ant-..." onchange="sC()"></div>
+<div class="fg"><label class="fl">AI Model</label><select id="aiM" onchange="sC()"><option value="claude-sonnet-4-20250514">Claude Sonnet 4</option><option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option></select></div>
+<div class="fg"><label class="fl">PubMed Email</label><input type="text" id="pmE" placeholder="you@email.com" onchange="sC()"></div>
+<button class="btn bp" onclick="tAPI()" style="width:100%">Test Connection</button>
+</div>
+<main class="main" id="M"></main>
+
+<!-- MANUAL EDIT MODAL -->
+<div class="modal-overlay" id="modalOv" onclick="if(event.target===this)closeModal()">
+<div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+/* ===== CORE STATE ===== */
+const STEPS=['PICO','Search','Dedup','Screening','Appraisal','Extraction','Quality','Meta-Analysis','Report'];
+const RTYPES=[{v:'slr',l:'Systematic Literature Review'},{v:'meta',l:'Meta-Analysis'},{v:'slr_meta',l:'SLR + Meta-Analysis'},{v:'scoping',l:'Scoping Review'},{v:'rapid',l:'Rapid Review'},{v:'narrative',l:'Narrative Review'},{v:'umbrella',l:'Umbrella Review'},{v:'living',l:'Living SLR'},{v:'nma',l:'Network Meta-Analysis'},{v:'cer_sp',l:'CER: Safety & Performance (EU MDR)'},{v:'cer_eq',l:'CER: Equivalence/State of Art'},{v:'pmcf',l:'PMCF Report'},{v:'pms',l:'PMS Report'},{v:'sscp',l:'SSCP'},{v:'csr',l:'CSR (ICH E3)'},{v:'ib',l:'Investigator Brochure'},{v:'hta',l:'HTA Review'},{v:'heor',l:'HEOR/Cost-Effectiveness'},{v:'amcp',l:'AMCP Dossier'},{v:'nice',l:'NICE Evidence Review'},{v:'ind',l:'IND/NDA Lit Review'},{v:'medcomm',l:'Medical Communications'},{v:'guideline',l:'Clinical Guideline Review'},{v:'cochrane',l:'Cochrane Review'},{v:'pharmacovig',l:'Pharmacovigilance Review'},{v:'safety',l:'Safety Signal Review'},{v:'diagnostic',l:'Diagnostic Accuracy Review'},{v:'prognostic',l:'Prognostic Review'},{v:'qual',l:'Qualitative Synthesis'},{v:'mixed',l:'Mixed Methods Review'},{v:'realist',l:'Realist Review'}];
+const ROUTS=[{v:'prisma',l:'PRISMA 2020 SLR'},{v:'cer_sp',l:'CER: Safety & Performance'},{v:'cer_eq',l:'CER: Equivalence'},{v:'csr',l:'CSR (ICH E3)'},{v:'medcomm',l:'Medical Communications'},{v:'hta',l:'HTA Report'},{v:'heor',l:'HEOR Report'},{v:'amcp',l:'AMCP Dossier'},{v:'nice',l:'NICE Submission'},{v:'pmcf',l:'PMCF Report'},{v:'pms',l:'PMS Report'},{v:'sscp',l:'SSCP'},{v:'ib',l:'IB Update'},{v:'pub',l:'Publication Manuscript'},{v:'cochrane',l:'Cochrane Format'},{v:'safety',l:'Safety Report'},{v:'guideline',l:'Guideline Evidence'},{v:'exec',l:'Executive Summary'}];
+
+let D = {
+  step: 0,
+  done: new Set(),
+  pico: { P: '', I: '', C: '', O: '' },
+  rtype: 'slr', rout: 'prisma',
+  strat: '', pmq: '',
+  arts: [], uniq: [], dups: [],
+  screened: [], appraised: [],
+  extracted: [], rob: [], grade: [],
+  meta: null, report: '',
+  pc: {}
+};
+let _uid = 0;
+function uid() { return 'U' + (++_uid); }
+
+/* ===== SETTINGS ===== */
+function sC() {
+  localStorage.setItem('lk', document.getElementById('apiK').value);
+  localStorage.setItem('le', document.getElementById('pmE').value);
+  localStorage.setItem('lm', document.getElementById('aiM').value);
+}
+function lC() {
+  document.getElementById('apiK').value = localStorage.getItem('lk') || '';
+  document.getElementById('pmE').value = localStorage.getItem('le') || '';
+  document.getElementById('aiM').value = localStorage.getItem('lm') || 'claude-sonnet-4-20250514';
+  if (!localStorage.getItem('lk')) {
+    document.getElementById('apiD').classList.add('off');
+    document.getElementById('apiT').textContent = 'No Key';
+  }
+}
+
+/* ===== NOTIFICATION ===== */
+function ntf(m, t) {
+  t = t || 'in';
+  var n = document.createElement('div');
+  n.className = 'ntf ' + (t === 'success' ? 'ok' : t === 'error' ? 'er' : 'in');
+  n.textContent = m;
+  document.body.appendChild(n);
+  setTimeout(function() { n.remove(); }, 3500);
+}
+
+/* ===== AI CALL — ROBUST ===== */
+async function AI(p, s) {
+  s = s || '';
+  var k = localStorage.getItem('lk');
+  if (!k) throw new Error('Set API key in ⚙ Settings');
+  var b = {
+    model: localStorage.getItem('lm') || 'claude-sonnet-4-20250514',
+    max_tokens: 4096,
+    messages: [{ role: 'user', content: p }]
+  };
+  if (s) b.system = s;
+  var r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': k,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify(b)
+  });
+  if (!r.ok) {
+    var e = {};
+    try { e = await r.json(); } catch(_){}
+    throw new Error((e.error && e.error.message) || ('API error ' + r.status));
+  }
+  var data = await r.json();
+  return data.content.map(function(bl) { return bl.text || ''; }).join('');
+}
+
+async function tAPI() {
+  try {
+    var r = await AI('Reply exactly: OK');
+    ntf(r.includes('OK') ? 'Connected!' : 'Response received', 'success');
+    document.getElementById('apiD').classList.remove('off');
+    document.getElementById('apiT').textContent = 'Connected';
+  } catch(e) {
+    ntf(e.message, 'error');
+    document.getElementById('apiD').classList.add('off');
+    document.getElementById('apiT').textContent = 'Error';
+  }
+}
+
+/* ===== ROBUST JSON PARSER ===== */
+function parseJSON(raw) {
+  // Strategy 1: direct parse
+  try { return JSON.parse(raw); } catch(_){}
+  // Strategy 2: strip markdown fences
+  var clean = raw.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+  try { return JSON.parse(clean); } catch(_){}
+  // Strategy 3: find array
+  var arrM = clean.match(/\[[\s\S]*\]/);
+  if (arrM) { try { return JSON.parse(arrM[0]); } catch(_){} }
+  // Strategy 4: find object
+  var objM = clean.match(/\{[\s\S]*\}/);
+  if (objM) { try { return JSON.parse(objM[0]); } catch(_){} }
+  // Strategy 5: try to fix common issues
+  var fixed = clean.replace(/,\s*([}\]])/g, '$1').replace(/([{,]\s*)(\w+)\s*:/g, '$1"$2":');
+  try { return JSON.parse(fixed); } catch(_){}
+  return null;
+}
+
+/* ===== MODAL HELPERS ===== */
+function openModal(html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOv').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modalOv').classList.remove('open');
+}
+
+/* ===== PDF MANAGER (Rayyan-style) ===== */
+var PDFMgr={
+  files:{},doc:null,pages:[],textContent:[],matches:[],scale:1.3,
+  async load(file){
+    var buf=file instanceof Blob?await file.arrayBuffer():file;
+    this.doc=await pdfjsLib.getDocument({data:buf}).promise;
+    this.pages=[];this.textContent=[];
+    for(var i=1;i<=this.doc.numPages;i++){
+      var pg=await this.doc.getPage(i);this.pages.push(pg);
+      var tc=await pg.getTextContent();this.textContent.push(tc);
+    }
+  },
+  async renderTo(container,terms){
+    container.innerHTML='';
+    for(var i=0;i<this.pages.length;i++){
+      var pg=this.pages[i];
+      var vp=pg.getViewport({scale:this.scale});
+      var wrap=document.createElement('div');wrap.className='pdf-page';wrap.id='pdfPg_'+i;
+      var canvas=document.createElement('canvas');var ctx=canvas.getContext('2d');
+      canvas.width=vp.width;canvas.height=vp.height;
+      wrap.appendChild(canvas);
+      var overlay=document.createElement('div');overlay.className='pdf-overlay';
+      wrap.appendChild(overlay);container.appendChild(wrap);
+      await pg.render({canvasContext:ctx,viewport:vp}).promise;
+      if(terms)this.highlightPage(i,overlay,vp,terms);
+    }
+  },
+  highlightPage(pageIdx,overlay,viewport,terms){
+    var tc=this.textContent[pageIdx];if(!tc)return;
+    var self=this;
+    tc.items.forEach(function(item){
+      var txt=item.str;if(!txt.trim())return;
+      var tx=pdfjsLib.Util.transform(viewport.transform,item.transform);
+      var left=tx[4],bottom=tx[5],w=item.width*self.scale,h=item.height?item.height*self.scale:12*self.scale;
+      var top=viewport.height-bottom-h;
+      function hl(cls,cat,term){
+        var d=document.createElement('div');d.className='pdf-hl '+cls;
+        d.style.cssText='left:'+left+'px;top:'+top+'px;width:'+w+'px;height:'+(h+2)+'px';
+        d.title=cat+': '+term+' → "'+txt+'"';overlay.appendChild(d);
+        self.matches.push({page:pageIdx+1,cat:cat,term:term,context:txt.substring(0,60)});
+      }
+      var lo=txt.toLowerCase();
+      ['p','i','c','o'].forEach(function(k){
+        (terms[k]||[]).forEach(function(t){if(lo.indexOf(t.toLowerCase())>=0)hl('hl-'+k,k,t)});
+      });
+      if(/\d+\.?\d*\s*%|\bHR\b|\bOR\b|\bRR\b|\bp\s*[<=>]/i.test(txt))hl('hl-num','num',txt.trim().substring(0,20));
+    });
+  },
+  getFullText(){return this.textContent.map(function(tc){return tc.items.map(function(i){return i.str}).join(' ')}).join('\n\n')},
+  reset(){this.doc=null;this.pages=[];this.textContent=[];this.matches=[]}
+};
+
+async function handlePdfUpload(input){
+  var files=Array.from(input.files);if(!files.length)return;
+  ntf('Loading '+files.length+' PDF(s)...','in');
+  for(var i=0;i<files.length;i++){
+    try{
+      await PDFMgr.load(files[i]);
+      var id='pdf_'+Date.now()+'_'+i;
+      PDFMgr.files[id]={id:id,name:files[i].name,size:files[i].size,pages:PDFMgr.doc.numPages,blob:files[i],
+        text:PDFMgr.getFullText(),uploadedAt:new Date().toISOString()};
+    }catch(e){ntf('Failed: '+files[i].name,'error')}
+  }
+  ntf(files.length+' PDF(s) uploaded with text extraction','success');
+  refreshPdfPanel();
+}
+async function openPdfViewer(id){
+  var meta=PDFMgr.files[id];if(!meta||!meta.blob){ntf('PDF not available','error');return}
+  var view=document.getElementById('pdfViewArea');
+  var matchList=document.getElementById('pdfMatchList');
+  if(!view)return;
+  view.innerHTML='<div style="padding:20px;text-align:center;color:var(--t3)"><span class="spin"></span> Rendering PDF...</div>';
+  PDFMgr.matches=[];
+  await PDFMgr.load(meta.blob);
+  var picoTerms={p:[],i:[],c:[],o:[]};
+  function addTerms(s,arr){if(!s)return;s.split(/[\s,;]+/).forEach(function(w){if(w.length>3)arr.push(w)})}
+  addTerms(D.pico.P,picoTerms.p);addTerms(D.pico.I,picoTerms.i);addTerms(D.pico.C,picoTerms.c);addTerms(D.pico.O,picoTerms.o);
+  Object.keys(picoTerms).forEach(function(k){picoTerms[k]=picoTerms[k].filter(function(w){return !/^(the|with|from|patients?|adults?|were|that|this|have|been|more|than|such|also|into|over|each|only)$/i.test(w)})});
+  await PDFMgr.renderTo(view,picoTerms);
+  if(matchList){
+    matchList.innerHTML=PDFMgr.matches.length?
+      PDFMgr.matches.slice(0,40).map(function(m){
+        return '<div class="pdf-match" onclick="scrollToPdfPage('+m.page+')"><div class="pg">P'+m.page+' · '+m.cat.toUpperCase()+'</div><div>'+esc(m.context)+'</div></div>';
+      }).join(''):'<p style="font-size:10px;color:var(--t3)">No PICO matches found</p>';
+  }
+  document.querySelectorAll('.pdf-item').forEach(function(el){el.classList.toggle('on',el.dataset.id===id)});
+  ntf('Loaded '+meta.pages+' pages · '+PDFMgr.matches.length+' highlights','success');
+}
+function scrollToPdfPage(page){
+  var pages=document.querySelectorAll('.pdf-page');
+  if(pages[page-1]){pages[page-1].scrollIntoView({behavior:'smooth',block:'start'});pages[page-1].style.outline='3px solid var(--cy)';setTimeout(function(){pages[page-1].style.outline=''},1500)}
+}
+function removePdf(id){
+  if(!confirm('Remove this PDF?'))return;
+  delete PDFMgr.files[id];ntf('PDF removed','in');refreshPdfPanel();
+}
+function refreshPdfPanel(){
+  var el=document.getElementById('pdfPanel');if(el)el.innerHTML=renderPdfLibrary();
+}
+function renderPdfLibrary(){
+  var ids=Object.keys(PDFMgr.files);
+  var listHtml='<div class="pdf-list-h"><span>DOCUMENTS ('+ids.length+')</span></div>';
+  if(!ids.length){
+    listHtml+='<p style="font-size:10px;color:var(--t3);padding:8px">No PDFs uploaded yet</p>';
+  }else{
+    ids.forEach(function(id){
+      var f=PDFMgr.files[id];
+      listHtml+='<div class="pdf-item" data-id="'+id+'" onclick="openPdfViewer(\''+id+'\')"><div class="pdf-item-t">'+esc(f.name)+'</div><div class="pdf-item-m"><span>'+f.pages+' pg</span><span>'+(f.size/1024).toFixed(0)+' KB</span></div></div>';
+    });
+  }
+  var html='<div style="margin-bottom:10px"><label class="pdf-drop" ondragover="event.preventDefault();this.classList.add(\'dragover\')" ondragleave="this.classList.remove(\'dragover\')" ondrop="event.preventDefault();this.classList.remove(\'dragover\');var dt=event.dataTransfer;var inp={files:dt.files};handlePdfUpload(inp)"><input type="file" accept=".pdf" multiple style="display:none" onchange="handlePdfUpload(this)"><div onclick="this.parentNode.querySelector(\'input\').click()" style="cursor:pointer"><div style="font-size:24px;margin-bottom:6px">PDF</div><div style="font-size:11px;font-weight:600;margin-bottom:3px">Drop PDFs here or click to upload</div><div style="font-size:9px;color:var(--t3)">Supports multi-file upload · PICO terms highlighted automatically</div></div></label></div>';
+  html+='<div class="pdf-layout"><div class="pdf-list" style="overflow-y:auto">'+listHtml+'</div><div class="pdf-viewer" id="pdfViewArea"><div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--t3);font-size:12px">'+(ids.length?'Select a document to view':'Upload a PDF to begin')+'</div></div><div class="pdf-side" id="pdfSidePanel"><h4>PICO Matches</h4><div id="pdfMatchList"><p style="font-size:10px;color:var(--t3)">Matches appear here after opening a PDF</p></div>';
+  // Show extracted data from PDFs
+  var pdfExtracted=[];
+  ids.forEach(function(id){
+    var f=PDFMgr.files[id];if(!f.text)return;
+    var ex=extractFromPdfText(f.text);
+    if(Object.keys(ex).length>0)pdfExtracted.push({name:f.name,data:ex});
+  });
+  if(pdfExtracted.length){
+    html+='<h4 style="margin-top:14px">Source-Locked Extractions</h4>';
+    pdfExtracted.forEach(function(pe){
+      html+='<div style="font-size:9px;font-weight:600;color:var(--cy);margin:6px 0 4px">'+esc(pe.name)+'</div>';
+      Object.keys(pe.data).forEach(function(k){
+        var d=pe.data[k];
+        var confCls=d.conf>=0.9?'conf-high':d.conf>=0.7?'conf-med':'conf-low';
+        html+='<div class="pdf-match" style="cursor:default"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;color:var(--t1)">'+k.toUpperCase()+': '+d.val+(k==='hr'?' ['+d.lo+'-'+d.hi+']':'')+'</span><span class="conf-badge '+confCls+'">'+(d.conf*100).toFixed(0)+'%</span></div><div style="font-size:8px;color:var(--t3);margin-top:2px">'+esc(d.src)+'</div></div>';
+      });
+    });
+  }
+  html+='</div></div>';
+  html+='<div class="pleg" style="margin-top:8px"><span><div class="d" style="background:rgba(59,130,246,.5)"></div>Population</span><span><div class="d" style="background:rgba(16,185,129,.5)"></div>Intervention</span><span><div class="d" style="background:rgba(139,92,246,.5)"></div>Comparator</span><span><div class="d" style="background:rgba(245,158,11,.5)"></div>Outcome</span><span><div class="d" style="background:rgba(244,63,94,.5)"></div>Numeric</span></div>';
+  return html;
+}
+
+// Source-locked extraction from PDF text
+function extractFromPdfText(text){
+  var data={};
+  var orrM=text.match(/(?:objective response(?:\s+rate)?|ORR)[^.]*?(\d+\.?\d*)\s*%/i);
+  if(orrM)data.orr={val:parseFloat(orrM[1]),conf:0.93,src:orrM[0].substring(0,80)};
+  var pfsM=text.match(/(?:median (?:progression.free survival|PFS))[^.]*?(\d+\.?\d*)\s*months?/i);
+  if(pfsM)data.pfs={val:parseFloat(pfsM[1]),conf:0.95,src:pfsM[0].substring(0,80)};
+  var osM=text.match(/(?:median (?:overall survival|OS))[^.]*?(\d+\.?\d*)\s*months?/i);
+  if(osM)data.os={val:parseFloat(osM[1]),conf:0.94,src:osM[0].substring(0,80)};
+  var nM=text.match(/(\d+)\s+(?:patients|participants|subjects)\s+(?:were\s+)?(?:enrolled|randomi[sz]ed|included)/i);
+  if(nM)data.n={val:parseInt(nM[1]),conf:0.96,src:nM[0].substring(0,80)};
+  var aeM=text.match(/grade\s*(?:≥|>=|3\+|3 or)\s*\d?[^.]*?(\d+\.?\d*)\s*%/i);
+  if(aeM)data.ae={val:parseFloat(aeM[1]),conf:0.88,src:aeM[0].substring(0,80)};
+  var hrM=text.match(/(?:hazard ratio|HR)\s*[=:,]?\s*(\d+\.?\d*)\s*(?:\(|,|\s).*?(\d+\.?\d*)\s*[-\u2013to]+\s*(\d+\.?\d*)/i);
+  if(hrM)data.hr={val:parseFloat(hrM[1]),lo:parseFloat(hrM[2]),hi:parseFloat(hrM[3]),conf:0.91,src:hrM[0].substring(0,80)};
+  return data;
+}
+
+/* ===== NAVIGATION ===== */
+function buildPipe() {
+  document.getElementById('pipe').innerHTML = STEPS.map(function(s, i) {
+    return '<div class="ps' + (i === 0 ? ' on' : '') + '" data-s="' + i + '" onclick="go(' + i + ')"><span class="sn">' + (i + 1) + '</span>' + s + '</div>' + (i < STEPS.length - 1 ? '<span class="pa">›</span>' : '');
+  }).join('');
+}
+function go(s) {
+  if (s > D.step + 1 && !D.done.has(s)) return;
+  document.querySelectorAll('.mod').forEach(function(m) { m.classList.remove('on'); });
+  var el = document.getElementById('m' + s);
+  if (el) el.classList.add('on');
+  document.querySelectorAll('.ps').forEach(function(p) {
+    var n = +p.dataset.s;
+    p.classList.remove('on');
+    if (n === s) p.classList.add('on');
+    p.classList.toggle('done', D.done.has(n));
+  });
+  D.step = s;
+  scrollTo({ top: 0, behavior: 'smooth' });
+}
+function done(s) { D.done.add(s); go(s + 1); }
+
+/* ===== BUILD HTML ===== */
+function build() {
+  var M = document.getElementById('M');
+  var rtO = RTYPES.map(function(r) { return '<option value="' + r.v + '">' + r.l + '</option>'; }).join('');
+  var roO = ROUTS.map(function(r) { return '<option value="' + r.v + '">' + r.l + '</option>'; }).join('');
+
+  M.innerHTML =
+  /* ===== STEP 1: PICO ===== */
+  '<div class="mod on" id="m0">' +
+    '<div class="mh"><div class="badge bb">Step 1/9</div><h1>Define Research Question</h1></div>' +
+    '<div class="pico-g">' +
+      '<div class="pico-c"><div class="pico-l" style="color:var(--bl)">P</div><div class="pico-lb">Population</div><input type="text" id="pP" placeholder="e.g., Adults with T2DM"></div>' +
+      '<div class="pico-c"><div class="pico-l" style="color:var(--cy)">I</div><div class="pico-lb">Intervention</div><input type="text" id="pI" placeholder="e.g., GLP-1 agonists"></div>' +
+      '<div class="pico-c"><div class="pico-l" style="color:var(--vi)">C</div><div class="pico-lb">Comparator</div><input type="text" id="pC" placeholder="e.g., Insulin"></div>' +
+      '<div class="pico-c"><div class="pico-l" style="color:var(--em)">O</div><div class="pico-lb">Outcome</div><input type="text" id="pO" placeholder="e.g., HbA1c, weight"></div>' +
+    '</div>' +
+    '<div class="card"><div class="ct">Parameters</div><div class="cg">' +
+      '<div class="fg"><label class="fl">Study Design</label><select id="sd"><option value="all">All</option><option value="rct">RCTs Only</option><option value="rct_obs">RCTs+Observational</option><option value="obs">Observational</option></select></div>' +
+      '<div class="fg"><label class="fl">Dates</label><div style="display:flex;gap:4px"><input type="number" id="dF" placeholder="2015" style="width:50%"><input type="number" id="dT" placeholder="2026" style="width:50%"></div></div>' +
+      '<div class="fg"><label class="fl">Review Type</label><select id="rt">' + rtO + '</select></div>' +
+      '<div class="fg"><label class="fl">Final Report</label><select id="ro">' + roO + '</select></div>' +
+    '</div>' +
+    '<div class="fg"><label class="fl">Databases</label><div class="db-tg">' +
+      '<label class="dbt on" data-db="pubmed" onclick="this.classList.toggle(\'on\')">PubMed</label>' +
+      '<label class="dbt on" data-db="cochrane" onclick="this.classList.toggle(\'on\')">Cochrane</label>' +
+      '<label class="dbt on" data-db="ctgov" onclick="this.classList.toggle(\'on\')">ClinicalTrials.gov</label>' +
+      '<label class="dbt on" data-db="scholar" onclick="this.classList.toggle(\'on\')">Semantic Scholar</label>' +
+      '<label class="dbt" data-db="embase" onclick="this.classList.toggle(\'on\')">Embase (needs creds)</label>' +
+    '</div></div></div>' +
+    '<div class="bg2"><button class="btn bp blg" onclick="step1()">Generate Search Strategy →</button></div>' +
+  '</div>' +
+
+  /* ===== STEP 2: SEARCH ===== */
+  '<div class="mod" id="m1">' +
+    '<div class="mh"><div class="badge bc">Step 2/9</div><h1>Search & Execute</h1></div>' +
+    '<div class="card"><div class="ct">AI Strategy</div><div id="sOut" class="cb">Run Step 1 first...</div>' +
+    '<div class="fg" style="margin-top:10px"><label class="fl">PubMed Query (editable)</label><textarea id="pmQ" rows="3"></textarea></div></div>' +
+    '<div class="card"><div class="ct">Results</div><div class="sr">' +
+      '<div class="sc"><div class="sv" id="c_pm">-</div><div class="sl">PubMed</div></div>' +
+      '<div class="sc"><div class="sv" id="c_co">-</div><div class="sl">Cochrane</div></div>' +
+      '<div class="sc"><div class="sv" id="c_ct">-</div><div class="sl">CTgov</div></div>' +
+      '<div class="sc"><div class="sv" id="c_ss">-</div><div class="sl">Sem.Scholar</div></div>' +
+      '<div class="sc"><div class="sv" id="c_tot">-</div><div class="sl">Total</div></div>' +
+    '</div>' +
+    '<div id="s1p" style="display:none"><div class="aip"><div class="spin"></div><span id="s1t">Searching...</span></div><div class="pb"><div class="pf" id="s1b" style="width:0%"></div></div></div></div>' +
+    '<div class="bg2"><button class="btn bp" onclick="step2()" id="exB">Execute Searches</button><button class="btn bs" onclick="go(0)">Back</button></div>' +
+  '</div>' +
+
+  /* ===== STEP 3: DEDUP ===== */
+  '<div class="mod" id="m2">' +
+    '<div class="mh"><div class="badge bg">Step 3/9</div><h1>Deduplication</h1></div>' +
+    '<div class="sr">' +
+      '<div class="sc"><div class="sv" id="d_t">-</div><div class="sl">Total</div></div>' +
+      '<div class="sc"><div class="sv" id="d_d">-</div><div class="sl">Duplicates</div></div>' +
+      '<div class="sc"><div class="sv" id="d_m">-</div><div class="sl">Multi-arm</div></div>' +
+      '<div class="sc"><div class="sv" id="d_u">-</div><div class="sl">Unique</div></div>' +
+    '</div>' +
+    '<div class="card"><div id="dLog" style="max-height:300px;overflow-y:auto;font-size:11px"></div></div>' +
+    '<div class="bg2"><button class="btn bp" onclick="done(2);renderScr()">Proceed to Screening</button><button class="btn bs" onclick="go(1)">Back</button></div>' +
+  '</div>' +
+
+  /* ===== STEP 4: SCREENING (FIXED) ===== */
+  '<div class="mod" id="m3">' +
+    '<div class="mh"><div class="badge bv">Step 4/9 — SCREENING</div><h1>AI + Manual Screening</h1>' +
+    '<p>PICO color-coded. Click Include/Exclude/Maybe per article. AI can assist batch screening. Manual override always available.</p></div>' +
+    '<div class="pleg"><span><div class="d" style="background:rgba(59,130,246,.35)"></div>Population</span><span><div class="d" style="background:rgba(16,185,129,.35)"></div>Intervention</span><span><div class="d" style="background:rgba(139,92,246,.35)"></div>Comparator</span><span><div class="d" style="background:rgba(245,158,11,.35)"></div>Outcome</span></div>' +
+    '<div class="tabs" id="stabs">' +
+      '<button class="tab on" onclick="fScr(\'all\',this)">All</button>' +
+      '<button class="tab" onclick="fScr(\'si\',this)">Included (<span id="n_i">0</span>)</button>' +
+      '<button class="tab" onclick="fScr(\'se\',this)">Excluded (<span id="n_e">0</span>)</button>' +
+      '<button class="tab" onclick="fScr(\'sm\',this)">Maybe (<span id="n_m">0</span>)</button>' +
+      '<button class="tab" onclick="fScr(\'p\',this)">Pending (<span id="n_p">0</span>)</button>' +
+    '</div>' +
+    '<div id="s3p" style="display:none"><div class="aip"><div class="spin"></div><span id="s3t">Screening...</span></div><div class="pb"><div class="pf" id="s3b" style="width:0%"></div></div></div>' +
+    '<div class="warn-box">⚡ <strong>Manual override</strong>: Click Include/Exclude/Maybe buttons directly on each article. AI screening assists but you always have final say.</div>' +
+    '<div id="sList"></div>' +
+    '<div class="bg2">' +
+      '<button class="btn bac" onclick="aiScr()" id="asB">🤖 AI Screen Pending</button>' +
+      '<button class="btn bs" onclick="bulkScreenAction(\'included\')">✓ Include All Pending</button>' +
+      '<button class="btn bs" onclick="bulkScreenAction(\'excluded\')">✗ Exclude All Pending</button>' +
+      '<button class="btn bp" onclick="toAppr()">Proceed to Appraisal →</button>' +
+      '<button class="btn bs" onclick="go(2)">Back</button>' +
+    '</div>' +
+  '</div>' +
+
+  /* ===== STEP 5: APPRAISAL ===== */
+  '<div class="mod" id="m4">' +
+    '<div class="mh"><div class="badge br">Step 5/9 — APPRAISAL GATE</div><h1>Critical Appraisal</h1><p>Articles must pass appraisal. CER: DAPR/TOFSC/OCEBM mandatory. Manual toggle always available.</p></div>' +
+    '<div class="thresh-box"><div class="thresh-title">Appraisal Threshold</div><div class="cg">' +
+      '<div class="fg"><label class="fl">Min OCEBM Level (CER)</label><select id="thOcebm"><option value="5">5 (All)</option><option value="4" selected>4</option><option value="3">3</option><option value="2">2</option><option value="1">1</option></select></div>' +
+      '<div class="fg"><label class="fl">Min DAPR Score /12</label><input type="number" id="thDapr" value="4" min="0" max="12"></div>' +
+      '<div class="fg"><label class="fl">Non-CER: Auto-pass?</label><select id="thAuto"><option value="yes">Yes</option><option value="no">No</option></select></div>' +
+    '</div></div>' +
+    '<div id="s4p" style="display:none"><div class="aip"><div class="spin"></div><span id="s4t">Appraising...</span></div></div>' +
+    '<div class="card"><div class="tw"><table class="dt" id="apTbl"><thead><tr><th>Article</th><th>OCEBM</th><th>DAPR /12</th><th>TOFSC</th><th>Classification</th><th>Decision</th><th>Manual Override</th></tr></thead><tbody id="apBody"></tbody></table></div></div>' +
+    '<div class="sr">' +
+      '<div class="sc"><div class="sv" id="ap_p" style="-webkit-text-fill-color:var(--em)">0</div><div class="sl">Passed</div></div>' +
+      '<div class="sc"><div class="sv" id="ap_r" style="-webkit-text-fill-color:var(--am)">0</div><div class="sl">Review</div></div>' +
+      '<div class="sc"><div class="sv" id="ap_f" style="-webkit-text-fill-color:var(--ro)">0</div><div class="sl">Failed</div></div>' +
+    '</div>' +
+    '<div class="bg2">' +
+      '<button class="btn bac" onclick="runAppr()">🤖 Run AI Appraisal</button>' +
+      '<button class="btn bs" onclick="passAllAppr()">✓ Pass All</button>' +
+      '<button class="btn bp" onclick="toExtract()">Proceed to Extraction →</button>' +
+      '<button class="btn bs" onclick="go(3)">Back</button>' +
+    '</div>' +
+  '</div>' +
+
+  /* ===== STEP 6: EXTRACTION (FIXED — EDITABLE) ===== */
+  '<div class="mod" id="m5">' +
+    '<div class="mh"><div class="badge ba">Step 6/9</div><h1>Data Extraction</h1>' +
+    '<p>AI extracts data, then <strong>manually edit any cell</strong> by clicking it. Add/delete rows. SE auto-calculates from CI if missing.</p></div>' +
+    '<div id="s5p" style="display:none"><div class="aip"><div class="spin"></div><span id="s5t">Extracting...</span></div><div class="pb"><div class="pf" id="s5b" style="width:0%"></div></div></div>' +
+    '<div class="warn-box">📝 <strong>Manual editing</strong>: Click any cell to edit. SE (standard error) is auto-calculated from CI bounds if left empty. You can also add rows manually.</div>' +
+    '<div class="tabs" id="extTabs4"><button class="tab on" onclick="swExt(\'data\',this)">Extraction Table</button><button class="tab" onclick="swExt(\'pdf\',this)">PDF Library</button></div>' +
+    '<div class="tc on" id="ext_data"><div class="card"><div class="tw"><table class="dt"><thead><tr><th>Article</th><th>Arm</th><th>Year</th><th>Design</th><th>N</th><th>Intervention</th><th>Comparator</th><th>Outcome</th><th>Effect</th><th>95% CI</th><th>p</th><th>SE</th><th>Del</th></tr></thead><tbody id="exBody"></tbody></table></div></div></div>' +
+    '<div class="tc" id="ext_pdf"><div id="pdfPanel">'+renderPdfLibrary()+'</div></div>' +
+    '<div class="bg2">' +
+      '<button class="btn bac" onclick="runExtract()">🤖 Run AI Extraction</button>' +
+      '<button class="btn bs" onclick="addManualRow()">+ Add Row Manually</button>' +
+      '<label class="btn bs" style="cursor:pointer"><input type="file" accept=".pdf" multiple style="display:none" onchange="handlePdfUpload(this)">Upload PDFs</label>' +
+      '<button class="btn bs" onclick="recalcAllSE()">🔄 Recalc All SE</button>' +
+      '<button class="btn bp" onclick="toQual()">Proceed to Quality →</button>' +
+      '<button class="btn bs" onclick="go(4)">Back</button>' +
+    '</div>' +
+  '</div>' +
+
+  /* ===== STEP 7: QUALITY ===== */
+  '<div class="mod" id="m6">' +
+    '<div class="mh"><div class="badge bo">Step 7/9</div><h1>Quality Assessment</h1><p>RoB 2 + GRADE. Manual edit available per row.</p></div>' +
+    '<div class="tabs"><button class="tab on" onclick="swQ(\'rob\',this)">Risk of Bias</button><button class="tab" onclick="swQ(\'grade\',this)">GRADE</button></div>' +
+    '<div class="tc on" id="q_rob"><div class="card"><div class="tw"><table class="dt"><thead><tr><th>Study</th><th>Randomization</th><th>Deviations</th><th>Missing</th><th>Measurement</th><th>Selection</th><th>Overall</th><th>Edit</th></tr></thead><tbody id="robB"></tbody></table></div></div></div>' +
+    '<div class="tc" id="q_grade"><div class="card"><div class="tw"><table class="dt"><thead><tr><th>Outcome</th><th>Studies</th><th>RoB</th><th>Inconsistency</th><th>Indirectness</th><th>Imprecision</th><th>Pub Bias</th><th>Certainty</th></tr></thead><tbody id="grB"></tbody></table></div></div></div>' +
+    '<div id="s6p" style="display:none"><div class="aip"><div class="spin"></div><span>Assessing...</span></div></div>' +
+    '<div class="bg2">' +
+      '<button class="btn bac" onclick="runQual()">🤖 Run Quality Assessment</button>' +
+      '<button class="btn bp" onclick="done(6)">Proceed to Meta-Analysis →</button>' +
+      '<button class="btn bs" onclick="go(5)">Back</button>' +
+    '</div>' +
+  '</div>' +
+
+  /* ===== STEP 8: META-ANALYSIS (FIXED) ===== */
+  '<div class="mod" id="m7">' +
+    '<div class="mh"><div class="badge bo">Step 8/9</div><h1>Meta-Analysis</h1>' +
+    '<p>Requires ≥2 studies with valid Effect Size and SE. Check extraction table if errors occur.</p></div>' +
+    '<div class="card"><div class="cg">' +
+      '<div class="fg"><label class="fl">Model</label><select id="mm"><option value="dl">RE DerSimonian-Laird</option><option value="hksj">RE HKSJ</option><option value="fe">Fixed-Effect</option></select></div>' +
+      '<div class="fg"><label class="fl">Effect Measure</label><select id="me2"><option value="smd">SMD</option><option value="md">MD</option><option value="or">OR</option><option value="rr">RR</option></select></div>' +
+    '</div></div>' +
+    '<div id="metaValidation" class="warn-box" style="display:none"></div>' +
+    '<div class="card"><div class="plt"><svg id="fSVG" width="900" height="100"></svg></div></div>' +
+    '<div class="sr">' +
+      '<div class="sc"><div class="sv" id="me_e">-</div><div class="sl">Pooled</div></div>' +
+      '<div class="sc"><div class="sv" id="me_c">-</div><div class="sl">95% CI</div></div>' +
+      '<div class="sc"><div class="sv" id="me_i">-</div><div class="sl">I²</div></div>' +
+      '<div class="sc"><div class="sv" id="me_t">-</div><div class="sl">τ²</div></div>' +
+      '<div class="sc"><div class="sv" id="me_q">-</div><div class="sl">Q p</div></div>' +
+      '<div class="sc"><div class="sv" id="me_p">-</div><div class="sl">Pred Int</div></div>' +
+    '</div>' +
+    '<div class="card"><div class="plt"><svg id="fnSVG" width="600" height="350"></svg></div><div id="egR" style="font-size:11px;color:var(--t2);margin-top:6px"></div></div>' +
+    '<div class="bg2">' +
+      '<button class="btn bac" onclick="runMeta()">Run Meta-Analysis</button>' +
+      '<button class="btn bs" onclick="go(5)">← Fix Extraction Data</button>' +
+      '<button class="btn bp" onclick="done(7);genPRISMA()">Proceed to Report →</button>' +
+      '<button class="btn bs" onclick="go(6)">Back</button>' +
+    '</div>' +
+  '</div>' +
+
+  /* ===== STEP 9: REPORT ===== */
+  '<div class="mod" id="m8">' +
+    '<div class="mh"><div class="badge bg">Step 9/9</div><h1>Report & PRISMA</h1></div>' +
+    '<div class="card"><select id="frt">' + roO + '</select></div>' +
+    '<div class="tabs">' +
+      '<button class="tab on" onclick="swR(\'prisma\',this)">PRISMA</button>' +
+      '<button class="tab" onclick="swR(\'report\',this)">Report</button>' +
+      '<button class="tab" onclick="swR(\'export\',this)">Export</button>' +
+    '</div>' +
+    '<div class="tc on" id="r_prisma"><div class="card"><div class="plt"><svg id="prSVG" width="800" height="600"></svg></div></div></div>' +
+    '<div class="tc" id="r_report"><div class="card"><div class="rp" id="rC">Click Generate Report...</div></div></div>' +
+    '<div class="tc" id="r_export"><div class="card"><div class="eg">' +
+      '<div class="ec" onclick="doExp(\'html\')"><div class="ei">🌐</div>HTML</div>' +
+      '<div class="ec" onclick="doExp(\'txt\')"><div class="ei">📄</div>Text</div>' +
+      '<div class="ec" onclick="doExp(\'json\')"><div class="ei">📊</div>JSON</div>' +
+      '<div class="ec" onclick="doExp(\'svg\')"><div class="ei">📐</div>PRISMA</div>' +
+      '<div class="ec" onclick="doExp(\'csv\')"><div class="ei">📋</div>CSV</div>' +
+    '</div></div></div>' +
+    '<div id="s8p" style="display:none"><div class="aip"><div class="spin"></div><span id="s8t">Generating...</span></div></div>' +
+    '<div class="bg2">' +
+      '<button class="btn bac" onclick="genPRISMA()">PRISMA Diagram</button>' +
+      '<button class="btn bp" onclick="genRep()">Generate Report</button>' +
+      '<button class="btn bs" onclick="go(7)">Back</button>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ====================================================================
+   STEP 1: PICO & Search Strategy
+   ==================================================================== */
+async function step1() {
+  var P = document.getElementById('pP').value.trim();
+  var I = document.getElementById('pI').value.trim();
+  var C = document.getElementById('pC').value.trim();
+  var O = document.getElementById('pO').value.trim();
+  if (!P || !I || !O) { ntf('Fill P, I, and O at minimum', 'error'); return; }
+  D.pico = { P: P, I: I, C: C, O: O };
+  D.rtype = document.getElementById('rt').value;
+  D.rout = document.getElementById('ro').value;
+  done(0);
+  document.getElementById('sOut').textContent = 'Generating search strategy...';
+  try {
+    var r = await AI(
+      'Generate SLR search strategy:\nP:' + P + '\nI:' + I + '\nC:' + (C || 'Any') + '\nO:' + O +
+      '\nDates:' + (document.getElementById('dF').value || '2010') + '-' + (document.getElementById('dT').value || '2026') +
+      '\n\nProvide PubMed Boolean query in <QUERY> tags then explanation.',
+      'Expert medical librarian.'
+    );
+    document.getElementById('sOut').textContent = r;
+    var m = r.match(/<QUERY>([\s\S]*?)<\/QUERY>/);
+    D.pmq = m ? m[1].trim() : r.substring(0, 400);
+    document.getElementById('pmQ').value = D.pmq;
+    D.strat = r;
+    ntf('Strategy ready!', 'success');
+  } catch(e) {
+    document.getElementById('sOut').textContent = 'Error: ' + e.message + '\n\nYou can manually enter a PubMed query below.';
+    ntf(e.message, 'error');
+  }
+}
+
+/* ====================================================================
+   STEP 2: Database Search
+   ==================================================================== */
+function mkA(o) {
+  return {
+    id: o.pmid || o.nctId || uid(),
+    title: o.title || 'Untitled',
+    abstract: o.abstract || '',
+    authors: o.authors || '',
+    journal: o.journal || '',
+    year: o.year || '2024',
+    pmid: o.pmid || '',
+    doi: o.doi || '',
+    nctId: o.nctId || '',
+    pmcId: o.pmcId || '',
+    source: o.source || '',
+    isFree: !!o.isFree,
+    status: 'pending',
+    aiR: '',
+    arms: 1,
+    appraisal: null
+  };
+}
+function fbA(src, n) {
+  // No fake articles — return empty and notify user
+  ntf(src + ' search failed — check your network or try different terms', 'error');
+  return [];
+}
+
+async function sPM(em) {
+  try {
+    var r = await (await fetch('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=' + encodeURIComponent(D.pico.P + ' AND ' + D.pico.I) + '&retmax=40&retmode=json&email=' + encodeURIComponent(em))).json();
+    var ids = (r.esearchresult && r.esearchresult.idlist) ? r.esearchresult.idlist : [];
+    if (!ids.length) return fbA('PubMed', 12);
+    return await fPM(ids, em);
+  } catch(e) { return fbA('PubMed', 12); }
+}
+async function fPM(ids, em) {
+  var r = await (await fetch('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=' + ids.join(',') + '&retmode=xml&email=' + encodeURIComponent(em))).text();
+  var x = new DOMParser().parseFromString(r, 'text/xml');
+  return Array.from(x.querySelectorAll('PubmedArticle')).map(function(a) {
+    var ti = a.querySelector('ArticleTitle');
+    var ab = Array.from(a.querySelectorAll('AbstractText')).map(function(t) { return t.textContent; }).join(' ');
+    var au = Array.from(a.querySelectorAll('Author')).map(function(a2) {
+      var ln = a2.querySelector('LastName');
+      var ini = a2.querySelector('Initials');
+      return (ln ? ln.textContent : '') + (ini ? ' ' + ini.textContent : '');
+    }).filter(Boolean);
+    return mkA({
+      title: ti ? ti.textContent : 'Untitled',
+      abstract: ab || 'No abstract.',
+      authors: au.slice(0, 4).join(', ') + (au.length > 4 ? ' et al.' : ''),
+      journal: (a.querySelector('ISOAbbreviation') || {}).textContent || '',
+      year: (a.querySelector('PubDate Year') || {}).textContent || '2024',
+      pmid: (a.querySelector('PMID') || {}).textContent || '',
+      doi: (a.querySelector('ArticleId[IdType="doi"]') || {}).textContent || '',
+      pmcId: (a.querySelector('ArticleId[IdType="pmc"]') || {}).textContent || '',
+      source: 'PubMed',
+      isFree: !!a.querySelector('ArticleId[IdType="pmc"]')
+    });
+  });
+}
+async function sCO(em) {
+  try {
+    var r = await (await fetch('https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=' + encodeURIComponent(D.pico.P + ' ' + D.pico.I + ' systematic review') + '&retmax=15&retmode=json&email=' + encodeURIComponent(em))).json();
+    var ids = (r.esearchresult && r.esearchresult.idlist) ? r.esearchresult.idlist : [];
+    if (!ids.length) return fbA('Cochrane', 4);
+    var a = await fPM(ids, em);
+    return a.map(function(x) { x.source = 'Cochrane'; x.id = uid(); return x; });
+  } catch(e) { return fbA('Cochrane', 4); }
+}
+async function sCT() {
+  try {
+    var r = await (await fetch('https://clinicaltrials.gov/api/v2/studies?query.term=' + encodeURIComponent(D.pico.P + ' ' + D.pico.I) + '&pageSize=15&format=json')).json();
+    return (r.studies || []).map(function(s) {
+      var p = s.protocolSection || {};
+      var id = p.identificationModule || {};
+      var ds = p.descriptionModule || {};
+      var st = p.statusModule || {};
+      return mkA({
+        title: id.officialTitle || id.briefTitle || 'Trial',
+        abstract: ds.briefSummary || 'No description.',
+        authors: (id.organization || {}).fullName || '',
+        journal: 'ClinicalTrials.gov',
+        year: ((st.startDateStruct || {}).date || '2024').substring(0, 4),
+        nctId: id.nctId || '',
+        source: 'ClinicalTrials.gov',
+        isFree: true
+      });
+    });
+  } catch(e) { return fbA('ClinicalTrials.gov', 4); }
+}
+async function sSS() {
+  try {
+    var r = await (await fetch('https://api.semanticscholar.org/graph/v1/paper/search?query=' + encodeURIComponent(D.pico.P + ' ' + D.pico.I + ' ' + D.pico.O) + '&limit=15&fields=title,abstract,authors,year,externalIds,journal,isOpenAccess')).json();
+    return (r.data || []).map(function(p) {
+      return mkA({
+        title: p.title || '',
+        abstract: p.abstract || '',
+        authors: (p.authors || []).map(function(a) { return a.name; }).slice(0, 4).join(', '),
+        journal: (p.journal || {}).name || '',
+        year: '' + (p.year || 2024),
+        pmid: (p.externalIds || {}).PubMed || '',
+        doi: (p.externalIds || {}).DOI || '',
+        source: 'Semantic Scholar',
+        isFree: p.isOpenAccess || false
+      });
+    });
+  } catch(e) { return fbA('Semantic Scholar', 6); }
+}
+
+async function step2() {
+  var q = document.getElementById('pmQ').value.trim();
+  if (!q) { ntf('No query — go back to Step 1', 'error'); return; }
+  document.getElementById('s1p').style.display = 'block';
+  document.getElementById('exB').disabled = true;
+  var em = localStorage.getItem('le') || 'litai@example.com';
+  var dbs = Array.from(document.querySelectorAll('.dbt.on')).map(function(d) { return d.dataset.db; });
+  var all = [];
+  try {
+    if (dbs.indexOf('pubmed') >= 0) { uSP('PubMed...', 5); var a = await sPM(em); all = all.concat(a); document.getElementById('c_pm').textContent = a.length; }
+    if (dbs.indexOf('cochrane') >= 0) { uSP('Cochrane...', 25); var a2 = await sCO(em); all = all.concat(a2); document.getElementById('c_co').textContent = a2.length; }
+    if (dbs.indexOf('ctgov') >= 0) { uSP('ClinicalTrials.gov...', 45); var a3 = await sCT(); all = all.concat(a3); document.getElementById('c_ct').textContent = a3.length; }
+    if (dbs.indexOf('scholar') >= 0) { uSP('Semantic Scholar...', 65); var a4 = await sSS(); all = all.concat(a4); document.getElementById('c_ss').textContent = a4.length; }
+    uSP('Done!', 100);
+    D.arts = all;
+    document.getElementById('c_tot').textContent = all.length;
+    ntf(all.length + ' records found', 'success');
+    setTimeout(function() { document.getElementById('s1p').style.display = 'none'; done(1); dedup(); }, 700);
+  } catch(e) { ntf(e.message, 'error'); document.getElementById('s1p').style.display = 'none'; }
+  document.getElementById('exB').disabled = false;
+}
+function uSP(t, p) { document.getElementById('s1t').textContent = t; document.getElementById('s1b').style.width = p + '%'; }
+
+/* ====================================================================
+   STEP 3: Deduplication
+   ==================================================================== */
+function dedup() {
+  var seen = new Map(), dups = [], uni = [], ma = 0;
+  D.arts.forEach(function(a) {
+    var k = a.doi || a.pmid || a.title.toLowerCase().replace(/[^a-z0-9]/g, '').substring(0, 80);
+    if (k && seen.has(k)) {
+      var o = seen.get(k);
+      o.arms++;
+      if (o.arms === 2) ma++;
+      dups.push({ o: o, d: a });
+    } else { seen.set(k, a); uni.push(a); }
+  });
+  D.uniq = uni;
+  D.dups = dups;
+  document.getElementById('d_t').textContent = D.arts.length;
+  document.getElementById('d_d').textContent = dups.length;
+  document.getElementById('d_m').textContent = ma;
+  document.getElementById('d_u').textContent = uni.length;
+  D.pc.identified = D.arts.length;
+  D.pc.dupsRem = dups.length;
+  D.pc.screened = uni.length;
+  document.getElementById('dLog').innerHTML = dups.length ?
+    dups.map(function(d, i) { return '<div style="padding:6px;border-bottom:1px solid var(--bdr)"><span style="color:var(--am)">#' + (i + 1) + '</span> ' + d.o.title.substring(0, 60) + '</div>'; }).join('') :
+    '<p style="color:var(--t3);padding:12px">No duplicates found.</p>';
+}
+
+/* ====================================================================
+   STEP 4: SCREENING — FULLY FIXED
+   ==================================================================== */
+function hlPICO(t) {
+  var h = t;
+  var esc = function(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
+  [['P', 'hl-p'], ['I', 'hl-i'], ['C', 'hl-c'], ['O', 'hl-o']].forEach(function(pair) {
+    var v = D.pico[pair[0]];
+    if (!v) return;
+    v.split(/\s+/).filter(function(w) { return w.length > 3; }).forEach(function(w) {
+      h = h.replace(new RegExp('(' + esc(w) + ')', 'gi'), '<span class="' + pair[1] + '">$1</span>');
+    });
+  });
+  return h;
+}
+
+// Rayyan-style screening with full-text access links
+function renderScr(f) {
+  f = f || 'all';
+  var arts = D.uniq;
+  if (f === 'si') arts = arts.filter(function(a) { return a.status === 'included'; });
+  else if (f === 'se') arts = arts.filter(function(a) { return a.status === 'excluded'; });
+  else if (f === 'sm') arts = arts.filter(function(a) { return a.status === 'maybe'; });
+  else if (f === 'p') arts = arts.filter(function(a) { return a.status === 'pending'; });
+
+  document.getElementById('sList').innerHTML = arts.map(function(a) {
+    var artId = a.id;
+    var cls = a.status === 'included' ? 'si' : a.status === 'excluded' ? 'se' : a.status === 'maybe' ? 'sm' : '';
+    var mab2 = a.arms > 1 ? '<span class="mab">' + a.arms + ' arms</span>' : '';
+    var manTag = a.manualOverride ? '<span class="manual-tag">MANUAL</span>' : '';
+
+    // Confidence — ONLY show if AI actually set it (no fake %)
+    var confHtml = '';
+    if (a.aiConf != null && a.aiConf > 0) {
+      var confCls = a.aiConf >= 80 ? 'conf-high' : a.aiConf >= 60 ? 'conf-med' : 'conf-low';
+      confHtml = '<span class="conf-badge ' + confCls + '" title="AI confidence">' + a.aiConf + '%</span>';
+    }
+
+    // Full-text access — Rayyan-style
+    var accessHtml = '';
+    if (a.isFree) {
+      accessHtml = '<div class="acc-row"><span class="acc-tag acc-free-tag">FREE FULL TEXT</span>';
+      if (a.pmcId) accessHtml += '<a class="acc-link acc-link-free" href="https://www.ncbi.nlm.nih.gov/pmc/articles/' + a.pmcId + '/" target="_blank" rel="noopener">Read on PMC</a>';
+      else if (a.pmid) accessHtml += '<a class="acc-link acc-link-free" href="https://pubmed.ncbi.nlm.nih.gov/' + a.pmid + '/" target="_blank" rel="noopener">PubMed</a>';
+      if (a.doi) accessHtml += '<a class="acc-link acc-link-free" href="https://doi.org/' + encodeURIComponent(a.doi) + '" target="_blank" rel="noopener">DOI</a>';
+      if (a.nctId) accessHtml += '<a class="acc-link acc-link-free" href="https://clinicaltrials.gov/study/' + a.nctId + '" target="_blank" rel="noopener">ClinicalTrials.gov</a>';
+      accessHtml += '</div>';
+    } else {
+      accessHtml = '<div class="acc-row"><span class="acc-tag acc-paid-tag">ACCESS REQUIRED</span>';
+      if (a.doi) accessHtml += '<a class="acc-link acc-link-paid" href="https://doi.org/' + encodeURIComponent(a.doi) + '" target="_blank" rel="noopener">Publisher Page</a>';
+      if (a.pmid) accessHtml += '<a class="acc-link acc-link-paid" href="https://pubmed.ncbi.nlm.nih.gov/' + a.pmid + '/" target="_blank" rel="noopener">PubMed</a>';
+      accessHtml += '<a class="acc-link acc-link-paid" href="https://www.copyright.com/search?keyword=' + encodeURIComponent(a.doi || a.title.substring(0, 40)) + '" target="_blank" rel="noopener">CCC RightFind</a>';
+      accessHtml += '<span style="font-size:9px;color:var(--t3);margin-left:4px">Check institutional access</span>';
+      accessHtml += '</div>';
+    }
+
+    return '<div class="scrd ' + cls + '">' +
+      '<div class="scrd-t" style="display:flex;justify-content:space-between;align-items:flex-start"><span>' + esc(a.title) + mab2 + manTag + '</span>' + confHtml + '</div>' +
+      '<div class="scrd-m">' + esc(a.authors) + ' | ' + esc(a.journal) + ' (' + a.year + ') ' + (a.pmid ? 'PMID:' + a.pmid + ' ' : '') + (a.nctId ? a.nctId + ' ' : '') + '| ' + a.source + '</div>' +
+      accessHtml +
+      '<div class="scrd-a">' + hlPICO(a.abstract || 'No abstract available.') + '</div>' +
+      (a.aiR ? '<div class="scrd-r">AI: ' + a.aiR + '</div>' : '') +
+      '<div class="scrd-btns">' +
+        '<button class="sb sb-i ' + (a.status === 'included' ? 'on' : '') + '" onclick="setStById(\'' + artId + '\',\'included\')">Include</button>' +
+        '<button class="sb sb-e ' + (a.status === 'excluded' ? 'on' : '') + '" onclick="setStById(\'' + artId + '\',\'excluded\')">Exclude</button>' +
+        '<button class="sb sb-m ' + (a.status === 'maybe' ? 'on' : '') + '" onclick="setStById(\'' + artId + '\',\'maybe\')">Maybe</button>' +
+      '</div></div>';
+  }).join('');
+  updN();
+}
+
+// Set status by stable article ID (not fragile index)
+function setStById(artId, st) {
+  var art = D.uniq.find(function(a) { return a.id === artId; });
+  if (art) {
+    art.status = st;
+    art.manualOverride = true;
+    renderScr(curF());
+  }
+}
+
+function curF() {
+  var t = document.querySelector('#stabs .tab.on');
+  if (!t) return 'all';
+  var x = t.textContent.toLowerCase();
+  return x.indexOf('included') >= 0 ? 'si' : x.indexOf('excluded') >= 0 ? 'se' : x.indexOf('maybe') >= 0 ? 'sm' : x.indexOf('pending') >= 0 ? 'p' : 'all';
+}
+function fScr(f, btn) {
+  document.querySelectorAll('#stabs .tab').forEach(function(t) { t.classList.remove('on'); });
+  btn.classList.add('on');
+  renderScr(f);
+}
+function updN() {
+  var a = D.uniq;
+  document.getElementById('n_i').textContent = a.filter(function(x) { return x.status === 'included'; }).length;
+  document.getElementById('n_e').textContent = a.filter(function(x) { return x.status === 'excluded'; }).length;
+  document.getElementById('n_m').textContent = a.filter(function(x) { return x.status === 'maybe'; }).length;
+  document.getElementById('n_p').textContent = a.filter(function(x) { return x.status === 'pending'; }).length;
+}
+
+// Bulk actions for manual control
+function bulkScreenAction(status) {
+  D.uniq.forEach(function(a) {
+    if (a.status === 'pending') { a.status = status; a.manualOverride = true; }
+  });
+  renderScr(curF());
+  ntf('All pending set to ' + status, 'success');
+}
+
+// AI SCREENING — ROBUST with multiple parsing strategies
+async function aiScr() {
+  var pend = D.uniq.filter(function(a) { return a.status === 'pending'; });
+  if (!pend.length) { ntf('No pending articles to screen', 'info'); return; }
+  document.getElementById('s3p').style.display = 'block';
+  document.getElementById('asB').disabled = true;
+  var bs = 5;
+  var totalProcessed = 0;
+
+  for (var i = 0; i < pend.length; i += bs) {
+    var batch = pend.slice(i, i + bs);
+    document.getElementById('s3t').textContent = 'Screening ' + (i + 1) + '-' + Math.min(i + bs, pend.length) + ' of ' + pend.length;
+    document.getElementById('s3b').style.width = Math.round((i + bs) / pend.length * 100) + '%';
+
+    // Build indexed mapping
+    var batchMap = {};
+    var txt = batch.map(function(a, j) {
+      batchMap[j + 1] = a;
+      return 'ARTICLE ' + (j + 1) + ':\nTitle: ' + a.title + '\nAbstract: ' + a.abstract.substring(0, 500);
+    }).join('\n---\n');
+
+    try {
+      var r = await AI(
+        'Screen these articles for systematic review.\nPICO: P=' + D.pico.P + ', I=' + D.pico.I + ', C=' + (D.pico.C || 'Any') + ', O=' + D.pico.O +
+        '\n\nFor EACH article respond with EXACTLY this format on separate lines:\nARTICLE 1: INCLUDE | 85 | Reason text\nARTICLE 2: EXCLUDE | 92 | Reason text\nARTICLE 3: MAYBE | 55 | Reason text\n\nThe number after the decision is your CONFIDENCE (0-100) in that decision.\nValid decisions: INCLUDE, EXCLUDE, MAYBE\n\n' + txt,
+        'SLR screening expert. Be concise. One line per article. Always include confidence 0-100.'
+      );
+
+      // ROBUST PARSING — try multiple strategies
+      var parsed = 0;
+
+      // Strategy 1: Line-by-line with flexible regex
+      r.split('\n').forEach(function(line) {
+        line = line.trim();
+        if (!line) return;
+
+        // Try to match "ARTICLE N: DECISION | REASON" or similar patterns
+        var patterns = [
+          /ARTICLE\s*(\d+)\s*[:\.]\s*(INCLUDE|EXCLUDE|MAYBE)\s*[|:–-]\s*(\d+)\s*[|:–-]\s*(.*)/i,
+          /(\d+)\s*[:\.]\s*(INCLUDE|EXCLUDE|MAYBE)\s*[|:–-]\s*(\d+)\s*[|:–-]\s*(.*)/i,
+          /ARTICLE\s*(\d+)\s*[:\.]\s*(INCLUDE|EXCLUDE|MAYBE)\s*[|:–-]\s*(.*)/i,
+          /(\d+)\s*[:\.]\s*(INCLUDE|EXCLUDE|MAYBE)\s*[|:–-]\s*(.*)/i,
+          /ARTICLE\s*(\d+)\s*[:\.]\s*(INCLUDE|EXCLUDE|MAYBE)/i,
+          /(\d+)\s*\.\s*(INCLUDE|EXCLUDE|MAYBE)/i,
+          /^\s*[-•*]\s*(?:Article\s*)?(\d+)\s*[:\.]\s*(INCLUDE|EXCLUDE|MAYBE)/i
+        ];
+
+        for (var pi = 0; pi < patterns.length; pi++) {
+          var m = line.match(patterns[pi]);
+          if (m) {
+            var num = parseInt(m[1]);
+            var dec = m[2].toUpperCase();
+            var conf = null, reason = '';
+            if (pi <= 1 && m[3] && m[4]) { conf = parseInt(m[3]); reason = m[4].trim(); }
+            else if (m[3]) { var maybeConf = parseInt(m[3]); if (!isNaN(maybeConf) && maybeConf >= 0 && maybeConf <= 100 && m[3].match(/^\d+$/)) { conf = maybeConf; } else { reason = m[3].trim(); } }
+            var art = batchMap[num];
+            if (art && art.status === 'pending') {
+              art.status = dec === 'INCLUDE' ? 'included' : dec === 'EXCLUDE' ? 'excluded' : 'maybe';
+              art.aiR = reason || ('AI: ' + dec);
+              if (conf !== null && conf >= 0 && conf <= 100) art.aiConf = conf;
+              parsed++;
+            }
+            break;
+          }
+        }
+      });
+
+      // Strategy 2: If nothing parsed, try JSON
+      if (parsed === 0) {
+        var jsonD = parseJSON(r);
+        if (jsonD && Array.isArray(jsonD)) {
+          jsonD.forEach(function(item) {
+            var num = item.article || item.idx || item.num || item.id;
+            var dec = (item.decision || item.status || '').toUpperCase();
+            if (num && dec && batchMap[num]) {
+              var art = batchMap[num];
+              art.status = dec === 'INCLUDE' ? 'included' : dec === 'EXCLUDE' ? 'excluded' : 'maybe';
+              art.aiR = item.reason || '';
+              parsed++;
+            }
+          });
+        }
+      }
+
+      // Strategy 3: Heuristic fallback for unparsed
+      if (parsed < batch.length) {
+        batch.forEach(function(a) {
+          if (a.status !== 'pending') return;
+          var t = (a.title + ' ' + a.abstract).toLowerCase();
+          var pM = D.pico.P.toLowerCase().split(/\s+/).some(function(w) { return w.length > 3 && t.indexOf(w) >= 0; });
+          var iM = D.pico.I.toLowerCase().split(/\s+/).some(function(w) { return w.length > 3 && t.indexOf(w) >= 0; });
+          a.status = (pM && iM) ? 'included' : (pM || iM) ? 'maybe' : 'excluded';
+          a.aiR = 'Keyword heuristic (AI parse failed)';
+          parsed++;
+        });
+      }
+
+      totalProcessed += parsed;
+
+    } catch(e) {
+      // Full fallback: keyword heuristic
+      batch.forEach(function(a) {
+        if (a.status !== 'pending') return;
+        var t = (a.title + ' ' + a.abstract).toLowerCase();
+        var pM = D.pico.P.toLowerCase().split(/\s+/).some(function(w) { return w.length > 3 && t.indexOf(w) >= 0; });
+        var iM = D.pico.I.toLowerCase().split(/\s+/).some(function(w) { return w.length > 3 && t.indexOf(w) >= 0; });
+        a.status = (pM && iM) ? 'included' : (pM || iM) ? 'maybe' : 'excluded';
+        a.aiR = 'Keyword heuristic (API error: ' + e.message + ')';
+      });
+    }
+    renderScr();
+    await new Promise(function(r) { setTimeout(r, 200); });
+  }
+
+  document.getElementById('s3p').style.display = 'none';
+  document.getElementById('asB').disabled = false;
+  D.pc.scrExcl = D.uniq.filter(function(a) { return a.status === 'excluded'; }).length;
+  var inc = D.uniq.filter(function(a) { return a.status === 'included'; }).length;
+  ntf('Screening complete! ' + inc + ' included, review and override as needed.', 'success');
+}
+
+/* ====================================================================
+   STEP 5: Appraisal — with manual Pass All and Toggle
+   ==================================================================== */
+function toAppr() {
+  D.screened = D.uniq.filter(function(a) { return a.status === 'included' || a.status === 'maybe'; });
+  if (!D.screened.length) { ntf('Include articles first (go back to Screening)', 'error'); return; }
+  D.pc.fullText = D.screened.length;
+  done(3);
+  var isCER = D.rtype.indexOf('cer') === 0 || ['pmcf', 'pms', 'sscp'].indexOf(D.rtype) >= 0;
+  if (!isCER && document.getElementById('thAuto').value === 'yes') {
+    D.screened.forEach(function(a) { a.appraisal = { ocebm: 'N/A', daprTotal: 12, decision: 'pass' }; });
+    renderApprTbl();
+  }
+}
+
+function passAllAppr() {
+  D.screened.forEach(function(a) {
+    if (!a.appraisal) a.appraisal = {};
+    a.appraisal.decision = 'pass';
+  });
+  renderApprTbl();
+  ntf('All articles passed appraisal', 'success');
+}
+
+async function runAppr() {
+  if (!D.screened.length) { ntf('No articles to appraise', 'error'); return; }
+  document.getElementById('s4p').style.display = 'block';
+  var isCER = D.rtype.indexOf('cer') === 0 || ['pmcf', 'pms', 'sscp'].indexOf(D.rtype) >= 0;
+  var txt = D.screened.map(function(a, i) { return (i + 1) + '. ' + a.title + ' (' + a.year + ')'; }).join('\n');
+  try {
+    var r = await AI(
+      'Appraise for ' + (isCER ? 'CER (EU MDR). Use OCEBM 2011, DAPR (D/A/P/R each 0-3, /12), TOFSC. Classify Pivotal/Supportive.' : 'SLR. Assess quality.') +
+      '\n\nArticles:\n' + txt +
+      '\n\nReturn JSON array:\n[{"idx":0,"ocebm":"' + (isCER ? '1b' : 'N/A') + '","daprD":3,"daprA":2,"daprP":3,"daprR":2,"daprTotal":10,"tofsc":"T:RCT,O:Met,F:12mo,S:sig,C:meaningful","classification":"' + (isCER ? 'Pivotal' : 'Include') + '","quality":"Good"}]\n\nONLY JSON.',
+      'EU MDR CER expert. MEDDEV 2.7/1 Rev.4. OCEBM 2011.'
+    );
+    var d = parseJSON(r);
+    if (!d || !Array.isArray(d)) { d = []; ntf('AI returned invalid format, using defaults', 'error'); }
+    var thO = parseInt(document.getElementById('thOcebm').value);
+    var thD = parseInt(document.getElementById('thDapr').value);
+    d.forEach(function(ap) {
+      var a = D.screened[ap.idx];
+      if (!a) return;
+      var oN = parseInt(ap.ocebm) || 5;
+      var dapr = ap.daprTotal || 0;
+      var dec = 'pass';
+      if (isCER) {
+        if (oN > thO || dapr < thD) dec = 'fail';
+        else if (oN === thO || dapr === thD) dec = 'review';
+      }
+      a.appraisal = ap;
+      a.appraisal.decision = dec;
+    });
+    D.screened.forEach(function(a) {
+      if (!a.appraisal) a.appraisal = { ocebm: 'N/A', daprTotal: 12, decision: isCER ? 'review' : 'pass' };
+    });
+    renderApprTbl();
+    ntf('Appraisal done! Toggle overrides as needed.', 'success');
+  } catch(e) {
+    ntf('AI appraisal failed — all set to REVIEW. Toggle manually.', 'error');
+    D.screened.forEach(function(a) {
+      a.appraisal = { ocebm: '—', daprTotal: 0, tofsc: '—', classification: '—', decision: 'review' };
+    });
+    renderApprTbl();
+  }
+  document.getElementById('s4p').style.display = 'none';
+}
+
+function renderApprTbl() {
+  var isCER = D.rtype.indexOf('cer') === 0 || ['pmcf', 'pms', 'sscp'].indexOf(D.rtype) >= 0;
+  document.getElementById('apBody').innerHTML = D.screened.map(function(a, i) {
+    var ap = a.appraisal || {};
+    var dc = ap.decision === 'pass' ? 'ap-pass' : ap.decision === 'fail' ? 'ap-fail' : 'ap-review';
+    return '<tr><td><strong>' + a.title.substring(0, 45) + '...</strong><br><span style="font-size:9px;color:var(--t3)">' + a.authors + ' (' + a.year + ')</span></td>' +
+      '<td>' + (isCER ? '<span class="rb ' + ((['1a', '1b', '2a', '2b'].indexOf(ap.ocebm) >= 0) ? 'rl' : 'rm') + '">' + (ap.ocebm || '-') + '</span>' : 'N/A') + '</td>' +
+      '<td>' + (isCER ? (ap.daprTotal || 0) + '/12' : 'N/A') + '</td>' +
+      '<td style="font-size:9px">' + (isCER ? (ap.tofsc || '-') : 'N/A') + '</td>' +
+      '<td>' + (ap.classification || '-') + '</td>' +
+      '<td><span class="' + dc + '">' + (ap.decision === 'pass' ? 'PASS' : ap.decision === 'fail' ? 'FAIL' : 'REVIEW') + '</span></td>' +
+      '<td><button class="btn bsm ' + (ap.decision === 'pass' ? 'bs' : 'bp') + '" onclick="togAp(' + i + ')">' + (ap.decision === 'pass' ? '↓ Reject' : '↑ Force Pass') + '</button></td></tr>';
+  }).join('');
+  var p = D.screened.filter(function(a) { return a.appraisal && a.appraisal.decision === 'pass'; }).length;
+  var rv = D.screened.filter(function(a) { return a.appraisal && a.appraisal.decision === 'review'; }).length;
+  var f2 = D.screened.filter(function(a) { return a.appraisal && a.appraisal.decision === 'fail'; }).length;
+  document.getElementById('ap_p').textContent = p;
+  document.getElementById('ap_r').textContent = rv;
+  document.getElementById('ap_f').textContent = f2;
+}
+function togAp(i) {
+  var a = D.screened[i];
+  if (!a || !a.appraisal) return;
+  a.appraisal.decision = a.appraisal.decision === 'pass' ? 'fail' : 'pass';
+  renderApprTbl();
+}
+function toExtract() {
+  D.appraised = D.screened.filter(function(a) { return a.appraisal && (a.appraisal.decision === 'pass' || a.appraisal.decision === 'review'); });
+  if (!D.appraised.length) { ntf('No articles passed appraisal — toggle overrides above', 'error'); return; }
+  D.pc.apprPassed = D.appraised.length;
+  D.pc.apprFailed = D.screened.length - D.appraised.length;
+  done(4);
+}
+
+/* ====================================================================
+   STEP 6: DATA EXTRACTION — FULLY FIXED with EDITABLE TABLE
+   ==================================================================== */
+function calcSE(ciLow, ciHigh) {
+  var lo = parseFloat(ciLow), hi = parseFloat(ciHigh);
+  if (isNaN(lo) || isNaN(hi) || lo >= hi) return 0;
+  return +((hi - lo) / (2 * 1.96)).toFixed(4);
+}
+
+function ensureSE() {
+  D.extracted.forEach(function(d) {
+    var se = parseFloat(d.se);
+    if (!se || se <= 0 || isNaN(se)) {
+      d.se = calcSE(d.ciLower, d.ciUpper);
+    }
+  });
+}
+
+function swExt(tab, btn) {
+  document.querySelectorAll('#extTabs4 .tab').forEach(function(t) { t.classList.remove('on'); });
+  btn.classList.add('on');
+  document.getElementById('ext_data').classList.toggle('on', tab === 'data');
+  document.getElementById('ext_pdf').classList.toggle('on', tab === 'pdf');
+  if (tab === 'pdf') refreshPdfPanel();
+}
+function recalcAllSE() {
+  D.extracted.forEach(function(d) {
+    d.se = calcSE(d.ciLower, d.ciUpper);
+  });
+  renderExtTbl(D.extracted);
+  ntf('SE recalculated from CI for all rows', 'success');
+}
+
+async function runExtract() {
+  if (!D.appraised.length) { ntf('No articles to extract from', 'error'); return; }
+  document.getElementById('s5p').style.display = 'block';
+  document.getElementById('s5b').style.width = '20%';
+  var txt = D.appraised.slice(0, 15).map(function(a, i) {
+    return 'STUDY ' + (i + 1) + ':\nTitle:' + a.title + '\nAuthors:' + a.authors + '\nYear:' + a.year + '\nAbstract:' + a.abstract.substring(0, 500);
+  }).join('\n---\n');
+
+  try {
+    document.getElementById('s5b').style.width = '50%';
+    var r = await AI(
+      'Extract data for meta-analysis from these study abstracts.\nP:' + D.pico.P + ', I:' + D.pico.I + ', C:' + (D.pico.C || 'Control') + ', O:' + D.pico.O +
+      '.\n\nCRITICAL RULES — DO NOT HALLUCINATE:\n' +
+      '1. ONLY extract values EXPLICITLY STATED in the abstract text. If a number is not written in the abstract, use null.\n' +
+      '2. Do NOT fabricate effect sizes, sample sizes, CI, or p-values.\n' +
+      '3. If the abstract only mentions qualitative results (e.g. "significant improvement"), set effectSize to null.\n' +
+      '4. For effectType: use what the study reports (HR, OR, RR, SMD, MD). Do not convert between types.\n' +
+      '5. se = (ciUpper - ciLower) / (2 * 1.96). If CI not reported, set se to null.\n' +
+      '6. Multi-arm studies: same articleId, different arm names.\n' +
+      '7. For n (sample size): only use the number explicitly stated. Do not guess.\n\n' +
+      'Return JSON array:\n[{"articleId":"A0","study":"FirstAuthor","arm":"Main","year":"2024","design":"RCT","n":100,"intervention":"drug","comparator":"placebo","outcome":"measure","effectSize":-0.5,"effectType":"SMD","ciLower":-0.8,"ciUpper":-0.2,"pValue":"0.001","se":0.15}]\n' +
+      'Use null for ANY value not explicitly found in the abstract. ONLY valid JSON array.\n\n' + txt,
+      'SLR data extraction expert. You MUST only extract values explicitly stated in the text. Never invent or estimate data. Use null for missing values.'
+    );
+    document.getElementById('s5b').style.width = '80%';
+    var d = parseJSON(r);
+    if (!d || !Array.isArray(d) || d.length === 0) throw new Error('AI returned invalid JSON');
+
+    // Validate rows — preserve nulls as 0 but flag for manual review
+    var nullCount = 0;
+    d.forEach(function(row) {
+      var hadNull = (row.effectSize === null || row.n === null || row.se === null);
+      if (hadNull) nullCount++;
+      row.effectSize = (row.effectSize != null) ? parseFloat(row.effectSize) : 0;
+      row.n = (row.n != null) ? parseInt(row.n) : 0;
+      row.ciLower = (row.ciLower != null) ? parseFloat(row.ciLower) : 0;
+      row.ciUpper = (row.ciUpper != null) ? parseFloat(row.ciUpper) : 0;
+      row.pValue = (row.pValue != null) ? String(row.pValue) : '';
+      var se = (row.se != null) ? parseFloat(row.se) : NaN;
+      if (!se || se <= 0 || isNaN(se)) {
+        row.se = calcSE(row.ciLower, row.ciUpper);
+      } else {
+        row.se = +se.toFixed(4);
+      }
+      // Mark as placeholder if key values were null (AI couldn't find them)
+      if (hadNull && row.effectSize === 0 && row.se === 0) row._placeholder = true;
+    });
+    if (nullCount > 0) ntf(nullCount + ' rows have missing values (AI could not find them in abstracts). Edit these manually.', 'error');
+
+    D.extracted = d;
+    // Enrich with PDF source-locked data
+    var pdfIds=Object.keys(PDFMgr.files);
+    if(pdfIds.length>0){
+      var allPdfText=pdfIds.map(function(id){return PDFMgr.files[id].text||''}).join('\n\n');
+      if(allPdfText.length>100){
+        var pdfEx=extractFromPdfText(allPdfText);
+        if(pdfEx&&Object.keys(pdfEx).length>0){
+          d.forEach(function(row){
+            if(!row._pdfLock)row._pdfLock={};
+            if(pdfEx.n&&(!row.n||row.n<10)){row.n=pdfEx.n.val;row._pdfLock.n={conf:pdfEx.n.conf,src:pdfEx.n.src}}
+            if(pdfEx.hr&&row.effectType==='HR'){row.effectSize=pdfEx.hr.val;row.ciLower=pdfEx.hr.lo;row.ciUpper=pdfEx.hr.hi;row.se=calcSE(pdfEx.hr.lo,pdfEx.hr.hi);row._pdfLock.hr={conf:pdfEx.hr.conf,src:pdfEx.hr.src}}
+          });
+        }
+      }
+    }
+    var ua = new Set(d.map(function(x) { return x.articleId || x.study; }));
+    D.pc.uniqueStudies = ua.size;
+    D.pc.dataRows = d.length;
+    document.getElementById('s5b').style.width = '100%';
+    renderExtTbl(d);
+    ntf('Extracted: ' + ua.size + ' articles, ' + d.length + ' rows. Edit any cell by clicking.', 'success');
+  } catch(e) {
+    ntf('AI extraction failed: ' + e.message + '. Blank template created — YOU must fill in real data from the papers.', 'error');
+    // Empty template — no random/fake data
+    D.extracted = D.appraised.slice(0, 15).map(function(a, i) {
+      return {
+        articleId: 'A' + i,
+        study: (a.authors.split(',')[0] || 'Author' + i).trim(),
+        arm: 'Main',
+        year: a.year,
+        design: '',
+        n: 0,
+        intervention: D.pico.I,
+        comparator: D.pico.C || 'Control',
+        outcome: D.pico.O,
+        effectSize: 0,
+        effectType: 'SMD',
+        ciLower: 0,
+        ciUpper: 0,
+        pValue: '',
+        se: 0,
+        _placeholder: true
+      };
+    });
+    D.pc.uniqueStudies = D.extracted.length;
+    D.pc.dataRows = D.extracted.length;
+    renderExtTbl(D.extracted);
+  }
+  document.getElementById('s5p').style.display = 'none';
+}
+
+// EDITABLE EXTRACTION TABLE
+function renderExtTbl(d) {
+  document.getElementById('exBody').innerHTML = d.map(function(r, idx) {
+    var multi = d.filter(function(x) { return (x.articleId || x.study) === (r.articleId || r.study); }).length > 1;
+    var isPlaceholder = r._placeholder || (r.effectSize === 0 && r.se === 0 && !r.pValue);
+    return '<tr' + (isPlaceholder ? ' class="placeholder-row"' : '') + '>' +
+      '<td><strong>' + esc(r.study) + '</strong>' + (multi ? '<span class="mab">Multi-arm</span>' : '') + (isPlaceholder ? ' <span class="placeholder-tag">EDIT REQUIRED</span>' : '') + '</td>' +
+      '<td>' + esc(r.arm || 'Main') + '</td>' +
+      '<td>' + esc(r.year) + '</td>' +
+      '<td>' + esc(r.design) + '</td>' +
+      '<td><input class="inline-edit" type="number" value="' + r.n + '" onchange="editExt(' + idx + ',\'n\',this.value)"></td>' +
+      '<td style="font-size:10px">' + esc(r.intervention) + '</td>' +
+      '<td style="font-size:10px">' + esc(r.comparator) + '</td>' +
+      '<td style="font-size:10px">' + esc(r.outcome) + '</td>' +
+      '<td><input class="inline-edit" type="number" step="0.01" value="' + r.effectSize + '" onchange="editExt(' + idx + ',\'effectSize\',this.value)"> <span style="font-size:9px;color:var(--t3)">' + (r.effectType || 'SMD') + '</span></td>' +
+      '<td><input class="inline-edit" type="number" step="0.01" value="' + r.ciLower + '" onchange="editExt(' + idx + ',\'ciLower\',this.value)" style="width:55px"> , <input class="inline-edit" type="number" step="0.01" value="' + r.ciUpper + '" onchange="editExt(' + idx + ',\'ciUpper\',this.value)" style="width:55px"></td>' +
+      '<td><input class="inline-edit" type="text" value="' + r.pValue + '" onchange="editExt(' + idx + ',\'pValue\',this.value)" style="width:55px"></td>' +
+      '<td><input class="inline-edit" type="number" step="0.001" value="' + (r.se || '') + '" onchange="editExt(' + idx + ',\'se\',this.value)" style="width:60px;' + ((!r.se || r.se <= 0) ? 'border-color:var(--ro)' : '') + '"></td>' +
+      '<td><button class="del-btn" onclick="delExtRow(' + idx + ')" title="Delete row">✕</button></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+function editExt(idx, field, val) {
+  if (idx < 0 || idx >= D.extracted.length) return;
+  D.extracted[idx]._placeholder = false; // user is editing — no longer placeholder
+  if (['effectSize', 'ciLower', 'ciUpper', 'se', 'n'].indexOf(field) >= 0) {
+    D.extracted[idx][field] = parseFloat(val) || 0;
+  } else {
+    D.extracted[idx][field] = val;
+  }
+  // Auto-recalc SE if CI changed and SE is blank/zero
+  if (field === 'ciLower' || field === 'ciUpper') {
+    var row = D.extracted[idx];
+    row.se = calcSE(row.ciLower, row.ciUpper);
+    renderExtTbl(D.extracted);
+  }
+}
+
+function delExtRow(idx) {
+  D.extracted.splice(idx, 1);
+  D.pc.dataRows = D.extracted.length;
+  renderExtTbl(D.extracted);
+  ntf('Row deleted', 'info');
+}
+
+function addManualRow() {
+  openModal(
+    '<h2>Add Extraction Row</h2>' +
+    '<div class="cg">' +
+      '<div class="fg"><label class="fl">Study (Author)</label><input type="text" id="mr_study" placeholder="Smith"></div>' +
+      '<div class="fg"><label class="fl">Year</label><input type="text" id="mr_year" placeholder="2024"></div>' +
+      '<div class="fg"><label class="fl">Arm</label><input type="text" id="mr_arm" value="Main"></div>' +
+      '<div class="fg"><label class="fl">Design</label><select id="mr_design"><option>RCT</option><option>Cohort</option><option>Case-Control</option><option>Cross-sectional</option><option>Before-After</option></select></div>' +
+      '<div class="fg"><label class="fl">N</label><input type="number" id="mr_n" placeholder="100"></div>' +
+      '<div class="fg"><label class="fl">Intervention</label><input type="text" id="mr_int" value="' + esc(D.pico.I) + '"></div>' +
+      '<div class="fg"><label class="fl">Comparator</label><input type="text" id="mr_comp" value="' + esc(D.pico.C || 'Placebo') + '"></div>' +
+      '<div class="fg"><label class="fl">Outcome</label><input type="text" id="mr_out" value="' + esc(D.pico.O) + '"></div>' +
+      '<div class="fg"><label class="fl">Effect Size</label><input type="number" step="0.01" id="mr_eff" placeholder="-0.5"></div>' +
+      '<div class="fg"><label class="fl">Effect Type</label><select id="mr_et"><option>SMD</option><option>MD</option><option>OR</option><option>RR</option><option>HR</option></select></div>' +
+      '<div class="fg"><label class="fl">CI Lower</label><input type="number" step="0.01" id="mr_ciL" placeholder="-0.8"></div>' +
+      '<div class="fg"><label class="fl">CI Upper</label><input type="number" step="0.01" id="mr_ciU" placeholder="-0.2"></div>' +
+      '<div class="fg"><label class="fl">p-value</label><input type="text" id="mr_p" placeholder="0.01"></div>' +
+      '<div class="fg"><label class="fl">SE (or leave blank to auto-calc from CI)</label><input type="number" step="0.001" id="mr_se" placeholder="auto"></div>' +
+    '</div>' +
+    '<div class="bg2"><button class="btn bp" onclick="saveManualRow()">Add Row</button><button class="btn bs" onclick="closeModal()">Cancel</button></div>'
+  );
+}
+
+function saveManualRow() {
+  var eff = parseFloat(document.getElementById('mr_eff').value) || 0;
+  var ciL = parseFloat(document.getElementById('mr_ciL').value) || (eff - 0.5);
+  var ciU = parseFloat(document.getElementById('mr_ciU').value) || (eff + 0.5);
+  var se = parseFloat(document.getElementById('mr_se').value);
+  if (!se || se <= 0 || isNaN(se)) se = calcSE(ciL, ciU);
+  if (!se || se <= 0) se = 0.15;
+
+  D.extracted.push({
+    articleId: 'M' + uid(),
+    study: document.getElementById('mr_study').value || 'Manual Entry',
+    arm: document.getElementById('mr_arm').value || 'Main',
+    year: document.getElementById('mr_year').value || '2024',
+    design: document.getElementById('mr_design').value,
+    n: parseInt(document.getElementById('mr_n').value) || 50,
+    intervention: document.getElementById('mr_int').value,
+    comparator: document.getElementById('mr_comp').value,
+    outcome: document.getElementById('mr_out').value,
+    effectSize: eff,
+    effectType: document.getElementById('mr_et').value,
+    ciLower: ciL,
+    ciUpper: ciU,
+    pValue: document.getElementById('mr_p').value || 'N/A',
+    se: se
+  });
+  D.pc.dataRows = D.extracted.length;
+  renderExtTbl(D.extracted);
+  closeModal();
+  ntf('Manual row added', 'success');
+}
+
+function toQual() {
+  if (!D.extracted.length) { ntf('Extract data first', 'error'); return; }
+  ensureSE();
+  done(5);
+}
+
+/* ====================================================================
+   STEP 7: Quality Assessment
+   ==================================================================== */
+async function runQual() {
+  if (!D.extracted.length) { ntf('No extracted data', 'error'); return; }
+  document.getElementById('s6p').style.display = 'block';
+  var sTxt = D.extracted.map(function(d, i) { return (i + 1) + '.' + d.study + '(' + d.year + '),' + d.design; }).join('; ');
+  try {
+    var r = await AI(
+      'Quality assessment: RoB2+GRADE for ' + D.pico.I + ' in ' + D.pico.P +
+      '.\nStudies: ' + sTxt +
+      '\nReturn JSON:\n{"rob":[{"study":"Author(2024)","randomization":"Low","deviations":"Low","missingData":"Low","measurement":"Low","selection":"Low","overall":"Low"}],"grade":[{"outcome":"' + D.pico.O + '","studies":' + D.extracted.length + ',"riskOfBias":"Serious","inconsistency":"Not serious","indirectness":"Not serious","imprecision":"Serious","publicationBias":"Undetected","certainty":"Low"}]}\nONLY JSON.',
+      'Cochrane RoB2 GRADE expert.'
+    );
+    var d = parseJSON(r);
+    if (d && d.rob) {
+      D.rob = d.rob;
+      D.grade = d.grade || [];
+    } else if (Array.isArray(d)) {
+      D.rob = d;
+      D.grade = [{ outcome: D.pico.O, studies: D.extracted.length, riskOfBias: 'Serious', inconsistency: 'Not serious', indirectness: 'Not serious', imprecision: 'Serious', publicationBias: 'Undetected', certainty: 'Low' }];
+    } else {
+      throw new Error('Invalid format');
+    }
+    rRoB(D.rob); rGR(D.grade);
+    ntf('Quality assessment done!', 'success');
+  } catch(e) {
+    ntf('AI quality assessment failed — all set to "Unclear". Edit manually.', 'error');
+    D.rob = D.extracted.map(function(d) {
+      return { study: d.study + '(' + d.year + ')', randomization: 'Unclear', deviations: 'Unclear', missingData: 'Unclear', measurement: 'Unclear', selection: 'Unclear', overall: 'Unclear' };
+    });
+    D.grade = [{ outcome: D.pico.O, studies: D.extracted.length, riskOfBias: 'Not assessed', inconsistency: 'Not assessed', indirectness: 'Not assessed', imprecision: 'Not assessed', publicationBias: 'Not assessed', certainty: 'Not assessed' }];
+    rRoB(D.rob); rGR(D.grade);
+  }
+  document.getElementById('s6p').style.display = 'none';
+}
+function rc2(v) { var l = (v || '').toLowerCase(); return l.indexOf('low') >= 0 ? 'rl' : l.indexOf('high') >= 0 ? 'rh' : 'rm'; }
+function rRoB(d) {
+  document.getElementById('robB').innerHTML = d.map(function(r, idx) {
+    return '<tr><td><strong>' + r.study + '</strong></td>' +
+      ['randomization', 'deviations', 'missingData', 'measurement', 'selection', 'overall'].map(function(k) {
+        return '<td><span class="rb ' + rc2(r[k]) + '">' + r[k] + '</span></td>';
+      }).join('') +
+      '<td><button class="btn bsm bs" onclick="editRob(' + idx + ')">Edit</button></td></tr>';
+  }).join('');
+}
+function editRob(idx) {
+  var r = D.rob[idx];
+  var fields = ['randomization', 'deviations', 'missingData', 'measurement', 'selection', 'overall'];
+  var opts = '<option>Low</option><option>Some concerns</option><option>High</option>';
+  openModal(
+    '<h2>Edit RoB: ' + r.study + '</h2>' +
+    fields.map(function(f) {
+      return '<div class="fg"><label class="fl">' + f + '</label><select id="rob_' + f + '">' + opts + '</select></div>';
+    }).join('') +
+    '<div class="bg2"><button class="btn bp" onclick="saveRob(' + idx + ')">Save</button><button class="btn bs" onclick="closeModal()">Cancel</button></div>'
+  );
+  setTimeout(function() {
+    fields.forEach(function(f) { document.getElementById('rob_' + f).value = r[f] || 'Low'; });
+  }, 50);
+}
+function saveRob(idx) {
+  var fields = ['randomization', 'deviations', 'missingData', 'measurement', 'selection', 'overall'];
+  fields.forEach(function(f) { D.rob[idx][f] = document.getElementById('rob_' + f).value; });
+  rRoB(D.rob);
+  closeModal();
+  ntf('RoB updated', 'success');
+}
+function rGR(d) {
+  document.getElementById('grB').innerHTML = d.map(function(g) {
+    return '<tr><td><strong>' + g.outcome + '</strong></td><td>' + g.studies + '</td><td>' + g.riskOfBias + '</td><td>' + g.inconsistency + '</td><td>' + g.indirectness + '</td><td>' + g.imprecision + '</td><td>' + g.publicationBias + '</td><td><span class="rb ' + (g.certainty === 'High' ? 'rl' : g.certainty === 'Moderate' ? 'rm' : 'rh') + '">' + g.certainty + '</span></td></tr>';
+  }).join('');
+}
+function swQ(t, b) {
+  document.querySelectorAll('#m6 .tab').forEach(function(x) { x.classList.remove('on'); });
+  b.classList.add('on');
+  ['rob', 'grade'].forEach(function(x) { document.getElementById('q_' + x).classList.toggle('on', x === t); });
+}
+
+/* ====================================================================
+   STEP 8: META-ANALYSIS — FULLY FIXED
+   ==================================================================== */
+function runMeta() {
+  // First ensure all SE values are valid
+  ensureSE();
+
+  var data = D.extracted.filter(function(d) {
+    return d.effectSize != null && !isNaN(parseFloat(d.effectSize)) && parseFloat(d.se) > 0;
+  });
+
+  // Show validation info
+  var invalid = D.extracted.length - data.length;
+  var valEl = document.getElementById('metaValidation');
+  if (invalid > 0) {
+    valEl.style.display = 'block';
+    valEl.innerHTML = '⚠️ <strong>' + invalid + ' row(s) excluded</strong> from meta-analysis (missing effect size or SE ≤ 0). ' +
+      '<button class="btn bsm bs" onclick="go(5)" style="margin-left:8px">← Fix in Extraction</button>';
+  } else {
+    valEl.style.display = 'none';
+  }
+
+  if (data.length < 2) {
+    ntf('Need ≥ 2 studies with valid Effect Size and SE > 0. Found: ' + data.length + '. Go back to fix extraction data.', 'error');
+    return;
+  }
+
+  // Check for placeholder/unverified data
+  var placeholders = data.filter(function(d) { return d._placeholder || (d.effectSize === 0 && d.se === 0); });
+  if (placeholders.length > 0) {
+    valEl.style.display = 'block';
+    valEl.innerHTML = '<strong>' + placeholders.length + ' row(s) still contain placeholder data</strong> (effect=0, SE=0). These are NOT real data — go back to Extraction and enter actual values from the papers before running meta-analysis.' +
+      '<br><button class="btn bsm bs" onclick="go(5)" style="margin-top:6px">Go to Extraction</button>';
+    ntf('WARNING: ' + placeholders.length + ' rows have placeholder data — results will be meaningless', 'error');
+  }
+
+  var model = document.getElementById('mm').value;
+  var z = 1.96;
+  var st = data.map(function(d) {
+    return { nm: d.study + '(' + d.year + ')' + (d.arm && d.arm !== 'Main' ? ' [' + d.arm + ']' : ''), y: +d.effectSize, se: +d.se, w: 0, wR: 0, wp: 0 };
+  });
+
+  // Fixed-effect
+  var W = 0;
+  st.forEach(function(s) { s.w = 1 / (s.se * s.se); W += s.w; });
+  var mu_f = st.reduce(function(a, s) { return a + s.w * s.y; }, 0) / W;
+  var Q = st.reduce(function(a, s) { return a + s.w * Math.pow(s.y - mu_f, 2); }, 0);
+  var df = st.length - 1;
+  var I2 = Math.max(0, (Q - df) / Q * 100);
+  var C2 = W - st.reduce(function(a, s) { return a + s.w * s.w; }, 0) / W;
+  var t2 = Math.max(0, (Q - df) / (C2 || 1));
+
+  // Random-effects
+  var WR = 0;
+  st.forEach(function(s) { s.wR = 1 / (s.se * s.se + t2); WR += s.wR; });
+  st.forEach(function(s) { s.wp = s.wR / WR * 100; });
+  var mu_r = st.reduce(function(a, s) { return a + s.wR * s.y; }, 0) / WR;
+  var se_r = Math.sqrt(1 / WR);
+
+  if (model === 'hksj') {
+    var qR = st.reduce(function(a, s) { return a + s.wR * Math.pow(s.y - mu_r, 2); }, 0);
+    se_r *= Math.sqrt(Math.max(1, qR / df));
+  }
+
+  var pe = model === 'fe' ? mu_f : mu_r;
+  var pse = model === 'fe' ? Math.sqrt(1 / W) : se_r;
+  var cl = pe - z * pse, ch = pe + z * pse;
+  var predSE = Math.sqrt(pse * pse + t2);
+  var pl = pe - 2.2 * predSE, ph = pe + 2.2 * predSE;
+  var qP = 1 - chiCDF(Q, df);
+
+  D.meta = { st: st, pe: pe, cl: cl, ch: ch, I2: I2, t2: t2, qP: qP, pl: pl, ph: ph, model: model.toUpperCase() };
+
+  document.getElementById('me_e').textContent = pe.toFixed(3);
+  document.getElementById('me_c').textContent = '[' + cl.toFixed(3) + ', ' + ch.toFixed(3) + ']';
+  document.getElementById('me_i').textContent = I2.toFixed(1) + '%';
+  document.getElementById('me_t').textContent = t2.toFixed(4);
+  document.getElementById('me_q').textContent = qP.toFixed(4);
+  document.getElementById('me_p').textContent = '[' + pl.toFixed(2) + ', ' + ph.toFixed(2) + ']';
+
+  // Egger's test
+  var eg = '';
+  if (st.length >= 10) {
+    var prec = st.map(function(s) { return 1 / s.se; });
+    var snd = st.map(function(s) { return s.y / s.se; });
+    var n2 = prec.length;
+    var mP = prec.reduce(function(a, b) { return a + b; }, 0) / n2;
+    var mS = snd.reduce(function(a, b) { return a + b; }, 0) / n2;
+    var num = prec.reduce(function(a, v, i) { return a + (v - mP) * (snd[i] - mS); }, 0);
+    var den = prec.reduce(function(a, v) { return a + (v - mP) * (v - mP); }, 0);
+    var slope = num / (den || 1);
+    var intercept = mS - slope * mP;
+    eg = 'Egger intercept: ' + intercept.toFixed(3) + ' (≥10 studies)';
+  } else {
+    eg = 'Egger test requires ≥10 studies (' + st.length + ' available)';
+  }
+  document.getElementById('egR').textContent = eg;
+
+  drawF(st, pe, cl, ch);
+  drawFn(st, pe);
+  ntf('Meta-analysis complete! ' + st.length + ' studies pooled.', 'success');
+}
+
+function chiCDF(x, k) {
+  if (x <= 0) return 0;
+  var a = k / 2, z2 = x / 2;
+  var s = 0, t = Math.exp(-z2) * Math.pow(z2, a) / gm(a + 1);
+  for (var n = 0; n < 100; n++) { s += t; t *= z2 / (a + n + 1); if (t < 1e-10) break; }
+  return s;
+}
+function gm(n) {
+  if (n === 1) return 1;
+  if (n === .5) return Math.sqrt(Math.PI);
+  n -= 1;
+  var c = [.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
+  var x = c[0];
+  for (var i = 1; i < 9; i++) x += c[i] / (n + i);
+  var t = n + 7.5;
+  return Math.sqrt(2 * Math.PI) * Math.pow(t, n + .5) * Math.exp(-t) * x;
+}
+
+// Forest Plot
+function drawF(st, pe, cl, ch) {
+  var svg = document.getElementById('fSVG');
+  var rH = 28, top = 40, w = 900, pL = 220, pR = w - 60, pW = pR - pL;
+  var h = top + (st.length + 2) * rH + 40;
+  svg.setAttribute('height', h);
+  var vals = [];
+  st.forEach(function(s) { vals.push(s.y - 1.96 * s.se, s.y + 1.96 * s.se); });
+  vals.push(cl, ch, 0);
+  var mn = Math.min.apply(null, vals) - .2, mx = Math.max.apply(null, vals) + .2;
+  var sc = function(v) { return pL + ((v - mn) / (mx - mn)) * pW; };
+  var H = '<rect width="' + w + '" height="' + h + '" fill="white"/>';
+  H += '<text x="6" y="24" font-size="10" font-weight="700" fill="#333" font-family="DM Sans">Study</text>';
+  H += '<text x="' + (pR + 6) + '" y="24" font-size="9" font-weight="700" fill="#333" font-family="DM Sans">Weight</text>';
+  H += '<line x1="0" y1="32" x2="' + w + '" y2="32" stroke="#ddd"/>';
+  H += '<line x1="' + sc(0) + '" y1="' + top + '" x2="' + sc(0) + '" y2="' + (top + (st.length + 1) * rH) + '" stroke="#999" stroke-dasharray="3,3"/>';
+  st.forEach(function(s, i) {
+    var y = top + (i + .5) * rH;
+    var x = sc(s.y), xL = sc(s.y - 1.96 * s.se), xH = sc(s.y + 1.96 * s.se);
+    var sq = Math.max(3, Math.min(11, s.wp / 3));
+    H += '<text x="6" y="' + (y + 3) + '" font-size="9" fill="#333" font-family="DM Sans">' + s.nm.substring(0, 28) + '</text>';
+    H += '<line x1="' + Math.max(pL, xL) + '" y1="' + y + '" x2="' + Math.min(pR, xH) + '" y2="' + y + '" stroke="#3b82f6" stroke-width="1.5"/>';
+    H += '<rect x="' + (x - sq / 2) + '" y="' + (y - sq / 2) + '" width="' + sq + '" height="' + sq + '" fill="#3b82f6"/>';
+    H += '<text x="' + (pR + 6) + '" y="' + (y + 3) + '" font-size="8" fill="#666" font-family="DM Mono">' + s.wp.toFixed(1) + '%</text>';
+  });
+  var pY = top + (st.length + .5) * rH;
+  H += '<line x1="0" y1="' + (pY - rH / 2) + '" x2="' + w + '" y2="' + (pY - rH / 2) + '" stroke="#ddd"/>';
+  H += '<text x="6" y="' + (pY + 3) + '" font-size="9" font-weight="700" fill="#333" font-family="DM Sans">Pooled (' + D.meta.model + ')</text>';
+  H += '<polygon points="' + sc(cl) + ',' + pY + ' ' + sc(pe) + ',' + (pY - 7) + ' ' + sc(ch) + ',' + pY + ' ' + sc(pe) + ',' + (pY + 7) + '" fill="#f43f5e"/>';
+  H += '<text x="' + (sc(pe) + 12) + '" y="' + (pY + 3) + '" font-size="8" fill="#f43f5e" font-family="DM Mono">' + pe.toFixed(3) + ' [' + cl.toFixed(2) + ', ' + ch.toFixed(2) + ']</text>';
+  svg.innerHTML = H;
+}
+
+// Funnel Plot
+function drawFn(st, pe) {
+  var svg = document.getElementById('fnSVG'), w = 600, h = 350;
+  var p = { t: 40, r: 40, b: 50, l: 60 };
+  var pW2 = w - p.l - p.r, pH = h - p.t - p.b;
+  var mSE = 0;
+  st.forEach(function(s) { if (s.se > mSE) mSE = s.se; });
+  mSE *= 1.3;
+  var effs = st.map(function(s) { return s.y; });
+  var mn = Math.min.apply(null, effs.concat([pe])) - .5, mx = Math.max.apply(null, effs.concat([pe])) + .5;
+  var sx = function(v) { return p.l + ((v - mn) / (mx - mn)) * pW2; };
+  var sy = function(se) { return p.t + (se / mSE) * pH; };
+  var H = '<rect width="' + w + '" height="' + h + '" fill="white"/>';
+  H += '<text x="' + (w / 2) + '" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#333" font-family="DM Sans">Funnel Plot</text>';
+  H += '<polygon points="' + sx(pe) + ',' + p.t + ' ' + sx(pe - 1.96 * mSE) + ',' + (p.t + pH) + ' ' + sx(pe + 1.96 * mSE) + ',' + (p.t + pH) + '" fill="rgba(59,130,246,.06)" stroke="rgba(59,130,246,.25)" stroke-dasharray="3,3"/>';
+  H += '<line x1="' + sx(pe) + '" y1="' + p.t + '" x2="' + sx(pe) + '" y2="' + (p.t + pH) + '" stroke="#999" stroke-dasharray="3,3"/>';
+  st.forEach(function(s) {
+    H += '<circle cx="' + sx(s.y) + '" cy="' + sy(s.se) + '" r="4" fill="#3b82f6" stroke="white" stroke-width="1"/>';
+  });
+  H += '<line x1="' + p.l + '" y1="' + p.t + '" x2="' + p.l + '" y2="' + (p.t + pH) + '" stroke="#333"/>';
+  H += '<line x1="' + p.l + '" y1="' + (p.t + pH) + '" x2="' + (p.l + pW2) + '" y2="' + (p.t + pH) + '" stroke="#333"/>';
+  H += '<text x="' + (w / 2) + '" y="' + (h - 8) + '" text-anchor="middle" font-size="9" fill="#666" font-family="DM Sans">Effect Size</text>';
+  H += '<text x="15" y="' + (h / 2) + '" text-anchor="middle" font-size="9" fill="#666" font-family="DM Sans" transform="rotate(-90,15,' + (h / 2) + ')">Standard Error</text>';
+  svg.innerHTML = H;
+}
+
+/* ====================================================================
+   STEP 9: Report & PRISMA
+   ==================================================================== */
+function genPRISMA() {
+  var c = D.pc;
+  var svg = document.getElementById('prSVG');
+  var id = c.identified || D.arts.length;
+  var dp = c.dupsRem || 0;
+  var scr = c.screened || D.uniq.length;
+  var se = c.scrExcl || 0;
+  var ft = c.fullText || D.screened.length;
+  var apP = c.apprPassed || D.appraised.length;
+  var apF = c.apprFailed || 0;
+  var inc = c.uniqueStudies || D.extracted.length;
+  var rows = c.dataRows || D.extracted.length;
+  var bx = 'rx="7" ry="7" fill="#f8fafc" stroke="#3b82f6" stroke-width="1.5"';
+  var ex = 'rx="7" ry="7" fill="#fff5f5" stroke="#f43f5e" stroke-width="1.5"';
+  var ax = 'stroke="#3b82f6" stroke-width="1.5" marker-end="url(#ah)"';
+  var H = '<rect width="800" height="600" fill="white"/><defs><marker id="ah" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#3b82f6"/></marker></defs>';
+  H += '<text x="400" y="26" text-anchor="middle" font-size="16" font-weight="800" fill="#111" font-family="Playfair Display">PRISMA 2020 Flow Diagram</text>';
+  function bx2(x, y, w2, h2, st2, t1, t2) {
+    return '<rect x="' + x + '" y="' + y + '" width="' + w2 + '" height="' + h2 + '" ' + st2 + '/>' +
+      '<text x="' + (x + w2 / 2) + '" y="' + (y + h2 / 2 - 5) + '" text-anchor="middle" font-size="10" fill="#333" font-family="DM Sans">' + t1 + '</text>' +
+      '<text x="' + (x + w2 / 2) + '" y="' + (y + h2 / 2 + 9) + '" text-anchor="middle" font-size="13" font-weight="700" fill="' + (st2.indexOf('f43f5e') >= 0 ? '#f43f5e' : '#3b82f6') + '" font-family="DM Sans">(n=' + t2 + ')</text>';
+  }
+  function ar(x1, y1, x2, y2) { return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" ' + ax + '/>'; }
+  H += bx2(190, 45, 210, 40, bx, 'Records identified', id);
+  H += bx2(460, 45, 190, 40, ex, 'Duplicates removed', dp);
+  H += ar(400, 65, 458, 65); H += ar(295, 85, 295, 110);
+  H += bx2(190, 115, 210, 40, bx, 'Records screened', scr);
+  H += bx2(460, 115, 190, 40, ex, 'Screen excluded', se);
+  H += ar(400, 135, 458, 135); H += ar(295, 155, 295, 185);
+  H += bx2(190, 190, 210, 40, bx, 'Full-text assessed', ft);
+  H += ar(295, 230, 295, 260);
+  H += bx2(190, 265, 210, 40, 'rx="7" ry="7" fill="#fef9c3" stroke="#f59e0b" stroke-width="1.5"', 'Appraised', ft);
+  H += bx2(460, 265, 190, 40, ex, 'Appraisal failed', apF);
+  H += ar(400, 285, 458, 285); H += ar(295, 305, 295, 335);
+  H += bx2(190, 340, 210, 44, 'rx="7" ry="7" fill="#f0fdf4" stroke="#10b981" stroke-width="1.5"', 'Articles included', apP);
+  H += ar(295, 384, 295, 410);
+  H += bx2(190, 415, 210, 44, 'rx="7" ry="7" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5"', 'Data rows in synthesis', rows);
+  H += '<text x="400" y="585" text-anchor="middle" font-size="9" fill="#999" font-family="DM Sans">LITAI v4.0 PRISMA 2020</text>';
+  svg.innerHTML = H;
+}
+
+async function genRep() {
+  document.getElementById('s8p').style.display = 'block';
+  var rt = document.getElementById('frt').value;
+  var meta = D.meta;
+  var mTxt = meta ? 'Pooled: ' + meta.pe.toFixed(3) + ' [' + meta.cl.toFixed(3) + ', ' + meta.ch.toFixed(3) + '], I²=' + meta.I2.toFixed(1) + '%' : 'No meta-analysis performed.';
+  var exTxt = D.extracted.slice(0, 8).map(function(d) { return d.study + ' (' + d.year + '): ' + d.design + ', N=' + d.n + ', Effect=' + d.effectSize; }).join('\n');
+  var cerTxt = D.screened.filter(function(a) { return a.appraisal; }).slice(0, 5).map(function(a) { return a.title.substring(0, 30) + ': OCEBM=' + a.appraisal.ocebm + ', DAPR=' + a.appraisal.daprTotal; }).join('\n');
+  var prompts = {
+    prisma: 'PRISMA 2020 SLR with all sections.',
+    cer_sp: 'CER Safety & Performance per EU MDR MedDev 2.7/1. Include OCEBM+DAPR+TOFSC tables.\nAppraisal:\n' + cerTxt,
+    csr: 'CSR per ICH E3.',
+    medcomm: 'Medical Communications manuscript per ICMJE.',
+    hta: 'HTA Report with all sections.'
+  };
+  try {
+    var r = await AI(
+      'Write ' + (prompts[rt] || prompts.prisma) +
+      '\n\nReview: ' + D.pico.I + ' for ' + D.pico.P + '. O:' + D.pico.O +
+      '\nData:\n' + exTxt + '\nMeta: ' + mTxt +
+      '\nIncluded: ' + (D.pc.uniqueStudies || D.extracted.length) + ' articles\n\nHTML format (no html/head/body). Include tables.',
+      'Senior medical writer.'
+    );
+    D.report = r;
+    document.getElementById('rC').innerHTML = r;
+    ntf('Report generated!', 'success');
+  } catch(e) {
+    ntf(e.message, 'error');
+    document.getElementById('rC').innerHTML = '<h1>Error generating report</h1><p>' + e.message + '</p><p>Check your API key in Settings.</p>';
+  }
+  document.getElementById('s8p').style.display = 'none';
+}
+
+function swR(t, b) {
+  document.querySelectorAll('#m8 .tab').forEach(function(x) { x.classList.remove('on'); });
+  b.classList.add('on');
+  ['prisma', 'report', 'export'].forEach(function(x) { document.getElementById('r_' + x).classList.toggle('on', x === t); });
+}
+
+function doExp(f) {
+  if (f === 'html') dl2('<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;padding:20px;line-height:1.8}h1{border-bottom:3px solid #3b82f6}h2{margin-top:24px;border-bottom:2px solid #eee}table{width:100%;border-collapse:collapse;margin:12px 0;font-size:11px}th,td{border:1px solid #ddd;padding:5px 8px}th{background:#f5f5f5}</style></head><body>' + (D.report || 'No report') + '</body></html>', 'Report.html', 'text/html');
+  else if (f === 'json') dl2(JSON.stringify({ pico: D.pico, extracted: D.extracted, rob: D.rob, grade: D.grade, meta: D.meta ? { pooled: D.meta.pe, ci: [D.meta.cl, D.meta.ch], I2: D.meta.I2 } : null, prisma: D.pc }, null, 2), 'Data.json', 'application/json');
+  else if (f === 'svg') dl2('<?xml version="1.0"?>' + document.getElementById('prSVG').outerHTML, 'PRISMA.svg', 'image/svg+xml');
+  else if (f === 'csv') dl2(['Study,Arm,Year,Design,N,Effect,CI_Low,CI_High,p,SE'].concat(D.extracted.map(function(d) { return d.study + ',' + d.arm + ',' + d.year + ',' + d.design + ',' + d.n + ',' + d.effectSize + ',' + d.ciLower + ',' + d.ciUpper + ',' + d.pValue + ',' + d.se; })).join('\n'), 'Extraction.csv', 'text/csv');
+  else { var dv = document.createElement('div'); dv.innerHTML = D.report || ''; dl2(dv.textContent, 'Report.txt', 'text/plain'); }
+  ntf('Downloaded!', 'success');
+}
+function dl2(c, n, m) {
+  var b = new Blob([c], { type: m }), u = URL.createObjectURL(b), a = document.createElement('a');
+  a.href = u; a.download = n; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(u);
+}
+
+/* ===== INIT ===== */
+lC();
+buildPipe();
+build();
+</script>
+</body>
+</html>

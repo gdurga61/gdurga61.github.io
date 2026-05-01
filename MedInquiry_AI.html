@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedInquiry AI — Medical Inquiries Intelligence Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 50%,#0f172a 100%);color:#e2e8f0;min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#1e293b}
+::-webkit-scrollbar-thumb{background:#475569;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#64748b}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fade-in{animation:fadeIn 0.4s ease-out}
+.pulse{animation:pulse 1.5s infinite}
+.spinner{width:20px;height:20px;border:3px solid #334155;border-top-color:#06b6d4;border-radius:50%;animation:spin 0.8s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef,useCallback} = React;
+
+// ─── SAMPLE DATA ─────────────────────────
+const SAMPLE_INQUIRIES = [
+  {id:1,date:"2025-01-05",source:"MIR",region:"Northeast US",hcp_type:"Oncologist",product:"OncaVax-7",inquiry:"What is the recommended dosage adjustment for OncaVax-7 in patients with moderate hepatic impairment (Child-Pugh B)?"},
+  {id:2,date:"2025-01-07",source:"MSL Note",region:"West US",hcp_type:"Neurologist",product:"NeuroShield Pro",inquiry:"A patient on NeuroShield Pro developed grade 3 peripheral neuropathy after 4 cycles. Is dose reduction or discontinuation recommended?"},
+  {id:3,date:"2025-01-10",source:"MIR",region:"Southeast US",hcp_type:"Cardiologist",product:"CardioStabil XR",inquiry:"Can CardioStabil XR be used in combination with rivaroxaban for patients with atrial fibrillation and heart failure?"},
+  {id:4,date:"2025-01-12",source:"Advisory Board",region:"Midwest US",hcp_type:"Rheumatologist",product:"ImmunoFlex 200",inquiry:"Advisory board discussed potential off-label use of ImmunoFlex 200 for refractory lupus nephritis. Panel expressed interest in RWE data."},
+  {id:5,date:"2025-01-15",source:"MIR",region:"West US",hcp_type:"Pharmacist",product:"OncaVax-7",inquiry:"Is there data on the efficacy of OncaVax-7 in patients who progressed on prior checkpoint inhibitor therapy?"},
+  {id:6,date:"2025-01-18",source:"MSL Note",region:"Northeast US",hcp_type:"Oncologist",product:"OncaVax-7",inquiry:"KOL raised concern about increased hepatotoxicity signals seen in their clinical practice with OncaVax-7, particularly ALT elevations >5x ULN."},
+  {id:7,date:"2025-01-20",source:"MIR",region:"Southeast US",hcp_type:"Patient",product:"NeuroShield Pro",inquiry:"I've been experiencing severe headaches and dizziness since starting NeuroShield Pro 3 weeks ago. Are these known side effects?"},
+  {id:8,date:"2025-01-22",source:"MIR",region:"Midwest US",hcp_type:"Endocrinologist",product:"GlucoBalance AI",inquiry:"What is the mechanism of action of GlucoBalance AI and how does it differ from existing GLP-1 receptor agonists?"},
+  {id:9,date:"2025-01-25",source:"Advisory Board",region:"West US",hcp_type:"Oncologist",product:"OncaVax-7",inquiry:"Board discussed emerging data on OncaVax-7 combination with PARP inhibitors in BRCA-mutated ovarian cancer. Requested clinical trial updates."},
+  {id:10,date:"2025-01-28",source:"MIR",region:"Northeast US",hcp_type:"Cardiologist",product:"CardioStabil XR",inquiry:"Patient with severe renal impairment (eGFR <30). Is CardioStabil XR contraindicated or does it require dose modification?"},
+  {id:11,date:"2025-02-02",source:"MSL Note",region:"Southeast US",hcp_type:"Neurologist",product:"NeuroShield Pro",inquiry:"Community neurologist asked about real-world persistence data for NeuroShield Pro vs. natalizumab in relapsing MS patients."},
+  {id:12,date:"2025-02-05",source:"MIR",region:"Midwest US",hcp_type:"Pharmacist",product:"ImmunoFlex 200",inquiry:"What are the storage requirements for ImmunoFlex 200 after reconstitution? Pharmacy received conflicting information."},
+  {id:13,date:"2025-02-08",source:"MIR",region:"West US",hcp_type:"Oncologist",product:"OncaVax-7",inquiry:"Has there been any signal for immune-related myocarditis with OncaVax-7? We observed 2 suspected cases in our institution."},
+  {id:14,date:"2025-02-10",source:"Advisory Board",region:"Northeast US",hcp_type:"Cardiologist",product:"CardioStabil XR",inquiry:"Panel recommended exploring CardioStabil XR for HFpEF population based on mechanistic rationale. Currently only approved for HFrEF."},
+  {id:15,date:"2025-02-12",source:"MIR",region:"Southeast US",hcp_type:"Gastroenterologist",product:"GlucoBalance AI",inquiry:"Reports of pancreatitis in 3 patients on GlucoBalance AI at our center. Is this a recognized adverse event? What is the recommended management?"},
+  {id:16,date:"2025-02-15",source:"MSL Note",region:"Midwest US",hcp_type:"Oncologist",product:"OncaVax-7",inquiry:"Tier-1 KOL expressed interest in investigator-initiated trial combining OncaVax-7 with novel bispecific antibody. Requested medical affairs support."},
+  {id:17,date:"2025-02-18",source:"MIR",region:"West US",hcp_type:"Neurologist",product:"NeuroShield Pro",inquiry:"Is there data supporting use of NeuroShield Pro in pediatric MS patients aged 10-17? The current label only covers adults."},
+  {id:18,date:"2025-02-20",source:"MIR",region:"Northeast US",hcp_type:"Rheumatologist",product:"ImmunoFlex 200",inquiry:"What is the recommended washout period when switching from ImmunoFlex 200 to a JAK inhibitor?"},
+  {id:19,date:"2025-02-25",source:"MSL Note",region:"Southeast US",hcp_type:"Cardiologist",product:"CardioStabil XR",inquiry:"Multiple cardiologists in region report superior exercise tolerance improvements vs. label claims. Suggest post-marketing outcomes study."},
+  {id:20,date:"2025-03-01",source:"MIR",region:"Midwest US",hcp_type:"Patient",product:"GlucoBalance AI",inquiry:"I was prescribed GlucoBalance AI but my insurance denied coverage saying it's not on formulary. Can you provide cost-effectiveness data for my appeal?"},
+  {id:21,date:"2025-03-05",source:"MIR",region:"West US",hcp_type:"Oncologist",product:"OncaVax-7",inquiry:"What biomarker testing is recommended before initiating OncaVax-7? Is PD-L1 expression or TMB score the better predictor of response?"},
+  {id:22,date:"2025-03-08",source:"Advisory Board",region:"Northeast US",hcp_type:"Endocrinologist",product:"GlucoBalance AI",inquiry:"Board discussed cardiovascular outcome data for GlucoBalance AI. Members concerned about absence of CVOT data compared to established GLP-1 RAs."},
+  {id:23,date:"2025-03-12",source:"MIR",region:"Southeast US",hcp_type:"Pharmacist",product:"OncaVax-7",inquiry:"Can OncaVax-7 be administered through a peripheral IV or does it require central venous access?"},
+  {id:24,date:"2025-03-15",source:"MSL Note",region:"Midwest US",hcp_type:"Neurologist",product:"NeuroShield Pro",inquiry:"KOL flagged concern about PML risk with NeuroShield Pro in JCV-positive patients. Requested updated risk stratification data."},
+  {id:25,date:"2025-03-18",source:"MIR",region:"West US",hcp_type:"Cardiologist",product:"CardioStabil XR",inquiry:"Elderly patient (82 years) with multiple comorbidities. What are the safety considerations for CardioStabil XR in geriatric populations?"},
+];
+
+const CATEGORIES = ["Safety","Efficacy","Dosage","Off-label","Disease State","Product Info","Access/Reimbursement","Drug Interaction"];
+const CAT_COLORS = {Safety:"#ef4444",Efficacy:"#3b82f6",Dosage:"#f59e0b","Off-label":"#a855f7","Disease State":"#10b981","Product Info":"#6366f1","Access/Reimbursement":"#ec4899","Drug Interaction":"#f97316"};
+const URG_COLORS = {High:"#ef4444",Medium:"#f59e0b",Low:"#10b981"};
+const REGIONS = ["Northeast US","Southeast US","Midwest US","West US","International"];
+const SOURCES = ["MIR","MSL Note","Advisory Board"];
+
+function countBy(arr,key){const m={};arr.forEach(i=>{const v=i[key]||"Unknown";m[v]=(m[v]||0)+1});return m}
+
+function App(){
+  const [page,setPage]=useState("home");
+  const [inquiries,setInquiries]=useState([]);
+  const [results,setResults]=useState([]);
+  const [processing,setProcessing]=useState(false);
+  const [processed,setProcessed]=useState(0);
+  const [mode,setMode]=useState("autopilot");
+  const [editIdx,setEditIdx]=useState(null);
+  const [editData,setEditData]=useState(null);
+  const [summary,setSummary]=useState("");
+  const [sumLoading,setSumLoading]=useState(false);
+  const [manual,setManual]=useState({date:"",source:"MIR",region:"Northeast US",hcp_type:"",product:"",inquiry:""});
+  const [dashTab,setDashTab]=useState("overview");
+  const [apiKey,setApiKey]=useState("");
+  const [showApiModal,setShowApiModal]=useState(false);
+  const p1=useRef(null),p2=useRef(null),p3=useRef(null),p4=useRef(null);
+
+  const loadSample=()=>{setInquiries(SAMPLE_INQUIRIES.map(i=>({...i,status:"pending"})));setResults([]);setSummary("")};
+
+  const handleCSV=(e)=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=(ev)=>{
+      try{
+        const lines=ev.target.result.split("\n").filter(l=>l.trim());
+        const hdrs=lines[0].split(",").map(h=>h.trim().toLowerCase().replace(/['"]/g,""));
+        const parsed=lines.slice(1).map((line,idx)=>{
+          const vals=[];let cur="",inQ=false;
+          for(let c of line){if(c==='"'){inQ=!inQ}else if(c===','&&!inQ){vals.push(cur.trim());cur=""}else{cur+=c}}
+          vals.push(cur.trim());
+          const obj={};hdrs.forEach((h,i)=>{obj[h]=(vals[i]||"").replace(/^"|"$/g,"").trim()});
+          return{id:idx+1,date:obj.date||"2025-01-01",source:obj.source||"MIR",region:obj.region||"Unknown",hcp_type:obj.hcp_type||obj.hcptype||"HCP",product:obj.product||"Unknown",inquiry:obj.inquiry||obj.text||obj.question||"",status:"pending"};
+        }).filter(o=>o.inquiry);
+        setInquiries(parsed);setResults([]);setSummary("");
+      }catch(err){alert("Error parsing CSV. Headers needed: date, source, region, hcp_type, product, inquiry")}
+    };r.readAsText(f);
+  };
+
+  const addManual=()=>{
+    if(!manual.inquiry.trim())return;
+    setInquiries(p=>[...p,{...manual,id:p.length+1,status:"pending"}]);
+    setManual({date:"",source:"MIR",region:"Northeast US",hcp_type:"",product:"",inquiry:""});
+  };
+
+  const callAI=async(prompt,sys)=>{
+    if(!apiKey){setShowApiModal(true);throw new Error("API key required")}
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:sys,messages:[{role:"user",content:prompt}]})
+    });
+    const data=await resp.json();
+    if(data.error)throw new Error(data.error.message);
+    return data.content?.[0]?.text||"";
+  };
+
+  const analyzeOne=async(inq)=>{
+    const sys=`You are a pharmaceutical Medical Affairs AI analyst. Analyze medical inquiries and return ONLY valid JSON with no markdown or backticks. Structure: {"category":"Safety|Efficacy|Dosage|Off-label|Disease State|Product Info|Access/Reimbursement|Drug Interaction","urgency":"High|Medium|Low","meddra_soc":"MedDRA System Organ Class","meddra_pt":"MedDRA Preferred Term","meddra_llt":"MedDRA Lowest Level Term","sentiment":"Positive|Neutral|Negative|Concerned","key_entities":["entity1","entity2"],"summary":"One sentence summary","recommended_action":"Brief next step for Medical Affairs","safety_signal":true or false}`;
+    const prompt=`Analyze:\nSource:${inq.source}\nHCP:${inq.hcp_type}\nProduct:${inq.product}\nRegion:${inq.region}\nDate:${inq.date}\nInquiry:${inq.inquiry}`;
+    const raw=await callAI(prompt,sys);
+    try{return JSON.parse(raw.replace(/```json|```/g,"").trim())}
+    catch{return{category:"Product Info",urgency:"Medium",meddra_soc:"General disorders",meddra_pt:"Product inquiry",meddra_llt:"Information request",sentiment:"Neutral",key_entities:[inq.product],summary:inq.inquiry.substring(0,100),recommended_action:"Review per SOP",safety_signal:false}}
+  };
+
+  const runAnalysis=async()=>{
+    if(!apiKey){setShowApiModal(true);return}
+    setProcessing(true);setProcessed(0);setResults([]);setPage("analysis");
+    const res=[];
+    for(let i=0;i<inquiries.length;i++){
+      try{
+        const r=await analyzeOne(inquiries[i]);
+        res.push({...inquiries[i],...r,status:"analyzed"});
+      }catch(err){
+        res.push({...inquiries[i],category:"Product Info",urgency:"Medium",meddra_soc:"Error",meddra_pt:err.message,meddra_llt:"",sentiment:"Neutral",key_entities:[],summary:"Analysis failed",recommended_action:"Manual review required",safety_signal:false,status:"error"});
+      }
+      setProcessed(i+1);setResults([...res]);
+    }
+    setResults(res);setProcessing(false);
+  };
+
+  const genSummary=async()=>{
+    if(!apiKey){setShowApiModal(true);return}
+    setSumLoading(true);
+    const cats=countBy(results,"category"),prods=countBy(results,"product"),srcs=countBy(results,"source"),regs=countBy(results,"region");
+    const urgH=results.filter(r=>r.urgency==="High").length;
+    const sigs=results.filter(r=>r.safety_signal);
+    const sys="You are a senior Medical Affairs analytics leader writing for the VP of Medical Affairs. Be concise, data-driven, action-oriented. Use professional pharma language.";
+    const prompt=`Generate executive summary for ${results.length} medical inquiries.\n\nCategories:${JSON.stringify(cats)}\nProducts:${JSON.stringify(prods)}\nHigh Urgency:${urgH}\nSafety Signals:${sigs.length}\nSignal Details:${sigs.map(s=>s.product+": "+s.summary).join("; ")}\nDate Range:${results[0]?.date} to ${results[results.length-1]?.date}\nSources:${JSON.stringify(srcs)}\nRegions:${JSON.stringify(regs)}\n\nProvide:\n1. Executive Summary (2-3 sentences)\n2. Key Findings (top 5)\n3. Safety Signal Alert\n4. Trending Topics\n5. Recommended Actions (top 3)\n6. Resource Allocation`;
+    try{const s=await callAI(prompt,sys);setSummary(s)}catch(err){setSummary("Error: "+err.message)}
+    setSumLoading(false);
+  };
+
+  const saveEdit=()=>{
+    if(editIdx===null)return;
+    const u=[...results];u[editIdx]={...u[editIdx],...editData};
+    setResults(u);setEditIdx(null);setEditData(null);
+  };
+
+  const exportCSV=()=>{
+    if(!results.length)return;
+    const headers=["id","date","source","region","hcp_type","product","inquiry","category","urgency","meddra_soc","meddra_pt","meddra_llt","safety_signal","sentiment","summary","recommended_action"];
+    const csv=[headers.join(","),...results.map(r=>headers.map(h=>`"${String(r[h]||"").replace(/"/g,'""')}"`).join(","))].join("\n");
+    const blob=new Blob([csv],{type:"text/csv"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=url;a.download="medinquiry_analysis_"+new Date().toISOString().slice(0,10)+".csv";a.click();
+  };
+
+  // Charts
+  useEffect(()=>{
+    if(page!=="dashboard"||!results.length)return;
+    setTimeout(()=>{
+      const cats=countBy(results,"category");
+      if(p1.current){
+        Plotly.newPlot(p1.current,[{labels:Object.keys(cats),values:Object.values(cats),type:"pie",marker:{colors:Object.keys(cats).map(c=>CAT_COLORS[c]||"#64748b")},textinfo:"label+percent",hole:0.4}],{paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#e2e8f0",size:11},margin:{t:10,b:10,l:10,r:10},showlegend:false,height:300},{responsive:true,displayModeBar:false});
+      }
+      const prods=countBy(results,"product");
+      if(p2.current){
+        Plotly.newPlot(p2.current,[{x:Object.keys(prods),y:Object.values(prods),type:"bar",marker:{color:["#06b6d4","#8b5cf6","#f59e0b","#10b981","#ef4444"]}}],{paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#e2e8f0",size:11},xaxis:{gridcolor:"#334155"},yaxis:{gridcolor:"#334155"},margin:{t:10,b:60,l:40,r:10},height:300},{responsive:true,displayModeBar:false});
+      }
+      const regs=countBy(results,"region");
+      if(p3.current){
+        Plotly.newPlot(p3.current,[{x:Object.values(regs),y:Object.keys(regs),type:"bar",orientation:"h",marker:{color:"#3b82f6"}}],{paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#e2e8f0",size:11},xaxis:{gridcolor:"#334155"},yaxis:{gridcolor:"#334155"},margin:{t:10,b:30,l:110,r:10},height:300},{responsive:true,displayModeBar:false});
+      }
+      const byMonth={};
+      results.forEach(r=>{const m=(r.date||"").substring(0,7)||"Unk";if(!byMonth[m])byMonth[m]={};byMonth[m][r.category]=(byMonth[m][r.category]||0)+1});
+      const months=Object.keys(byMonth).sort();
+      const usedCats=[...new Set(results.map(r=>r.category))];
+      const traces=usedCats.map(cat=>({x:months,y:months.map(m=>byMonth[m]?.[cat]||0),name:cat,type:"bar",marker:{color:CAT_COLORS[cat]||"#64748b"}}));
+      if(p4.current){
+        Plotly.newPlot(p4.current,traces,{barmode:"stack",paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#e2e8f0",size:11},xaxis:{gridcolor:"#334155"},yaxis:{gridcolor:"#334155"},margin:{t:10,b:40,l:40,r:10},legend:{orientation:"h",y:-0.25,font:{size:10}},height:300},{responsive:true,displayModeBar:false});
+      }
+    },150);
+  },[page,results,dashTab]);
+
+  // Styles
+  const badge=(color)=>({display:"inline-block",padding:"2px 10px",borderRadius:20,fontSize:11,fontWeight:700,background:color+"22",color:color,border:"1px solid "+color+"44"});
+  const card={background:"rgba(30,41,59,0.6)",borderRadius:14,border:"1px solid #334155",padding:20,backdropFilter:"blur(8px)"};
+  const btn=(c="#3b82f6",full)=>({padding:"10px 18px",borderRadius:9,border:"none",background:c,color:"#fff",cursor:"pointer",fontSize:13,fontWeight:700,width:full?"100%":"auto",transition:"all 0.2s"});
+  const inp={padding:"9px 12px",borderRadius:7,border:"1px solid #475569",background:"#1e293b",color:"#e2e8f0",fontSize:13,width:"100%",outline:"none",fontFamily:"inherit"};
+  const sel={...inp};
+
+  // ─── API KEY MODAL ─────────────────────────
+  const ApiModal=()=>showApiModal?(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.8)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200}}>
+      <div style={{...card,maxWidth:460,width:"90%",padding:28}} className="fade-in">
+        <h3 style={{margin:"0 0 8px",fontSize:18}}>🔑 Anthropic API Key Required</h3>
+        <p style={{fontSize:13,color:"#94a3b8",marginBottom:16}}>Enter your Claude API key to power the AI analysis. Your key stays in your browser and is never stored.</p>
+        <input type="password" placeholder="sk-ant-..." value={apiKey} onChange={e=>setApiKey(e.target.value)} style={{...inp,marginBottom:12,fontSize:14,padding:"12px 14px"}} />
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+          <button onClick={()=>setShowApiModal(false)} style={btn("#475569")}>Cancel</button>
+          <button onClick={()=>{if(apiKey.trim())setShowApiModal(false)}} style={btn("#10b981")}>Save & Continue</button>
+        </div>
+      </div>
+    </div>
+  ):null;
+
+  // ─── EDIT MODAL ─────────────────────────
+  const EditModal=()=>(editIdx!==null&&editData)?(
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.75)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:150}}>
+      <div style={{...card,maxWidth:540,width:"92%",padding:28}} className="fade-in">
+        <h3 style={{margin:"0 0 12px",fontSize:17}}>✏️ Edit — Inquiry #{results[editIdx]?.id}</h3>
+        <div style={{fontSize:12,color:"#94a3b8",marginBottom:14,padding:12,background:"#1e293b",borderRadius:8,maxHeight:80,overflow:"auto"}}>{results[editIdx]?.inquiry}</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:14}}>
+          <div><label style={{fontSize:11,color:"#94a3b8",display:"block",marginBottom:3}}>Category</label>
+            <select value={editData.category} onChange={e=>setEditData(p=>({...p,category:e.target.value}))} style={sel}>
+              {CATEGORIES.map(c=><option key={c}>{c}</option>)}
+            </select></div>
+          <div><label style={{fontSize:11,color:"#94a3b8",display:"block",marginBottom:3}}>Urgency</label>
+            <select value={editData.urgency} onChange={e=>setEditData(p=>({...p,urgency:e.target.value}))} style={sel}>
+              <option>High</option><option>Medium</option><option>Low</option>
+            </select></div>
+          <div><label style={{fontSize:11,color:"#94a3b8",display:"block",marginBottom:3}}>MedDRA SOC</label>
+            <input value={editData.meddra_soc} onChange={e=>setEditData(p=>({...p,meddra_soc:e.target.value}))} style={inp}/></div>
+          <div><label style={{fontSize:11,color:"#94a3b8",display:"block",marginBottom:3}}>MedDRA PT</label>
+            <input value={editData.meddra_pt} onChange={e=>setEditData(p=>({...p,meddra_pt:e.target.value}))} style={inp}/></div>
+        </div>
+        <label style={{fontSize:12,color:"#94a3b8",display:"flex",alignItems:"center",gap:6,marginBottom:14}}>
+          <input type="checkbox" checked={editData.safety_signal} onChange={e=>setEditData(p=>({...p,safety_signal:e.target.checked}))}/> Safety Signal Detected
+        </label>
+        <div style={{marginBottom:14}}><label style={{fontSize:11,color:"#94a3b8",display:"block",marginBottom:3}}>Recommended Action</label>
+          <textarea value={editData.recommended_action} onChange={e=>setEditData(p=>({...p,recommended_action:e.target.value}))} rows={2} style={{...inp,resize:"vertical"}}/></div>
+        <div style={{display:"flex",gap:8,justifyContent:"flex-end"}}>
+          <button onClick={()=>{setEditIdx(null);setEditData(null)}} style={btn("#475569")}>Cancel</button>
+          <button onClick={saveEdit} style={btn("#10b981")}>Save</button>
+        </div>
+      </div>
+    </div>
+  ):null;
+
+  // ─── HOME ──────────────────────────────────
+  const Home=()=>(
+    <div style={{maxWidth:1100,margin:"0 auto",padding:"36px 20px"}} className="fade-in">
+      <div style={{textAlign:"center",marginBottom:44}}>
+        <div style={{fontSize:13,color:"#06b6d4",fontWeight:700,letterSpacing:2,marginBottom:6}}>MEDICAL AFFAIRS AI PLATFORM</div>
+        <h1 style={{fontSize:44,fontWeight:900,margin:"0 0 14px",background:"linear-gradient(135deg,#06b6d4,#3b82f6,#8b5cf6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1.1}}>MedInquiry AI</h1>
+        <p style={{color:"#94a3b8",fontSize:15,maxWidth:600,margin:"0 auto"}}>Transform medical inquiries into actionable insights using NLP, LLMs, and GenAI. Auto-classification, MedDRA mapping, trend analysis, and executive reporting.</p>
+      </div>
+
+      {/* Mode + API Key */}
+      <div style={{...card,marginBottom:20,display:"flex",gap:12,alignItems:"center",justifyContent:"center",flexWrap:"wrap"}}>
+        <span style={{color:"#94a3b8",fontSize:13,fontWeight:600}}>Mode:</span>
+        <button onClick={()=>setMode("autopilot")} style={btn(mode==="autopilot"?"#06b6d4":"#475569")}>⚡ AutoPilot</button>
+        <button onClick={()=>setMode("semi")} style={btn(mode==="semi"?"#8b5cf6":"#475569")}>✏️ Semi-AI</button>
+        <span style={{color:"#334155"}}>|</span>
+        <button onClick={()=>setShowApiModal(true)} style={btn(apiKey?"#10b981":"#ef4444")}>
+          {apiKey?"🔑 Key Set":"🔑 Set API Key"}
+        </button>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
+        {/* Data Input */}
+        <div style={card}>
+          <h3 style={{margin:"0 0 18px",fontSize:17,fontWeight:700}}>📥 Data Input</h3>
+          <button onClick={loadSample} style={{...btn("#10b981",true),marginBottom:14,padding:"13px"}}>🧪 Load 25 Sample Inquiries</button>
+          <div style={{marginBottom:14}}>
+            <label style={{fontSize:12,color:"#94a3b8",display:"block",marginBottom:5,fontWeight:600}}>Upload CSV</label>
+            <input type="file" accept=".csv,.tsv,.txt" onChange={handleCSV} style={{...inp,padding:"7px"}} />
+            <div style={{fontSize:10,color:"#64748b",marginTop:3}}>Headers: date, source, region, hcp_type, product, inquiry</div>
+          </div>
+          <div style={{borderTop:"1px solid #334155",paddingTop:14}}>
+            <div style={{fontSize:12,color:"#94a3b8",fontWeight:600,marginBottom:8}}>➕ Add Single Inquiry</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:7}}>
+              <input placeholder="Date (YYYY-MM-DD)" value={manual.date} onChange={e=>setManual(p=>({...p,date:e.target.value}))} style={inp}/>
+              <select value={manual.source} onChange={e=>setManual(p=>({...p,source:e.target.value}))} style={sel}>
+                {SOURCES.map(s=><option key={s}>{s}</option>)}</select>
+              <input placeholder="HCP Type" value={manual.hcp_type} onChange={e=>setManual(p=>({...p,hcp_type:e.target.value}))} style={inp}/>
+              <input placeholder="Product" value={manual.product} onChange={e=>setManual(p=>({...p,product:e.target.value}))} style={inp}/>
+            </div>
+            <select value={manual.region} onChange={e=>setManual(p=>({...p,region:e.target.value}))} style={{...sel,marginBottom:7}}>
+              {REGIONS.map(r=><option key={r}>{r}</option>)}</select>
+            <textarea placeholder="Enter medical inquiry..." value={manual.inquiry} onChange={e=>setManual(p=>({...p,inquiry:e.target.value}))} rows={3} style={{...inp,resize:"vertical"}}/>
+            <button onClick={addManual} style={{...btn("#6366f1",true),marginTop:7}}>Add Inquiry</button>
+          </div>
+        </div>
+
+        {/* Status */}
+        <div style={card}>
+          <h3 style={{margin:"0 0 18px",fontSize:17,fontWeight:700}}>📊 Pipeline Status</h3>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
+            {[{n:inquiries.length,l:"Loaded",g:"#06b6d4,#3b82f6"},{n:results.length,l:"Analyzed",g:"#10b981,#06b6d4"},{n:results.filter(r=>r.safety_signal).length,l:"Signals",g:"#ef4444,#f59e0b"}].map((k,i)=>(
+              <div key={i} style={{textAlign:"center",padding:16}}>
+                <div style={{fontSize:34,fontWeight:900,background:`linear-gradient(135deg,${k.g})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>{k.n}</div>
+                <div style={{fontSize:11,color:"#94a3b8",textTransform:"uppercase",letterSpacing:"1px"}}>{k.l}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{margin:"16px 0",fontSize:12,color:"#94a3b8"}}>
+            Mode: <span style={{color:mode==="autopilot"?"#06b6d4":"#8b5cf6",fontWeight:700}}>{mode==="autopilot"?"⚡ AutoPilot":"✏️ Semi-AI"}</span>
+            <div style={{fontSize:11,color:"#64748b",marginTop:4}}>{mode==="autopilot"?"Full automation — classify, map, assess":"AI analyzes, you review and edit"}</div>
+          </div>
+          {inquiries.length>0&&(
+            <div style={{borderTop:"1px solid #334155",paddingTop:12}}>
+              <div style={{fontSize:11,color:"#94a3b8",marginBottom:6}}>Preview:</div>
+              {inquiries.slice(0,4).map((inq,i)=>(
+                <div key={i} style={{fontSize:11,color:"#cbd5e1",padding:"5px 0",borderBottom:"1px solid #1e293b",display:"flex",gap:6,alignItems:"center"}}>
+                  <span style={badge("#06b6d4")}>{inq.source}</span>
+                  <span style={{flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{inq.inquiry}</span>
+                </div>
+              ))}
+              {inquiries.length>4&&<div style={{fontSize:10,color:"#64748b",marginTop:3}}>...+{inquiries.length-4} more</div>}
+            </div>
+          )}
+          <button disabled={!inquiries.length||processing} onClick={runAnalysis}
+            style={{...btn(!inquiries.length?"#475569":"#3b82f6",true),marginTop:18,padding:"15px",fontSize:15,opacity:!inquiries.length?0.5:1}}>
+            🚀 Run AI Analysis ({inquiries.length} inquiries)
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ─── ANALYSIS ──────────────────────────────
+  const Analysis=()=>{
+    const pct=inquiries.length?(processed/inquiries.length)*100:0;
+    return(
+      <div style={{maxWidth:1200,margin:"0 auto",padding:"20px"}} className="fade-in">
+        {processing&&(
+          <div style={{...card,marginBottom:18,textAlign:"center"}}>
+            <div style={{fontSize:15,fontWeight:700,marginBottom:10}}><span className="spinner"></span>Processing... {processed}/{inquiries.length}</div>
+            <div style={{width:"100%",height:6,borderRadius:3,background:"#1e293b",overflow:"hidden"}}>
+              <div style={{width:pct+"%",height:"100%",borderRadius:3,background:"linear-gradient(90deg,#06b6d4,#3b82f6,#8b5cf6)",transition:"width 0.3s"}}/>
+            </div>
+          </div>
+        )}
+        <div style={{...card,overflow:"auto"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14,flexWrap:"wrap",gap:8}}>
+            <h3 style={{margin:0,fontSize:17,fontWeight:700}}>
+              {mode==="semi"?"✏️ Semi-AI Results":"⚡ AutoPilot Results"} — {results.length} Analyzed
+            </h3>
+            {!processing&&results.length>0&&(
+              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                <button onClick={()=>setPage("dashboard")} style={btn("#06b6d4")}>📊 Dashboard</button>
+                <button onClick={genSummary} disabled={sumLoading} style={btn("#8b5cf6")}>{sumLoading?<><span className="spinner"></span>Generating...</>:"📝 Executive Summary"}</button>
+                <button onClick={exportCSV} style={btn("#10b981")}>📁 Export CSV</button>
+              </div>
+            )}
+          </div>
+          <div style={{overflowX:"auto"}}>
+            <table style={{width:"100%",borderCollapse:"separate",borderSpacing:"0 3px",fontSize:12}}>
+              <thead><tr>
+                {["#","Source","Product","Category","Urgency","MedDRA SOC","MedDRA PT","Signal","Summary",...(mode==="semi"?["Edit"]:[])].map(h=>(
+                  <th key={h} style={{textAlign:"left",padding:"8px 10px",color:"#94a3b8",fontSize:10,textTransform:"uppercase",letterSpacing:"1px",borderBottom:"1px solid #334155",whiteSpace:"nowrap"}}>{h}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {results.map((r,i)=>(
+                  <tr key={i}>
+                    <td style={{padding:"8px 10px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b"}}>{r.id}</td>
+                    <td style={{padding:"8px 10px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b"}}><span style={badge("#06b6d4")}>{r.source}</span></td>
+                    <td style={{padding:"8px 10px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b",fontWeight:600}}>{r.product}</td>
+                    <td style={{padding:"8px 10px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b"}}><span style={badge(CAT_COLORS[r.category]||"#64748b")}>{r.category}</span></td>
+                    <td style={{padding:"8px 10px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b"}}><span style={badge(URG_COLORS[r.urgency]||"#64748b")}>{r.urgency}</span></td>
+                    <td style={{padding:"8px 10px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b",fontSize:11,maxWidth:110,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.meddra_soc}</td>
+                    <td style={{padding:"8px 10px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b",fontSize:11,maxWidth:110,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.meddra_pt}</td>
+                    <td style={{padding:"8px 10px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b"}}>{r.safety_signal?<span style={badge("#ef4444")}>⚠️ YES</span>:<span style={{fontSize:10,color:"#64748b"}}>No</span>}</td>
+                    <td style={{padding:"8px 10px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b",fontSize:11,maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.summary}</td>
+                    {mode==="semi"&&<td style={{padding:"8px 10px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b"}}>
+                      <button onClick={()=>{setEditIdx(i);setEditData({category:r.category,urgency:r.urgency,meddra_soc:r.meddra_soc,meddra_pt:r.meddra_pt,safety_signal:r.safety_signal,recommended_action:r.recommended_action||""})}} style={{...btn("#6366f1"),padding:"3px 9px",fontSize:10}}>Edit</button>
+                    </td>}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {summary&&(
+          <div style={{...card,marginTop:18}}>
+            <h3 style={{margin:"0 0 14px",fontSize:17}}>📝 Executive Summary</h3>
+            <div style={{whiteSpace:"pre-wrap",fontSize:13,lineHeight:1.8,color:"#cbd5e1",background:"#1e293b",padding:20,borderRadius:10,border:"1px solid #334155"}}>{summary}</div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ─── DASHBOARD ─────────────────────────────
+  const Dashboard=()=>{
+    const cats=countBy(results,"category"),urgC=countBy(results,"urgency"),sigN=results.filter(r=>r.safety_signal).length,srcs=countBy(results,"source");
+    return(
+      <div style={{maxWidth:1200,margin:"0 auto",padding:"20px"}} className="fade-in">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18,flexWrap:"wrap",gap:8}}>
+          <h2 style={{margin:0,fontSize:22,fontWeight:800}}>📊 Insights Dashboard</h2>
+          <div style={{display:"flex",gap:6}}>
+            {["overview","safety","meddra"].map(t=>(
+              <button key={t} onClick={()=>setDashTab(t)} style={{padding:"7px 14px",borderRadius:7,border:"none",background:dashTab===t?"#3b82f6":"transparent",color:dashTab===t?"#fff":"#94a3b8",cursor:"pointer",fontSize:12,fontWeight:600}}>
+                {t==="overview"?"Overview":t==="safety"?"Safety Signals":"MedDRA"}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* KPIs */}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,marginBottom:18}}>
+          {[{n:results.length,l:"Total",c:"#3b82f6"},{n:urgC.High||0,l:"High Urgency",c:"#ef4444"},{n:sigN,l:"Signals",c:"#f59e0b"},{n:Object.keys(cats).length,l:"Categories",c:"#8b5cf6"},{n:Object.keys(srcs).length,l:"Sources",c:"#06b6d4"}].map((k,i)=>(
+            <div key={i} style={{...card,textAlign:"center",padding:14}}>
+              <div style={{fontSize:30,fontWeight:900,color:k.c}}>{k.n}</div>
+              <div style={{fontSize:10,color:"#94a3b8",textTransform:"uppercase",letterSpacing:"1px"}}>{k.l}</div>
+            </div>
+          ))}
+        </div>
+
+        {dashTab==="overview"&&(
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+            <div style={card}><h4 style={{margin:"0 0 8px",fontSize:14,color:"#94a3b8"}}>Category Distribution</h4><div ref={p1}/></div>
+            <div style={card}><h4 style={{margin:"0 0 8px",fontSize:14,color:"#94a3b8"}}>By Product</h4><div ref={p2}/></div>
+            <div style={card}><h4 style={{margin:"0 0 8px",fontSize:14,color:"#94a3b8"}}>Geographic Distribution</h4><div ref={p3}/></div>
+            <div style={card}><h4 style={{margin:"0 0 8px",fontSize:14,color:"#94a3b8"}}>Temporal Trends</h4><div ref={p4}/></div>
+          </div>
+        )}
+
+        {dashTab==="safety"&&(
+          <div style={card}>
+            <h3 style={{margin:"0 0 14px",color:"#ef4444",fontSize:16}}>⚠️ Safety Signal Tracker</h3>
+            {!results.filter(r=>r.safety_signal).length?<div style={{textAlign:"center",padding:36,color:"#64748b"}}>No safety signals detected</div>:(
+              <table style={{width:"100%",borderCollapse:"separate",borderSpacing:"0 3px",fontSize:12}}>
+                <thead><tr>{["Product","Source","Date","MedDRA PT","Inquiry","Action"].map(h=>(
+                  <th key={h} style={{textAlign:"left",padding:"8px",color:"#94a3b8",fontSize:10,textTransform:"uppercase",borderBottom:"1px solid #334155"}}>{h}</th>
+                ))}</tr></thead>
+                <tbody>{results.filter(r=>r.safety_signal).map((r,i)=>(
+                  <tr key={i} style={{background:"rgba(239,68,68,0.05)"}}>
+                    <td style={{padding:"8px",fontWeight:700,borderBottom:"1px solid #1e293b"}}>{r.product}</td>
+                    <td style={{padding:"8px",borderBottom:"1px solid #1e293b"}}><span style={badge("#ef4444")}>{r.source}</span></td>
+                    <td style={{padding:"8px",borderBottom:"1px solid #1e293b"}}>{r.date}</td>
+                    <td style={{padding:"8px",borderBottom:"1px solid #1e293b"}}>{r.meddra_pt}</td>
+                    <td style={{padding:"8px",borderBottom:"1px solid #1e293b",maxWidth:260,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.inquiry}</td>
+                    <td style={{padding:"8px",borderBottom:"1px solid #1e293b",fontSize:11}}>{r.recommended_action}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {dashTab==="meddra"&&(
+          <div style={card}>
+            <h3 style={{margin:"0 0 14px",fontSize:16}}>🏥 MedDRA Term Mapping</h3>
+            <div style={{overflowX:"auto"}}>
+              <table style={{width:"100%",borderCollapse:"separate",borderSpacing:"0 3px",fontSize:12}}>
+                <thead><tr>{["#","Product","Category","SOC","Preferred Term","LLT","Entities"].map(h=>(
+                  <th key={h} style={{textAlign:"left",padding:"8px",color:"#94a3b8",fontSize:10,textTransform:"uppercase",borderBottom:"1px solid #334155"}}>{h}</th>
+                ))}</tr></thead>
+                <tbody>{results.map((r,i)=>(
+                  <tr key={i}>
+                    <td style={{padding:"8px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b"}}>{r.id}</td>
+                    <td style={{padding:"8px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b",fontWeight:600}}>{r.product}</td>
+                    <td style={{padding:"8px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b"}}><span style={badge(CAT_COLORS[r.category]||"#64748b")}>{r.category}</span></td>
+                    <td style={{padding:"8px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b",fontSize:11}}>{r.meddra_soc}</td>
+                    <td style={{padding:"8px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b",fontSize:11,fontWeight:600}}>{r.meddra_pt}</td>
+                    <td style={{padding:"8px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b",fontSize:11}}>{r.meddra_llt}</td>
+                    <td style={{padding:"8px",background:"rgba(30,41,59,0.4)",borderBottom:"1px solid #1e293b",fontSize:11}}>{(r.key_entities||[]).join(", ")}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <div style={{marginTop:18,textAlign:"center",display:"flex",gap:8,justifyContent:"center"}}>
+          <button onClick={genSummary} disabled={sumLoading} style={{...btn("#8b5cf6"),padding:"13px 28px",fontSize:14}}>
+            {sumLoading?<><span className="spinner"></span>Generating...</>:"📝 Generate Executive Summary"}
+          </button>
+          <button onClick={exportCSV} style={{...btn("#10b981"),padding:"13px 28px",fontSize:14}}>📁 Export to CSV</button>
+        </div>
+
+        {summary&&(
+          <div style={{...card,marginTop:18}}>
+            <h3 style={{margin:"0 0 14px",fontSize:17}}>📝 Executive Summary — VP Medical Affairs</h3>
+            <div style={{whiteSpace:"pre-wrap",fontSize:13,lineHeight:1.8,color:"#cbd5e1",background:"#1e293b",padding:22,borderRadius:10}}>{summary}</div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ─── MAIN RENDER ─────────────────────────
+  return(
+    <div>
+      <nav style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 22px",borderBottom:"1px solid #1e293b",background:"rgba(15,23,42,0.95)",backdropFilter:"blur(12px)",position:"sticky",top:0,zIndex:50}}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <span style={{fontSize:22}}>🧬</span>
+          <span style={{fontSize:20,fontWeight:900,background:"linear-gradient(135deg,#06b6d4,#3b82f6,#8b5cf6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>MedInquiry AI</span>
+          <span style={{fontSize:10,color:"#64748b"}}>v2.0</span>
+        </div>
+        <div style={{display:"flex",gap:4}}>
+          {[{p:"home",l:"🏠 Home"},{p:"analysis",l:"📋 Analysis"},{p:"dashboard",l:"📊 Dashboard"}].map(n=>(
+            <button key={n.p} onClick={()=>setPage(n.p)} disabled={n.p!=="home"&&!results.length}
+              style={{padding:"7px 14px",borderRadius:7,border:"none",background:page===n.p?"#3b82f6":"transparent",color:page===n.p?"#fff":"#94a3b8",cursor:n.p!=="home"&&!results.length?"not-allowed":"pointer",fontSize:12,fontWeight:600,opacity:n.p!=="home"&&!results.length?0.4:1}}>
+              {n.l}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {page==="home"&&<Home/>}
+      {page==="analysis"&&<Analysis/>}
+      {page==="dashboard"&&<Dashboard/>}
+
+      <footer style={{textAlign:"center",padding:"20px",borderTop:"1px solid #1e293b",marginTop:36}}>
+        <div style={{fontSize:11,color:"#475569"}}>MedInquiry AI — Medical Inquiries Intelligence Platform | NLP + LLM + GenAI</div>
+        <div style={{fontSize:10,color:"#334155",marginTop:3}}>Classification • MedDRA Mapping • Trend Analysis • Safety Signals • Executive Reporting</div>
+      </footer>
+
+      <ApiModal/>
+      <EditModal/>
+    </div>
+  );
+}
+
+ReactDOM.render(<App/>,document.getElementById("root"));
+</script>
+</body>
+</html>

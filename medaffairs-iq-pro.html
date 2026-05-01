@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedAffairs IQ Pro — AI Medical Affairs Intelligence Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg0:#050810;--bg1:#0a0f1c;--bg2:#111828;--bg3:#172038;--bg4:#1c2844;--bg5:#243352;
+--bdr:#1c2b48;--bdr2:#2a3d62;--bdr-a:#3b7dff;
+--t1:#eaf0fa;--t2:#9aa8c2;--t3:#5e6e8c;--t4:#3d4d6a;
+--blue:#3b7dff;--blue-g:rgba(59,125,255,.12);
+--cyan:#00c9a7;--cyan-g:rgba(0,201,167,.1);
+--gold:#f0b429;--gold-g:rgba(240,180,41,.1);
+--rose:#ff4d6d;--rose-g:rgba(255,77,109,.1);
+--violet:#8b5cf6;--violet-g:rgba(139,92,246,.1);
+--sky:#38bdf8;--sky-g:rgba(56,189,248,.1);
+--orange:#f97316;--orange-g:rgba(249,115,22,.1);
+--green:#22c55e;--green-g:rgba(34,197,94,.1);
+--red:#ef4444;--red-g:rgba(239,68,68,.1);
+--r:8px;--rl:12px;--rs:5px;
+--f:'Inter',system-ui,sans-serif;--fm:'JetBrains Mono',monospace;--fd:'Fraunces',serif;
+--ease:cubic-bezier(.4,0,.2,1);
+}
+html{font-size:13.5px}
+body{font-family:var(--f);background:var(--bg0);color:var(--t1);min-height:100vh;overflow-x:hidden}
+button{font-family:inherit;cursor:pointer;border:none;outline:none}
+input,textarea,select{font-family:inherit;outline:none}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:6px}
+a{color:var(--blue);text-decoration:none}
+
+/* ===== TOPBAR ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;background:rgba(10,15,28,.95);border-bottom:1px solid var(--bdr);position:sticky;top:0;z-index:100;backdrop-filter:blur(20px)}
+.logo{display:flex;align-items:center;gap:9px}
+.logo-mark{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff;letter-spacing:-.5px;position:relative}
+.logo-mark::after{content:'';position:absolute;inset:0;border-radius:8px;background:linear-gradient(135deg,transparent 50%,rgba(255,255,255,.12))}
+.logo h1{font-size:1.15rem;font-weight:700;letter-spacing:-.3px}.logo h1 b{color:var(--cyan);font-weight:800}
+.logo-v{font-size:.55rem;background:linear-gradient(135deg,var(--violet),var(--blue));color:#fff;padding:2px 7px;border-radius:10px;font-weight:600;letter-spacing:.5px}
+.tbar-r{display:flex;gap:7px;align-items:center}
+.tb{padding:6px 13px;border-radius:var(--r);font-size:.72rem;font-weight:600;display:flex;align-items:center;gap:4px;transition:all .2s var(--ease)}
+.tb-g{background:var(--bg3);color:var(--t2);border:1px solid var(--bdr)}.tb-g:hover{border-color:var(--cyan);color:var(--cyan)}
+.tb-c{background:linear-gradient(135deg,var(--cyan),#0a9e83);color:#fff}.tb-c:hover{box-shadow:0 4px 14px var(--cyan-g);transform:translateY(-1px)}
+.tb-b{background:linear-gradient(135deg,var(--blue),var(--violet));color:#fff}.tb-b:hover{box-shadow:0 4px 14px var(--blue-g);transform:translateY(-1px)}
+
+/* ===== HERO ===== */
+.hero{padding:14px 20px 10px;background:linear-gradient(180deg,var(--bg1),var(--bg0));border-bottom:1px solid var(--bdr)}
+.hero-row{display:flex;align-items:center;justify-content:space-between}
+.hero h2{font-family:var(--fd);font-size:1.45rem;font-weight:700;letter-spacing:-.3px}
+.hero-sub{font-size:.68rem;color:var(--t3);margin-top:1px}
+.hero-badges{display:flex;gap:6px;flex-wrap:wrap}
+.hb{font-size:.6rem;padding:3px 8px;border-radius:12px;font-weight:600;letter-spacing:.3px}
+.hb-v{background:var(--violet-g);color:var(--violet)}.hb-c{background:var(--cyan-g);color:var(--cyan)}.hb-b{background:var(--blue-g);color:var(--blue)}.hb-g{background:var(--gold-g);color:var(--gold)}
+
+/* ===== TABS ===== */
+.tabs{display:flex;gap:0;padding:0 20px;background:var(--bg1);border-bottom:1px solid var(--bdr);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tt{padding:9px 13px;font-size:.68rem;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .18s;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.tt:hover{color:var(--t2)}.tt.on{color:var(--cyan);border-color:var(--cyan);font-weight:600}
+.tt i{font-style:normal;font-size:.8rem}
+
+/* ===== MAIN ===== */
+.main{padding:16px 20px;max-width:1580px;margin:0 auto}
+.pn{display:none}.pn.on{display:block;animation:su .28s var(--ease)}
+@keyframes su{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* ===== KPIs ===== */
+.ks{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:10px;margin-bottom:16px}
+.k{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);padding:13px 14px;transition:all .2s;position:relative;overflow:hidden}
+.k:hover{border-color:var(--blue);transform:translateY(-1px)}
+.k::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.k.kc::before{background:var(--cyan)}.k.kb::before{background:var(--blue)}.k.kg::before{background:var(--green)}.k.kr::before{background:var(--rose)}.k.kv::before{background:var(--violet)}.k.ko::before{background:var(--orange)}.k.ky::before{background:var(--gold)}.k.ks2::before{background:var(--sky)}
+.k-v{font-size:1.4rem;font-weight:700;letter-spacing:-.5px;margin-bottom:1px}
+.k-l{font-size:.6rem;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;font-weight:500}
+.k-d{font-size:.62rem;margin-top:3px;display:flex;align-items:center;gap:3px}
+.k-up{color:var(--green)}.k-dn{color:var(--rose)}.k-nt{color:var(--t3)}
+
+/* ===== TABLE ===== */
+.tw{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden;margin-bottom:16px}
+.th{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--bdr);flex-wrap:wrap;gap:8px}
+.th-t{font-size:.85rem;font-weight:600}.th-r{display:flex;gap:6px;align-items:center}
+.ts{background:var(--bg1);border:1px solid var(--bdr);color:var(--t1);padding:5px 10px;border-radius:var(--r);font-size:.7rem;width:170px;transition:border .2s}.ts:focus{border-color:var(--cyan)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:8px 11px;text-align:left;font-size:.6rem;text-transform:uppercase;letter-spacing:.7px;color:var(--t3);font-weight:600;border-bottom:1px solid var(--bdr);white-space:nowrap;position:sticky;top:0;background:var(--bg2)}
+tbody td{padding:9px 11px;font-size:.74rem;border-bottom:1px solid rgba(28,43,72,.4);white-space:nowrap}
+tbody tr{transition:background .12s}tbody tr:hover{background:var(--bg4)}tbody tr:last-child td{border-bottom:none}
+.tbl-scroll{overflow-x:auto;max-height:420px;overflow-y:auto}
+
+/* ===== PILLS ===== */
+.p{display:inline-flex;align-items:center;padding:2px 8px;border-radius:14px;font-size:.62rem;font-weight:600}
+.pc{background:var(--cyan-g);color:var(--cyan)}.pb{background:var(--blue-g);color:var(--blue)}.pg{background:var(--green-g);color:var(--green)}.pr{background:var(--rose-g);color:var(--rose)}.pv{background:var(--violet-g);color:var(--violet)}.py{background:var(--gold-g);color:var(--gold)}.ps{background:var(--sky-g);color:var(--sky)}.po{background:var(--orange-g);color:var(--orange)}.pre{background:var(--red-g);color:var(--red)}
+
+/* ===== GRIDS ===== */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
+.g32{display:grid;grid-template-columns:3fr 2fr;gap:12px;margin-bottom:16px}
+.g23{display:grid;grid-template-columns:2fr 3fr;gap:12px;margin-bottom:16px}
+@media(max-width:1024px){.g2,.g3,.g32,.g23{grid-template-columns:1fr}}
+
+/* ===== CARD ===== */
+.cd{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);overflow:hidden}
+.cd-h{padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+.cd-h h3{font-size:.82rem;font-weight:600}
+.cd-b{padding:12px 14px}
+
+/* ===== BAR ===== */
+.bars{display:flex;flex-direction:column;gap:8px}
+.br{display:flex;align-items:center;gap:7px}
+.br-l{font-size:.66rem;color:var(--t2);min-width:85px;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.br-t{flex:1;height:18px;background:var(--bg1);border-radius:4px;overflow:hidden}
+.br-f{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:6px;font-size:.58rem;font-weight:600;color:#fff;transition:width .8s var(--ease)}
+.br-v{font-size:.66rem;color:var(--t3);min-width:30px}
+
+/* ===== PROGRESS ===== */
+.prog{height:5px;background:var(--bg1);border-radius:6px;overflow:hidden;min-width:60px}
+.prog-f{height:100%;border-radius:6px;transition:width .6s var(--ease)}
+
+/* ===== TEXTAREA / INPUT ===== */
+.ai-ta{width:100%;min-height:140px;background:var(--bg1);border:1px solid var(--bdr);color:var(--t1);padding:12px;border-radius:var(--r);font-size:.78rem;resize:vertical;line-height:1.65;transition:border .2s}
+.ai-ta:focus{border-color:var(--cyan)}
+.ai-ta::placeholder{color:var(--t4)}
+.act-row{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+
+/* ===== AI OUTPUT ===== */
+.ai-out{margin-top:14px;padding:16px;background:var(--bg1);border:1px solid var(--bdr);border-radius:var(--r);font-size:.76rem;line-height:1.7;display:none;max-height:600px;overflow-y:auto}
+.ai-out.show{display:block;animation:su .3s var(--ease)}
+.ai-out h4{color:var(--cyan);font-size:.8rem;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.ai-sec{margin-bottom:12px;padding:10px 12px;background:var(--bg2);border-radius:var(--r);border-left:3px solid var(--cyan)}
+.ai-sec h5{font-size:.68rem;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;font-weight:600}
+.ai-sec p,.ai-sec li{font-size:.72rem;color:var(--t2);line-height:1.6}
+.ai-sec ul{padding-left:15px;margin-top:3px}.ai-sec li{margin-bottom:2px}
+.ai-sec table{width:100%;margin-top:6px}
+.ai-sec table th,.ai-sec table td{padding:5px 8px;font-size:.66rem}
+
+/* ===== MODAL ===== */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(5px)}.ov.show{display:flex}
+.ml{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl);width:620px;max-width:93vw;max-height:86vh;overflow-y:auto;box-shadow:0 16px 64px rgba(0,0,0,.5)}
+.ml-h{padding:14px 18px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between}
+.ml-h h2{font-size:1rem;font-weight:700}
+.ml-x{width:28px;height:28px;border-radius:50%;background:var(--bg1);border:1px solid var(--bdr);color:var(--t2);font-size:.95rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.ml-x:hover{background:var(--rose-g);color:var(--rose);border-color:var(--rose)}
+.ml-b{padding:18px}
+.drop{border:2px dashed var(--bdr);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;transition:all .2s}
+.drop:hover,.drop.over{border-color:var(--cyan);background:var(--cyan-g)}
+.drop-i{font-size:2rem;margin-bottom:6px}.drop h4{font-size:.82rem;margin-bottom:2px}.drop p{font-size:.68rem;color:var(--t3)}
+.up-tab{display:flex;gap:0;margin-bottom:14px;border-bottom:1px solid var(--bdr)}
+.up-t{padding:8px 16px;font-size:.72rem;font-weight:500;color:var(--t3);cursor:pointer;border-bottom:2px solid transparent;transition:all .18s}
+.up-t.on{color:var(--cyan);border-color:var(--cyan);font-weight:600}
+.up-panel{display:none}.up-panel.on{display:block}
+.umsg{margin-top:10px;padding:9px;border-radius:var(--rs);font-size:.72rem;display:none}
+.umsg-ok{background:var(--green-g);color:var(--green);display:block}.umsg-err{background:var(--red-g);color:var(--red);display:block}
+.tmpl{margin-top:12px;padding:11px;background:var(--bg1);border-radius:var(--rs);border:1px solid var(--bdr)}
+.tmpl h5{font-size:.72rem;font-weight:600;color:var(--cyan);margin-bottom:4px}.tmpl p{font-size:.65rem;color:var(--t3);line-height:1.5}
+
+/* ===== AI PANEL ===== */
+.ai-sh{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:140;display:none}.ai-sh.show{display:block}
+.ai-dw{position:fixed;right:0;top:0;bottom:0;width:440px;max-width:94vw;background:var(--bg2);border-left:1px solid var(--bdr);z-index:150;transform:translateX(100%);transition:transform .3s var(--ease);display:flex;flex-direction:column}
+.ai-dw.open{transform:none}
+.ai-dw-h{padding:12px 16px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ai-dw-h h3{font-size:.9rem;font-weight:700;display:flex;align-items:center;gap:6px}
+.ai-pk{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:pk 2s infinite}@keyframes pk{0%,100%{opacity:1}50%{opacity:.3}}
+.ai-ms{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:9px}
+.ai-m{padding:9px 11px;border-radius:var(--r);font-size:.74rem;line-height:1.6;animation:su .25s var(--ease)}
+.ai-m.u{background:var(--blue);color:#fff;align-self:flex-end;max-width:83%;border-bottom-right-radius:3px}
+.ai-m.a{background:var(--bg1);border:1px solid var(--bdr);align-self:flex-start;max-width:90%;border-bottom-left-radius:3px}
+.ai-m.a strong{color:var(--gold)}.ai-m.a em{color:var(--cyan);font-style:normal}
+.ai-m.sy{background:var(--violet-g);border:1px solid rgba(139,92,246,.2);font-size:.66rem;color:var(--t2);text-align:center;padding:6px}
+.ai-ld{display:flex;gap:3px;padding:8px 11px;align-self:flex-start}
+.ai-ld span{width:5px;height:5px;background:var(--t3);border-radius:50%;animation:ldp 1.4s infinite}
+.ai-ld span:nth-child(2){animation-delay:.2s}.ai-ld span:nth-child(3){animation-delay:.4s}
+@keyframes ldp{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-5px);opacity:1}}
+.ai-ft{padding:10px 16px;border-top:1px solid var(--bdr);flex-shrink:0}
+.ai-ir{display:flex;gap:6px}
+.ai-in{flex:1;background:var(--bg1);border:1px solid var(--bdr);color:var(--t1);padding:8px 11px;border-radius:var(--r);font-size:.74rem;resize:none;transition:border .2s}.ai-in:focus{border-color:var(--cyan)}
+.ai-sn{width:36px;height:36px;border-radius:var(--r);background:linear-gradient(135deg,var(--cyan),#0a9e83);color:#fff;font-size:.95rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}.ai-sn:hover{transform:scale(1.05)}
+.ai-ch{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.ai-c{padding:3px 8px;font-size:.6rem;border-radius:12px;background:var(--bg1);border:1px solid var(--bdr);color:var(--t2);transition:all .18s}.ai-c:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* ===== SCORE RING ===== */
+.ring{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;flex-shrink:0}
+
+/* ===== LANDSCAPE CARD ===== */
+.ls-card{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:11px 13px;margin-bottom:8px;transition:all .2s;cursor:default}
+.ls-card:hover{border-color:var(--blue)}
+.ls-card h5{font-size:.74rem;font-weight:600;color:var(--t1);margin-bottom:3px;display:flex;align-items:center;gap:5px}
+.ls-card p{font-size:.66rem;color:var(--t2);line-height:1.5}
+.ls-meta{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap}
+
+/* AVATAR */
+.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:#fff;flex-shrink:0}
+.av-row{display:flex;align-items:center;gap:8px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-mark">MA</div>
+    <h1>MedAffairs <b>IQ</b> Pro</h1>
+    <span class="logo-v">2026 Enterprise</span>
+  </div>
+  <div class="tbar-r">
+    <button class="tb tb-g" onclick="loadDemo()">📊 Demo Data</button>
+    <button class="tb tb-c" onclick="openUpload()">⬆ Upload Data</button>
+    <button class="tb tb-b" onclick="toggleAI()">🧠 AI Copilot</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-row">
+    <div>
+      <h2>Medical Affairs Intelligence Platform</h2>
+      <p class="hero-sub" id="srcLine">Powered by AI — Upload structured Excel or unstructured notes to generate insights</p>
+    </div>
+    <div class="hero-badges">
+      <span class="hb hb-v">Veeva-Class CRM</span><span class="hb hb-c">H1 KOL Mapping</span><span class="hb hb-b">ODAIA NBA Engine</span><span class="hb hb-g">IQVIA RWE Analytics</span>
+    </div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs" id="tabBar">
+  <div class="tt on" data-p="rwe"><i>📊</i> RWE Analytics</div>
+  <div class="tt" data-p="msl"><i>🔬</i> MSL Insights</div>
+  <div class="tt" data-p="kol"><i>👨‍⚕️</i> KOL Intelligence</div>
+  <div class="tt" data-p="landscape"><i>🌍</i> Landscape Analyzer</div>
+  <div class="tt" data-p="pls"><i>📝</i> Plain Language</div>
+  <div class="tt" data-p="nba"><i>🎯</i> Next Best Action</div>
+  <div class="tt" data-p="pubs"><i>📄</i> Publications</div>
+  <div class="tt" data-p="inquiry"><i>💬</i> Med Inquiries</div>
+  <div class="tt" data-p="pv"><i>⚠️</i> Pharmacovigilance</div>
+  <div class="tt" data-p="congress"><i>🏛</i> Congress Intel</div>
+  <div class="tt" data-p="evidence"><i>🔍</i> Evidence Gaps</div>
+  <div class="tt" data-p="content"><i>✍️</i> Content Gen</div>
+</div>
+
+<div class="main">
+
+<!-- ===== 1. RWE ANALYTICS ===== -->
+<div class="pn on" id="p-rwe"><div class="ks" id="rweK"></div><div class="g32"><div class="tw" id="rweTbl"></div><div class="cd"><div class="cd-h"><h3>Study Design Distribution</h3></div><div class="cd-b" id="rweChart1"></div></div></div><div class="g2"><div class="cd"><div class="cd-h"><h3>Data Sources</h3></div><div class="cd-b" id="rweChart2"></div></div><div class="cd"><div class="cd-h"><h3>Endpoints Tracked</h3></div><div class="cd-b" id="rweChart3"></div></div></div></div>
+
+<!-- ===== 2. MSL INSIGHTS ===== -->
+<div class="pn" id="p-msl"><div class="ks" id="mslK"></div><div class="g2"><div class="cd"><div class="cd-h"><h3>🔬 Unstructured → Structured Insights Engine</h3><span class="p pc">Claude AI</span></div><div class="cd-b"><textarea class="ai-ta" id="mslIn" placeholder="Paste unstructured MSL field notes, call summaries, or medical interaction reports here...&#10;&#10;The AI engine extracts: KOL profiles, clinical insights, competitive intelligence, safety signals, evidence gaps, follow-up actions, congress mentions, and sentiment analysis."></textarea><div class="act-row"><button class="tb tb-c" onclick="processMSL()">🧠 Extract Insights</button><button class="tb tb-g" onclick="loadSampleMSL()">📝 Sample Note</button><button class="tb tb-g" onclick="clearMSL()">✕ Clear</button></div><div class="ai-out" id="mslOut"></div></div></div><div><div class="tw" id="mslTbl" style="margin-bottom:12px"></div><div class="cd"><div class="cd-h"><h3>Activity by Region</h3></div><div class="cd-b" id="mslChart"></div></div></div></div></div>
+
+<!-- ===== 3. KOL INTELLIGENCE ===== -->
+<div class="pn" id="p-kol"><div class="ks" id="kolK"></div><div class="g32"><div class="tw" id="kolTbl"></div><div><div class="cd" style="margin-bottom:12px"><div class="cd-h"><h3>KOL Network Map — H1 Style</h3></div><div class="cd-b" id="kolNetwork"></div></div><div class="cd"><div class="cd-h"><h3>Tier Distribution</h3></div><div class="cd-b" id="kolTierC"></div></div></div></div></div>
+
+<!-- ===== 4. LANDSCAPE ANALYZER ===== -->
+<div class="pn" id="p-landscape"><div class="ks" id="lsK"></div><div class="g2"><div class="cd"><div class="cd-h"><h3>🌍 Therapeutic Landscape AI Analyzer</h3><span class="p pb">Claude AI</span></div><div class="cd-b"><textarea class="ai-ta" id="lsIn" placeholder="Enter a therapeutic area or indication to analyze...&#10;&#10;Examples: 'NSCLC first-line immunotherapy landscape 2025' or 'Heart failure with reduced ejection fraction treatment landscape' or paste clinical/regulatory text for AI analysis."></textarea><div class="act-row"><button class="tb tb-b" onclick="analyzeLandscape()">🌍 Analyze Landscape</button><button class="tb tb-g" onclick="document.getElementById('lsIn').value='Analyze the competitive landscape for GLP-1 receptor agonists in Type 2 Diabetes and Obesity, including semaglutide, tirzepatide, and emerging dual/triple agonists. Cover market dynamics, clinical differentiation, and pipeline threats.'">📝 Sample Query</button></div><div class="ai-out" id="lsOut"></div></div></div><div><div class="cd" style="margin-bottom:12px"><div class="cd-h"><h3>Active Competitive Landscape</h3></div><div class="cd-b" id="lsCards"></div></div><div class="cd"><div class="cd-h"><h3>Market Dynamics by TA</h3></div><div class="cd-b" id="lsChart"></div></div></div></div></div>
+
+<!-- ===== 5. PLAIN LANGUAGE SUMMARIZER ===== -->
+<div class="pn" id="p-pls"><div class="ks" id="plsK"></div><div class="cd" style="margin-bottom:16px"><div class="cd-h"><h3>📝 Plain Language Summarizer</h3><span class="p pc">Claude AI — Lay Audience Optimization</span></div><div class="cd-b"><textarea class="ai-ta" id="plsIn" placeholder="Paste complex medical/scientific text here — clinical trial results, study abstracts, regulatory documents, prescribing information, or any technical content...&#10;&#10;The AI will generate a plain language summary accessible to patients, caregivers, and non-specialist audiences while preserving medical accuracy."></textarea><div class="act-row"><button class="tb tb-c" onclick="plainLang()">📝 Generate Plain Language Summary</button><button class="tb tb-g" onclick="loadSamplePLS()">📄 Sample Abstract</button><button class="tb tb-g" onclick="plainLangPatient()">👤 Patient-Friendly Version</button><button class="tb tb-g" onclick="plainLangHCP()">👨‍⚕️ HCP Brief</button></div><div class="ai-out" id="plsOut"></div></div></div></div>
+
+<!-- ===== 6. NEXT BEST ACTION ===== -->
+<div class="pn" id="p-nba"><div class="ks" id="nbaK"></div><div class="tw" id="nbaTbl"></div><div class="g2"><div class="cd"><div class="cd-h"><h3>ODAIA-Style Engagement Scoring</h3></div><div class="cd-b" id="nbaScore"></div></div><div class="cd"><div class="cd-h"><h3>Action Priority Matrix</h3></div><div class="cd-b" id="nbaMatrix"></div></div></div></div>
+
+<!-- ===== 7. PUBLICATIONS ===== -->
+<div class="pn" id="p-pubs"><div class="ks" id="pubK"></div><div class="tw" id="pubTbl"></div><div class="g2"><div class="cd"><div class="cd-h"><h3>By Type</h3></div><div class="cd-b" id="pubChart1"></div></div><div class="cd"><div class="cd-h"><h3>Pipeline Status</h3></div><div class="cd-b" id="pubChart2"></div></div></div></div>
+
+<!-- ===== 8. MEDICAL INQUIRIES ===== -->
+<div class="pn" id="p-inquiry"><div class="ks" id="inqK"></div><div class="tw" id="inqTbl"></div><div class="g2"><div class="cd"><div class="cd-h"><h3>By Category</h3></div><div class="cd-b" id="inqChart1"></div></div><div class="cd"><div class="cd-h"><h3>By Product</h3></div><div class="cd-b" id="inqChart2"></div></div></div></div>
+
+<!-- ===== 9. PHARMACOVIGILANCE ===== -->
+<div class="pn" id="p-pv"><div class="ks" id="pvK"></div><div class="tw" id="pvTbl"></div><div class="g2"><div class="cd"><div class="cd-h"><h3>Signal Detection — DrugCard Style</h3></div><div class="cd-b" id="pvSignals"></div></div><div class="cd"><div class="cd-h"><h3>AE Distribution by SOC</h3></div><div class="cd-b" id="pvChart"></div></div></div></div>
+
+<!-- ===== 10. CONGRESS INTEL ===== -->
+<div class="pn" id="p-congress"><div class="ks" id="congK"></div><div class="tw" id="congTbl"></div></div>
+
+<!-- ===== 11. EVIDENCE GAPS ===== -->
+<div class="pn" id="p-evidence"><div class="ks" id="evK"></div><div class="tw" id="evTbl"></div></div>
+
+<!-- ===== 12. CONTENT GENERATOR ===== -->
+<div class="pn" id="p-content"><div class="ks" id="ctK"></div><div class="cd" style="margin-bottom:16px"><div class="cd-h"><h3>✍️ AI Scientific Content Generator</h3><span class="p pv">Persado-Class Compliant AI</span></div><div class="cd-b"><textarea class="ai-ta" id="ctIn" placeholder="Describe the content you need...&#10;&#10;Examples:&#10;• 'Create a medical slide deck summary for CardioStabil XR Phase 3 data targeting cardiologists'&#10;• 'Draft a compliant email for HCPs about new safety data for OncaVax-7'&#10;• 'Generate speaker training materials on NeuroShield Pro MOA'&#10;• 'Write a formulary dossier executive summary for GlucoBalance AI'"></textarea><div class="act-row"><button class="tb tb-b" onclick="genContent('scientific')">🔬 Scientific Content</button><button class="tb tb-c" onclick="genContent('hcp_email')">📧 HCP Communication</button><button class="tb tb-g" onclick="genContent('slide_deck')">📊 Slide Deck Outline</button><button class="tb tb-g" onclick="genContent('formulary')">📋 Formulary Brief</button></div><div class="ai-out" id="ctOut"></div></div></div></div>
+
+</div><!-- /main -->
+
+<!-- UPLOAD MODAL -->
+<div class="ov" id="upOv">
+<div class="ml">
+<div class="ml-h"><h2>⬆ Upload Medical Affairs Data</h2><button class="ml-x" onclick="closeUpload()">×</button></div>
+<div class="ml-b">
+  <div class="up-tab"><div class="up-t on" onclick="switchUpTab(0)">📊 Structured (Excel/CSV)</div><div class="up-t" onclick="switchUpTab(1)">📝 Unstructured (Text/Notes)</div></div>
+  <div class="up-panel on" id="upP0">
+    <div class="drop" id="dz" onclick="document.getElementById('fi').click()"><div class="drop-i">📁</div><h4>Drag & drop Excel / CSV file</h4><p>.xlsx, .xls, .csv — up to 10MB</p></div>
+    <input type="file" id="fi" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(this.files[0])">
+    <div id="umsg"></div>
+    <div class="tmpl"><h5>Auto-Detected Column Types</h5><p>RWE: Study Name, Design, TA, Indication, Data Source, N, Status, Endpoint, Effect Size<br>MSL: MSL Name, KOL, Institution, Type, Topic, Sentiment, Date<br>KOL: Name, Specialty, Institution, Tier, H-Index, Engagement<br>Pubs: Title, Journal, IF, Type, Status<br>PV: Product, AE Term, SOC, Severity, Outcome<br>Inquiries: ID, Category, Product, Source, Response Time</p></div>
+  </div>
+  <div class="up-panel" id="upP1">
+    <textarea class="ai-ta" id="unstIn" placeholder="Paste unstructured data here — MSL field notes, medical letters, clinical summaries, KOL meeting minutes, advisory board transcripts, congress notes, or any free-text medical content...&#10;&#10;The AI will analyze and route the content to the appropriate module."></textarea>
+    <div class="act-row"><button class="tb tb-c" onclick="processUnstructured()">🧠 Process with AI</button><button class="tb tb-g" onclick="closeUpload()">Cancel</button></div>
+    <div id="umsg2"></div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- AI DRAWER -->
+<div class="ai-sh" id="aiSh" onclick="toggleAI()"></div>
+<div class="ai-dw" id="aiDw">
+<div class="ai-dw-h"><h3><span class="ai-pk"></span> MedAffairs AI Copilot</h3><button class="ml-x" onclick="toggleAI()">×</button></div>
+<div class="ai-ms" id="aiMs"><div class="ai-m sy">MedAffairs AI Copilot ready. Ask about RWE evidence, KOL strategy, MSL insights, evidence gaps, competitive landscape, or any Medical Affairs topic.</div></div>
+<div class="ai-ft"><div class="ai-ir"><textarea class="ai-in" id="aiIn" rows="2" placeholder="Ask about your data..."></textarea><button class="ai-sn" onclick="sendAI()">➤</button></div>
+<div class="ai-ch">
+<button class="ai-c" onclick="qAI('Summarize the RWE evidence landscape and identify critical gaps')">Evidence Landscape</button>
+<button class="ai-c" onclick="qAI('Which KOLs should we prioritize for engagement based on influence and sentiment?')">KOL Priorities</button>
+<button class="ai-c" onclick="qAI('What are the top pharmacovigilance signals we should monitor?')">Safety Signals</button>
+<button class="ai-c" onclick="qAI('Generate next best actions for the MSL team this quarter')">MSL Actions</button>
+<button class="ai-c" onclick="qAI('What publications should we fast-track?')">Pub Strategy</button>
+</div></div>
+</div>
+
+<script>
+// ====== STATE ======
+let loaded=false;
+let rweD=[],mslD=[],kolD=[],pubD=[],inqD=[],pvD=[],evD=[],congD=[],nbaD=[],lsD=[];
+
+// ====== DATA GENERATORS ======
+function genAll(){
+const TAs=['Cardiology','Oncology','Neurology','Immunology','Endocrinology'];
+const brands=['CardioStabil XR','OncaVax-7','NeuroShield Pro','ImmunoFlex 200','GlucoBalance AI'];
+// RWE
+rweD=[
+{name:'CARDIO-RWE-001',ta:'Cardiology',ind:'Heart Failure (HFrEF)',design:'Retrospective Cohort',src:'Optum EHR',n:45200,status:'Published',ep:'CV Death + HF Hospitalization',fx:'HR 0.72 (0.65-0.80)',pval:'p<0.001',qual:'High',brand:'CardioStabil XR',yr:2022},
+{name:'ONCO-RWE-012',ta:'Oncology',ind:'NSCLC 1L',design:'Retrospective Cohort',src:'SEER-Medicare',n:32100,status:'Published',ep:'Overall Survival',fx:'mOS 18.2 vs 14.1 mo',pval:'p=0.003',qual:'High',brand:'OncaVax-7',yr:2021},
+{name:'NEURO-RWE-003',ta:'Neurology',ind:'Relapsing MS',design:'Prospective Registry',src:'Flatiron Health',n:8400,status:'Ongoing',ep:'Annualized Relapse Rate',fx:'ARR 0.18 vs 0.42',pval:'p<0.001',qual:'High',brand:'NeuroShield Pro',yr:2023},
+{name:'IMMUNO-RWE-007',ta:'Immunology',ind:'Rheumatoid Arthritis',design:'Claims Analysis',src:'IBM MarketScan',n:67800,status:'Analysis',ep:'Treatment Persistence',fx:'12mo pers. 72% vs 58%',pval:'p<0.001',qual:'Moderate',brand:'ImmunoFlex 200',yr:2023},
+{name:'ENDO-RWE-005',ta:'Endocrinology',ind:'T2DM + CKD',design:'Pragmatic RCT',src:'Multi-site EHR',n:4200,status:'Enrolling',ep:'HbA1c + eGFR slope',fx:'Interim: -1.2% HbA1c',pval:'Pending',qual:'High',brand:'GlucoBalance AI',yr:2024},
+{name:'CARDIO-RWE-009',ta:'Cardiology',ind:'Atrial Fibrillation',design:'Target Trial Emulation',src:'UK Biobank',n:18900,status:'Published',ep:'Stroke/SE',fx:'HR 0.65 (0.54-0.78)',pval:'p<0.001',qual:'High',brand:'CardioStabil XR',yr:2022},
+{name:'ONCO-RWE-018',ta:'Oncology',ind:'HER2+ Breast Cancer',design:'Retrospective Cohort',src:'Tempus',n:5600,status:'Manuscript',ep:'Real-world PFS',fx:'rwPFS 11.8 vs 8.3 mo',pval:'p=0.012',qual:'Moderate',brand:'OncaVax-7',yr:2023},
+{name:'NEURO-RWE-011',ta:'Neurology',ind:'Chronic Migraine',design:'Patient Survey + Claims',src:'IQVIA',n:12400,status:'Published',ep:'Monthly Migraine Days',fx:'-5.2 vs -3.1 MMD',pval:'p<0.001',qual:'Moderate',brand:'NeuroShield Pro',yr:2022},
+{name:'IMMUNO-RWE-015',ta:'Immunology',ind:'Psoriatic Arthritis',design:'Registry (CORRONA)',src:'CORRONA',n:3200,status:'Ongoing',ep:'CDAI Remission',fx:'Enrollment ongoing',pval:'N/A',qual:'High',brand:'ImmunoFlex 200',yr:2024},
+{name:'ENDO-RWE-008',ta:'Endocrinology',ind:'Obesity + T2DM',design:'Claims Analysis',src:'Komodo Health',n:89000,status:'Analysis',ep:'Weight loss + CV events',fx:'-8.2% body weight',pval:'p<0.001',qual:'Moderate',brand:'GlucoBalance AI',yr:2023},
+{name:'ONCO-RWE-022',ta:'Oncology',ind:'mCRC',design:'EHR Analysis',src:'Flatiron Health',n:14200,status:'Ongoing',ep:'Time to Treatment Failure',fx:'Interim data pending',pval:'TBD',qual:'High',brand:'OncaVax-7',yr:2024},
+{name:'CARDIO-RWE-014',ta:'Cardiology',ind:'Post-MI Secondary Prevention',design:'Claims + EHR Linkage',src:'Optum + Clinformatics',n:52000,status:'Published',ep:'MACE',fx:'HR 0.81 (0.74-0.89)',pval:'p<0.001',qual:'High',brand:'CardioStabil XR',yr:2023},
+];
+// MSL
+const mslNames=['Dr. Sarah Mitchell','Dr. James Rivera','Dr. Priya Nair','Dr. Michael Chen','Dr. Emily Watson','Dr. Raj Patel'];
+const regions=['Northeast','Southeast','Midwest','West','Pacific','Mid-Atlantic'];
+const kolNames=['Dr. Anderson','Dr. Ramirez','Dr. Kim','Dr. Patel','Dr. Thompson','Dr. Garcia','Dr. Lee','Dr. Wilson','Dr. Brown','Dr. Taylor','Dr. Hassan','Dr. Clark'];
+const insts=['Johns Hopkins','Mayo Clinic','Mass General','UCSF','MD Anderson','Cleveland Clinic','Stanford','Duke','Northwestern','UCLA','NYU Langone','Cedars-Sinai'];
+const mTypes=['Scientific Exchange','Advisory Board','Congress Interaction','Speaker Training','Investigator Meeting','Formulary Discussion','Medical Education'];
+const topics=['Phase 3 efficacy','Long-term safety','Real-world evidence','Biomarker strategy','Combination therapy','Formulary positioning','Treatment sequencing','Patient selection','MOA discussion','Competitive data'];
+const sents=['Very Positive','Positive','Neutral','Concerned','Skeptical'];
+mslD=[];for(let i=0;i<48;i++){const d=new Date(2025,Math.floor(Math.random()*4),Math.floor(Math.random()*28)+1);mslD.push({MSL:mslNames[i%6],Region:regions[i%6],KOL:kolNames[Math.floor(Math.random()*12)],Institution:insts[Math.floor(Math.random()*12)],Type:mTypes[Math.floor(Math.random()*7)],Topic:topics[Math.floor(Math.random()*10)],Sentiment:sents[Math.floor(Math.random()*5)],Date:d.toISOString().split('T')[0],FollowUp:Math.random()>.4?'Yes':'No',Brand:brands[Math.floor(Math.random()*5)]})}
+// KOL
+const kolFull=['Dr. Robert Anderson','Dr. Maria Ramirez','Dr. Hyun-Jae Kim','Dr. Anita Patel','Dr. William Thompson','Dr. Carmen Garcia','Dr. David Lee','Dr. Sarah Wilson','Dr. James Brown','Dr. Lisa Taylor','Dr. Ahmed Hassan','Dr. Jennifer Clark','Dr. Thomas Moore','Dr. Rachel Green','Dr. Kevin White'];
+const specs=['Cardiologist','Oncologist','Neurologist','Rheumatologist','Endocrinologist','Pulmonologist','Internist','Hematologist'];
+const engTypes=['Advisory Board','Speaker Bureau','Investigator','Consultant','Publication Author','Steering Committee'];
+kolD=kolFull.map((n,i)=>({Name:n,Specialty:specs[i%8],Institution:insts[i%12],Tier:i<5?'Tier 1 — National':i<10?'Tier 2 — Regional':'Tier 3 — Local',TA:TAs[i%5],Engagement:engTypes[i%6],Interactions:Math.floor(Math.random()*18)+2,LastContact:new Date(2025,Math.floor(Math.random()*3),Math.floor(Math.random()*28)+1).toISOString().split('T')[0],Sentiment:sents[Math.floor(Math.random()*4)],Pubs:Math.floor(Math.random()*35)+3,HIndex:Math.floor(Math.random()*45)+12,Region:regions[i%6],Influence:Math.floor(Math.random()*40)+60,color:['#3b7dff','#00c9a7','#f0b429','#8b5cf6','#ff4d6d','#38bdf8','#f97316','#22c55e'][i%8]}));
+// Pubs
+const pubTitles=['Real-World Effectiveness of CardioStabil XR in HFrEF: Multi-Center Cohort','Long-Term Safety of NeuroShield Pro in RRMS: 5-Year Follow-Up','OncaVax-7 First-Line NSCLC: Patient-Reported Outcomes','Treatment Persistence with ImmunoFlex 200 vs TNFi in RA','GlucoBalance AI Renal Outcomes in T2DM-CKD: Interim Analysis','Biomarker-Driven Selection for OncaVax-7: Retrospective Validation','CV Safety of CardioStabil XR: Post-Marketing Surveillance','HE Impact of NeuroShield Pro in MS Relapse Cost Reduction','Combination Therapy with ImmunoFlex 200: Systematic Review','Real-World Glycemic Control with GlucoBalance AI: Claims Analysis','OncaVax-7 + Radiation in Oligometastatic NSCLC: Phase 2','CardioStabil XR in HFpEF: Exploratory Subgroup Analysis'];
+const journals=['NEJM','Lancet','JAMA','Nature Medicine','JCO','Neurology','Annals Int Med','BMJ','Circulation','Diabetes Care','JAMA Oncology','European Heart J'];
+const pubTypes=['Original Research','Review','Meta-Analysis','Post-Hoc','Health Economics','Case Series','Letter','Systematic Review'];
+const pubStats=['Published','Under Review','Manuscript Draft','Accepted','In Preparation','Submitted'];
+pubD=pubTitles.map((t,i)=>({Title:t,Journal:journals[i],Type:pubTypes[i%8],Status:pubStats[i<4?0:i<6?1:i<8?2:i<10?3:i<11?4:5],IF:(Math.random()*85+4).toFixed(1),Author:kolFull[i%15],TA:TAs[i%5],Year:2024+Math.floor(Math.random()*2),Citations:Math.floor(Math.random()*140),Brand:brands[i%5]}));
+// Inquiries
+const iqCats=['Efficacy','Safety/AE','Dosing','Drug Interactions','Off-Label Use','Pregnancy/Lactation','Comparator Data','MOA','Storage/Stability'];
+const iqSrcs=['HCP — Phone','HCP — Email','Patient — Web','Sales Rep','Pharmacist','Nurse','Payer','HCP — In-Person'];
+inqD=[];for(let i=0;i<35;i++){inqD.push({ID:'MIQ-2025-'+String(1001+i),Category:iqCats[Math.floor(Math.random()*9)],Product:brands[Math.floor(Math.random()*5)],Source:iqSrcs[Math.floor(Math.random()*8)],Status:['Resolved','Resolved','Resolved','In Progress','Pending','Escalated'][Math.floor(Math.random()*6)],RespTime:Math.floor(Math.random()*68)+2,Date:new Date(2025,Math.floor(Math.random()*3),Math.floor(Math.random()*28)+1).toISOString().split('T')[0],Priority:Math.random()>.72?'High':'Standard'})}
+// PV
+const aeTerms=['Headache','Nausea','Fatigue','Dizziness','Rash','Diarrhea','Arthralgia','Myocarditis','Hepatotoxicity','Neutropenia','Injection site reaction','Hypertension','QT prolongation','Pneumonitis','Peripheral neuropathy'];
+const socs=['Nervous System','GI','General','Skin','Musculoskeletal','Cardiac','Hepatobiliary','Blood/Lymphatic','Respiratory','Vascular'];
+const severities=['Mild','Moderate','Severe','Life-threatening'];
+const outcomes=['Recovered','Recovering','Not recovered','Fatal','Unknown'];
+pvD=[];for(let i=0;i<40;i++){const sev=severities[Math.floor(Math.random()*4)];pvD.push({CaseID:'PV-2025-'+String(5001+i),Product:brands[Math.floor(Math.random()*5)],AETerm:aeTerms[Math.floor(Math.random()*15)],SOC:socs[Math.floor(Math.random()*10)],Severity:sev,Serious:sev==='Severe'||sev==='Life-threatening'?'Yes':'No',Outcome:outcomes[Math.floor(Math.random()*5)],Reporter:['HCP','Patient','Literature','Regulatory'][Math.floor(Math.random()*4)],Date:new Date(2025,Math.floor(Math.random()*3),Math.floor(Math.random()*28)+1).toISOString().split('T')[0],Signal:Math.random()>.75?'Under Review':'No Signal'})}
+// Evidence Gaps
+evD=[
+{Gap:'5-year overall survival data in NSCLC',TA:'Oncology',Brand:'OncaVax-7',Priority:'Critical',Status:'Study Planned',Source:'KOL consensus + NCCN review',Timeline:'Q3 2026',Action:'Retrospective OS analysis with SEER-Medicare'},
+{Gap:'Head-to-head vs sacubitril/valsartan in HFrEF',TA:'Cardiology',Brand:'CardioStabil XR',Priority:'Critical',Status:'Protocol Development',Source:'Advisory board + payer requests',Timeline:'Q1 2026',Action:'Pragmatic RCT with claims-linked outcomes'},
+{Gap:'Pediatric safety & efficacy in MS',TA:'Neurology',Brand:'NeuroShield Pro',Priority:'High',Status:'Gap Identified',Source:'FDA requirement + guidelines',Timeline:'Q4 2026',Action:'Submit pediatric study plan'},
+{Gap:'Renal outcomes in Stage 4 CKD',TA:'Endocrinology',Brand:'GlucoBalance AI',Priority:'High',Status:'Data Mining',Source:'Payer evidence requests',Timeline:'Q2 2026',Action:'Sub-group from ENDO-RWE-005'},
+{Gap:'JAK inhibitor combination therapy data',TA:'Immunology',Brand:'ImmunoFlex 200',Priority:'High',Status:'Literature Review',Source:'Investigator-initiated proposals',Timeline:'Q2 2026',Action:'Systematic review + meta-analysis'},
+{Gap:'PRO data in NSCLC',TA:'Oncology',Brand:'OncaVax-7',Priority:'Medium',Status:'Study Ongoing',Source:'ASCO feedback',Timeline:'Q1 2026',Action:'PRO sub-study in ONCO-RWE-018'},
+{Gap:'Cost-effectiveness vs SOC in HF',TA:'Cardiology',Brand:'CardioStabil XR',Priority:'Medium',Status:'Analysis Planned',Source:'HTA submission',Timeline:'Q3 2026',Action:'Markov model with RWE inputs'},
+{Gap:'Biomarker validation for response prediction',TA:'Oncology',Brand:'OncaVax-7',Priority:'Critical',Status:'Collaboration Initiated',Source:'Precision medicine trend',Timeline:'Q4 2025',Action:'Tempus biomarker discovery partnership'},
+{Gap:'Long-term GI safety (>3yr)',TA:'Endocrinology',Brand:'GlucoBalance AI',Priority:'Medium',Status:'Registry Planned',Source:'Post-marketing commitment',Timeline:'Q1 2027',Action:'Initiate GI safety registry'},
+{Gap:'Elderly subgroup (>75yr) efficacy',TA:'Immunology',Brand:'ImmunoFlex 200',Priority:'High',Status:'Data Available',Source:'Clinical practice gap',Timeline:'Q2 2026',Action:'Post-hoc from IMMUNO-RWE-007'},
+];
+// Congress
+congD=[
+{Congress:'ASCO 2025',Date:'May 30-Jun 3',Loc:'Chicago, IL',TA:'Oncology',Abs:5,Posters:3,Orals:2,Symposia:1,KOLs:9,Status:'Preparation',Key:'OncaVax-7 5yr OS update + biomarker data'},
+{Congress:'AHA 2025',Date:'Nov 8-10',Loc:'Dallas, TX',TA:'Cardiology',Abs:4,Posters:3,Orals:1,Symposia:1,KOLs:7,Status:'Abstract Submitted',Key:'CardioStabil XR real-world CV outcomes'},
+{Congress:'AAN 2025',Date:'Apr 5-9',Loc:'San Diego, CA',TA:'Neurology',Abs:3,Posters:2,Orals:1,Symposia:1,KOLs:6,Status:'Accepted',Key:'NeuroShield Pro long-term safety registry'},
+{Congress:'ACR 2025',Date:'Nov 14-19',Loc:'Washington, DC',TA:'Immunology',Abs:3,Posters:2,Orals:1,Symposia:0,KOLs:5,Status:'Planning',Key:'ImmunoFlex 200 persistence data'},
+{Congress:'ADA 2025',Date:'Jun 13-16',Loc:'San Francisco',TA:'Endocrinology',Abs:3,Posters:2,Orals:1,Symposia:1,KOLs:5,Status:'Abstract Submitted',Key:'GlucoBalance AI renal outcomes interim'},
+{Congress:'ESMO 2025',Date:'Sep 13-17',Loc:'Madrid, Spain',TA:'Oncology',Abs:4,Posters:3,Orals:1,Symposia:1,KOLs:8,Status:'Planning',Key:'OncaVax-7 biomarker subgroup + real-world PFS'},
+{Congress:'ESC 2025',Date:'Aug 30-Sep 2',Loc:'London, UK',TA:'Cardiology',Abs:3,Posters:2,Orals:1,Symposia:0,KOLs:6,Status:'Planning',Key:'CardioStabil XR AF outcomes + HE data'},
+];
+// NBA
+nbaD=kolD.map(k=>{
+  const urgency=k.Tier.includes('1')?90:k.Tier.includes('2')?65:40;
+  const recency=Math.floor(Math.random()*30)+1;
+  const score=Math.min(100,Math.floor(urgency+Math.random()*20-recency/3));
+  const actions=['Schedule scientific exchange','Invite to advisory board','Share new RWE publication','Follow-up on IIS discussion','Congress pre-meeting briefing','Provide updated safety data','Speaker program invitation'];
+  return{...k,NBAScore:score,Action:actions[Math.floor(Math.random()*7)],Urgency:score>80?'Critical':score>60?'High':score>40?'Medium':'Low',Channel:['In-Person','Virtual','Email','Congress'][Math.floor(Math.random()*4)],DaysSince:recency};
+}).sort((a,b)=>b.NBAScore-a.NBAScore);
+// Landscape
+lsD=[
+{brand:'Keytruda (Pembrolizumab)',company:'Merck',ta:'Oncology',share:'32%',trend:'Growing',threat:'High — market leader',pipeline:'Multiple new indications'},
+{brand:'Opdivo (Nivolumab)',company:'BMS',ta:'Oncology',share:'21%',trend:'Stable',threat:'High',pipeline:'Combo trials ongoing'},
+{brand:'Entresto (Sacubitril/Valsartan)',company:'Novartis',ta:'Cardiology',share:'28%',trend:'Growing',threat:'High — SOC for HFrEF',pipeline:'HFpEF expansion'},
+{brand:'Ozempic/Wegovy (Semaglutide)',company:'Novo Nordisk',ta:'Endocrinology',share:'45%',trend:'Rapidly growing',threat:'Critical',pipeline:'Oral + higher dose'},
+{brand:'Ocrevus (Ocrelizumab)',company:'Roche',ta:'Neurology',share:'24%',trend:'Growing',threat:'High',pipeline:'Subcutaneous formulation'},
+{brand:'Humira (Adalimumab)',company:'AbbVie',ta:'Immunology',share:'18%',trend:'Declining (biosimilars)',threat:'Moderate',pipeline:'Skyrizi/Rinvoq replacement'},
+];
+}
+
+// ====== LOAD ======
+function loadDemo(){genAll();loaded=true;document.getElementById('srcLine').textContent=`Demo Data — ${rweD.length} RWE studies | ${mslD.length} MSL interactions | ${kolD.length} KOLs | ${pubD.length} publications | ${pvD.length} PV cases | Generated ${new Date().toLocaleDateString()}`;renderAll()}
+
+// ====== HELPERS ======
+function sm(a){return a.reduce((s,v)=>s+(parseFloat(v)||0),0)}
+function av(a){return a.length?sm(a)/a.length:0}
+function fm(n){return Number(n).toLocaleString()}
+function pc(n){return n.toFixed(1)+'%'}
+function cntBy(a,k){const m={};a.forEach(r=>{const v=r[k]||'Other';m[v]=(m[v]||0)+1});return m}
+function pillCls(s){const l=(s||'').toLowerCase();if(l.includes('publish')||l.includes('resolv')||l.includes('accept')||l.includes('recover'))return'pg';if(l.includes('ongo')||l.includes('progress')||l.includes('enroll'))return'pc';if(l.includes('analy')||l.includes('manu')||l.includes('review')||l.includes('draft'))return'py';if(l.includes('plan')||l.includes('prep')||l.includes('submit'))return'ps';if(l.includes('escal')||l.includes('critical')||l.includes('fatal'))return'pre';if(l.includes('pend')||l.includes('warn'))return'po';return'pv'}
+function barHTML(data,colors){const mx=Math.max(...Object.values(data),1);const c=colors||['var(--cyan)','var(--blue)','var(--gold)','var(--violet)','var(--rose)','var(--sky)','var(--orange)','var(--green)','var(--red)'];return`<div class="bars">${Object.entries(data).map(([k,v],i)=>`<div class="br"><div class="br-l">${k}</div><div class="br-t"><div class="br-f" style="width:${(v/mx*100).toFixed(1)}%;background:${c[i%c.length]}">${v}</div></div></div>`).join('')}</div>`}
+function srch(el,id){const v=el.value.toLowerCase();document.querySelectorAll('#'+id+' tbody tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(v)?'':'none'})}
+function kpiH(v,l,d,cls){return`<div class="k ${cls}"><div class="k-v">${v}</div><div class="k-l">${l}</div><div class="k-d ${d.includes('▲')?'k-up':d.includes('▼')?'k-dn':'k-nt'}">${d}</div></div>`}
+
+// ====== RENDER ======
+function renderAll(){renderRWE();renderMSL();renderKOL();renderLS();renderNBA();renderPubs();renderInq();renderPV();renderCong();renderEv();renderCt()}
+
+function renderRWE(){
+  const d=rweD,pub=d.filter(s=>s.status==='Published').length,N=sm(d.map(s=>s.n));
+  document.getElementById('rweK').innerHTML=[kpiH(d.length,'Total RWE Studies','▲ 3 new this quarter','kc'),kpiH(pub,'Published',pc(pub/d.length*100)+' complete','kg'),kpiH(fm(N),'Total Patients','Combined N','kb'),kpiH(d.filter(s=>['Ongoing','Enrolling','Analysis'].includes(s.status)).length,'Active Pipeline','In progress','ky'),kpiH(d.filter(s=>s.qual==='High').length,'High Quality','RoB assessed','kv')].join('');
+  document.getElementById('rweTbl').innerHTML=`<div class="th"><span class="th-t">RWE Study Portfolio — IQVIA Analytics Class</span><div class="th-r"><input class="ts" placeholder="Search..." oninput="srch(this,'rweTbl')"></div></div><div class="tbl-scroll"><table><thead><tr><th>Study</th><th>Brand</th><th>TA</th><th>Indication</th><th>Design</th><th>Source</th><th>N</th><th>Status</th><th>Endpoint</th><th>Effect</th><th>Quality</th></tr></thead><tbody>${d.map(s=>`<tr><td><strong style="color:var(--blue)">${s.name}</strong></td><td>${s.brand}</td><td>${s.ta}</td><td style="max-width:140px;white-space:normal">${s.ind}</td><td><span class="p ps">${s.design}</span></td><td>${s.src}</td><td>${fm(s.n)}</td><td><span class="p ${pillCls(s.status)}">${s.status}</span></td><td style="font-size:.68rem">${s.ep}</td><td style="font-family:var(--fm);font-size:.66rem">${s.fx}</td><td><span class="p ${s.qual==='High'?'pg':'py'}">${s.qual}</span></td></tr>`).join('')}</tbody></table></div>`;
+  document.getElementById('rweChart1').innerHTML=barHTML(cntBy(d,'design'));
+  document.getElementById('rweChart2').innerHTML=barHTML(cntBy(d,'src'));
+  document.getElementById('rweChart3').innerHTML=barHTML(cntBy(d,'ep'));
+}
+
+function renderMSL(){
+  const d=mslD,pos=d.filter(r=>(r.Sentiment||'').includes('Positive')).length;
+  document.getElementById('mslK').innerHTML=[kpiH(d.length,'Total Interactions','MSL field activities','kc'),kpiH([...new Set(d.map(r=>r.MSL))].length,'Active MSLs','Field team','kb'),kpiH(pc(pos/d.length*100),'Positive Sentiment','KOL satisfaction','kg'),kpiH(d.filter(r=>r.FollowUp==='Yes').length,'Follow-Ups','Action items','ky')].join('');
+  document.getElementById('mslTbl').innerHTML=`<div class="th"><span class="th-t">MSL Interaction Log</span><input class="ts" placeholder="Search..." oninput="srch(this,'mslTbl')"></div><div class="tbl-scroll" style="max-height:300px"><table><thead><tr><th>Date</th><th>MSL</th><th>KOL</th><th>Institution</th><th>Type</th><th>Brand</th><th>Topic</th><th>Sentiment</th><th>F/U</th></tr></thead><tbody>${d.sort((a,b)=>new Date(b.Date)-new Date(a.Date)).map(r=>`<tr><td>${r.Date}</td><td>${r.MSL}</td><td><strong>${r.KOL}</strong></td><td style="font-size:.68rem">${r.Institution}</td><td><span class="p ps">${r.Type}</span></td><td>${r.Brand}</td><td style="font-size:.68rem">${r.Topic}</td><td><span class="p ${(r.Sentiment||'').includes('Positive')?'pg':(r.Sentiment||'').includes('Concern')||r.Sentiment==='Skeptical'?'pr':'py'}">${r.Sentiment}</span></td><td>${r.FollowUp==='Yes'?'<span class="p po">Yes</span>':'—'}</td></tr>`).join('')}</tbody></table></div>`;
+  document.getElementById('mslChart').innerHTML=barHTML(cntBy(d,'Region'));
+}
+
+function renderKOL(){
+  const d=kolD,t1=d.filter(k=>k.Tier.includes('1')).length;
+  document.getElementById('kolK').innerHTML=[kpiH(d.length,'Total KOLs','Engagement universe','kc'),kpiH(t1,'Tier 1 National','Top influence','kb'),kpiH(av(d.map(k=>k.HIndex)).toFixed(0),'Avg H-Index','Scientific impact','kv'),kpiH(av(d.map(k=>k.Interactions)).toFixed(1),'Avg Interactions','Per KOL','ky')].join('');
+  document.getElementById('kolTbl').innerHTML=`<div class="th"><span class="th-t">KOL Intelligence — H1 Style Database</span><input class="ts" placeholder="Search KOLs..." oninput="srch(this,'kolTbl')"></div><div class="tbl-scroll"><table><thead><tr><th>KOL</th><th>Specialty</th><th>Institution</th><th>Tier</th><th>TA</th><th>Engagement</th><th>Interactions</th><th>H-Index</th><th>Pubs</th><th>Influence</th><th>Sentiment</th><th>Last Contact</th></tr></thead><tbody>${d.map(k=>`<tr><td><div class="av-row"><div class="av" style="background:${k.color}">${k.Name.split(' ').slice(1).map(n=>n[0]).join('')}</div><strong style="color:var(--blue)">${k.Name}</strong></div></td><td>${k.Specialty}</td><td style="font-size:.68rem">${k.Institution}</td><td><span class="p ${k.Tier.includes('1')?'pg':k.Tier.includes('2')?'py':'ps'}">${k.Tier.split('—')[0].trim()}</span></td><td>${k.TA}</td><td><span class="p pv">${k.Engagement}</span></td><td>${k.Interactions}</td><td>${k.HIndex}</td><td>${k.Pubs}</td><td><div class="prog" style="width:60px"><div class="prog-f" style="width:${k.Influence}%;background:${k.Influence>80?'var(--cyan)':k.Influence>60?'var(--blue)':'var(--gold)'}"></div></div></td><td><span class="p ${(k.Sentiment||'').includes('Positive')?'pg':(k.Sentiment||'').includes('Concern')?'pr':'py'}">${k.Sentiment}</span></td><td>${k.LastContact}</td></tr>`).join('')}</tbody></table></div>`;
+  // Network
+  document.getElementById('kolNetwork').innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:6px">${d.slice(0,10).map(k=>`<div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--r);padding:8px 10px;width:calc(50% - 3px);display:flex;align-items:center;gap:7px"><div class="av" style="background:${k.color};width:32px;height:32px;font-size:.65rem">${k.Name.split(' ').slice(1).map(n=>n[0]).join('')}</div><div><div style="font-size:.7rem;font-weight:600">${k.Name}</div><div style="font-size:.6rem;color:var(--t3)">${k.Institution} • H:${k.HIndex}</div><div style="display:flex;gap:3px;margin-top:2px"><span class="p ${k.Tier.includes('1')?'pg':'py'}" style="font-size:.55rem">${k.Tier.split('—')[0].trim()}</span><span class="p ps" style="font-size:.55rem">${k.TA}</span></div></div></div>`).join('')}</div>`;
+  document.getElementById('kolTierC').innerHTML=barHTML(cntBy(d,'Tier'));
+}
+
+function renderLS(){
+  const d=lsD;
+  document.getElementById('lsK').innerHTML=[kpiH(d.length,'Tracked Competitors','Active monitoring','kc'),kpiH([...new Set(d.map(c=>c.ta))].length,'Therapeutic Areas','Landscape coverage','kb'),kpiH(d.filter(c=>c.threat.includes('Critical')||c.threat.includes('High')).length,'High Threat','Competitive risks','kr'),kpiH(d.filter(c=>c.trend.includes('Grow')).length,'Growing Brands','Market expansion','kg')].join('');
+  document.getElementById('lsCards').innerHTML=d.map(c=>`<div class="ls-card"><h5>${c.brand} <span class="p ${c.threat.includes('Critical')?'pre':c.threat.includes('High')?'pr':'py'}" style="font-size:.55rem">${c.threat}</span></h5><p>${c.company} | ${c.ta} | Share: ${c.share} | ${c.pipeline}</p><div class="ls-meta"><span class="p ps" style="font-size:.55rem">Trend: ${c.trend}</span></div></div>`).join('');
+  document.getElementById('lsChart').innerHTML=barHTML(cntBy(d,'ta'));
+}
+
+function renderNBA(){
+  const d=nbaD;
+  document.getElementById('nbaK').innerHTML=[kpiH(d.filter(n=>n.Urgency==='Critical').length,'Critical Actions','Immediate engagement','kr'),kpiH(d.filter(n=>n.Urgency==='High').length,'High Priority','This week','ko'),kpiH(av(d.map(n=>n.NBAScore)).toFixed(0),'Avg NBA Score','Engagement priority','kc'),kpiH(av(d.map(n=>n.DaysSince)).toFixed(0)+' days','Avg Gap','Since last contact','ky')].join('');
+  document.getElementById('nbaTbl').innerHTML=`<div class="th"><span class="th-t">Next Best Action — ODAIA MAPTUAL Style Engine</span><input class="ts" placeholder="Search..." oninput="srch(this,'nbaTbl')"></div><div class="tbl-scroll"><table><thead><tr><th>Score</th><th>KOL</th><th>Tier</th><th>TA</th><th>Institution</th><th>Urgency</th><th>Recommended Action</th><th>Channel</th><th>Days Since</th><th>Sentiment</th></tr></thead><tbody>${d.map(n=>`<tr><td><div class="ring" style="background:${n.NBAScore>80?'var(--rose-g)':n.NBAScore>60?'var(--orange-g)':n.NBAScore>40?'var(--gold-g)':'var(--green-g)'};color:${n.NBAScore>80?'var(--rose)':n.NBAScore>60?'var(--orange)':n.NBAScore>40?'var(--gold)':'var(--green)'}">${n.NBAScore}</div></td><td><strong style="color:var(--blue)">${n.Name}</strong></td><td><span class="p ${n.Tier.includes('1')?'pg':n.Tier.includes('2')?'py':'ps'}">${n.Tier.split('—')[0].trim()}</span></td><td>${n.TA}</td><td style="font-size:.68rem">${n.Institution}</td><td><span class="p ${n.Urgency==='Critical'?'pre':n.Urgency==='High'?'po':n.Urgency==='Medium'?'py':'pg'}">${n.Urgency}</span></td><td style="color:var(--cyan);font-size:.7rem;max-width:180px;white-space:normal">${n.Action}</td><td>${n.Channel}</td><td>${n.DaysSince}</td><td><span class="p ${(n.Sentiment||'').includes('Positive')?'pg':(n.Sentiment||'').includes('Concern')?'pr':'py'}">${n.Sentiment}</span></td></tr>`).join('')}</tbody></table></div>`;
+  // Score + Matrix
+  document.getElementById('nbaScore').innerHTML=`<div class="bars">${d.slice(0,8).map(n=>`<div class="br"><div class="br-l">${n.Name.split(' ').pop()}</div><div class="br-t"><div class="br-f" style="width:${n.NBAScore}%;background:${n.NBAScore>80?'var(--rose)':n.NBAScore>60?'var(--orange)':'var(--cyan)'}">${n.NBAScore}</div></div></div>`).join('')}</div>`;
+  document.getElementById('nbaMatrix').innerHTML=barHTML(cntBy(d,'Urgency'),['var(--rose)','var(--orange)','var(--gold)','var(--green)']);
+}
+
+function renderPubs(){
+  const d=pubD,pub=d.filter(p=>p.Status==='Published').length;
+  document.getElementById('pubK').innerHTML=[kpiH(d.length,'Publications','In portfolio','kc'),kpiH(pub,'Published',pc(pub/d.length*100)+' complete','kg'),kpiH(av(d.map(p=>parseFloat(p.IF)||0)).toFixed(1),'Avg IF','Journal quality','kb'),kpiH(fm(sm(d.map(p=>p.Citations))),'Citations','Academic impact','kv')].join('');
+  document.getElementById('pubTbl').innerHTML=`<div class="th"><span class="th-t">Publication Portfolio</span><input class="ts" placeholder="Search..." oninput="srch(this,'pubTbl')"></div><div class="tbl-scroll"><table><thead><tr><th>Title</th><th>Journal</th><th>Type</th><th>Status</th><th>IF</th><th>Author</th><th>TA</th><th>Brand</th><th>Citations</th></tr></thead><tbody>${d.map(p=>`<tr><td style="max-width:250px;white-space:normal;line-height:1.3"><strong style="color:var(--blue)">${p.Title}</strong></td><td>${p.Journal}</td><td><span class="p ps">${p.Type}</span></td><td><span class="p ${pillCls(p.Status)}">${p.Status}</span></td><td style="font-family:var(--fm)">${p.IF}</td><td>${p.Author}</td><td>${p.TA}</td><td>${p.Brand}</td><td>${p.Citations}</td></tr>`).join('')}</tbody></table></div>`;
+  document.getElementById('pubChart1').innerHTML=barHTML(cntBy(d,'Type'));
+  document.getElementById('pubChart2').innerHTML=barHTML(cntBy(d,'Status'));
+}
+
+function renderInq(){
+  const d=inqD,res=d.filter(i=>i.Status==='Resolved').length;
+  document.getElementById('inqK').innerHTML=[kpiH(d.length,'Total Inquiries','Medical information','kc'),kpiH(res,'Resolved',pc(res/d.length*100)+' rate','kg'),kpiH(av(d.map(i=>i.RespTime)).toFixed(1)+'h','Avg Response','Hours to close','kb'),kpiH(d.filter(i=>i.Priority==='High').length,'High Priority','Escalated','kr')].join('');
+  document.getElementById('inqTbl').innerHTML=`<div class="th"><span class="th-t">Medical Inquiry Intelligence — Veeva Vault Class</span><input class="ts" placeholder="Search..." oninput="srch(this,'inqTbl')"></div><div class="tbl-scroll"><table><thead><tr><th>ID</th><th>Date</th><th>Product</th><th>Category</th><th>Source</th><th>Priority</th><th>Status</th><th>Response (h)</th></tr></thead><tbody>${d.map(i=>`<tr><td style="font-family:var(--fm);font-size:.66rem">${i.ID}</td><td>${i.Date}</td><td><strong>${i.Product}</strong></td><td>${i.Category}</td><td>${i.Source}</td><td><span class="p ${i.Priority==='High'?'pre':'ps'}">${i.Priority}</span></td><td><span class="p ${pillCls(i.Status)}">${i.Status}</span></td><td>${i.RespTime}</td></tr>`).join('')}</tbody></table></div>`;
+  document.getElementById('inqChart1').innerHTML=barHTML(cntBy(d,'Category'));
+  document.getElementById('inqChart2').innerHTML=barHTML(cntBy(d,'Product'));
+}
+
+function renderPV(){
+  const d=pvD,serious=d.filter(p=>p.Serious==='Yes').length,signals=d.filter(p=>p.Signal==='Under Review').length;
+  document.getElementById('pvK').innerHTML=[kpiH(d.length,'Total AE Cases','Pharmacovigilance','kc'),kpiH(serious,'Serious AEs',pc(serious/d.length*100)+' of total','kr'),kpiH(signals,'Active Signals','Under review','ko'),kpiH(d.filter(p=>p.Outcome==='Recovered').length,'Recovered',pc(d.filter(p=>p.Outcome==='Recovered').length/d.length*100),'kg')].join('');
+  document.getElementById('pvTbl').innerHTML=`<div class="th"><span class="th-t">Pharmacovigilance — DrugCard Style AE Monitoring</span><input class="ts" placeholder="Search..." oninput="srch(this,'pvTbl')"></div><div class="tbl-scroll"><table><thead><tr><th>Case ID</th><th>Date</th><th>Product</th><th>AE Term</th><th>SOC</th><th>Severity</th><th>Serious</th><th>Outcome</th><th>Reporter</th><th>Signal</th></tr></thead><tbody>${d.map(p=>`<tr><td style="font-family:var(--fm);font-size:.66rem">${p.CaseID}</td><td>${p.Date}</td><td><strong>${p.Product}</strong></td><td>${p.AETerm}</td><td style="font-size:.68rem">${p.SOC}</td><td><span class="p ${p.Severity==='Severe'||p.Severity==='Life-threatening'?'pre':p.Severity==='Moderate'?'po':'py'}">${p.Severity}</span></td><td>${p.Serious==='Yes'?'<span class="p pre">Yes</span>':'No'}</td><td><span class="p ${pillCls(p.Outcome)}">${p.Outcome}</span></td><td>${p.Reporter}</td><td>${p.Signal==='Under Review'?'<span class="p po">⚠ Review</span>':'<span class="p pg">Clear</span>'}</td></tr>`).join('')}</tbody></table></div>`;
+  document.getElementById('pvSignals').innerHTML=`<div style="display:flex;flex-direction:column;gap:6px">${d.filter(p=>p.Signal==='Under Review').map(p=>`<div class="ls-card" style="border-left:3px solid var(--orange)"><h5>⚠ ${p.AETerm} — ${p.Product}</h5><p>Severity: ${p.Severity} | SOC: ${p.SOC} | Reporter: ${p.Reporter} | ${p.Date}</p></div>`).join('')}</div>`;
+  document.getElementById('pvChart').innerHTML=barHTML(cntBy(d,'SOC'));
+}
+
+function renderCong(){
+  const d=congD;
+  document.getElementById('congK').innerHTML=[kpiH(d.length,'Congresses','Upcoming/planned','kc'),kpiH(sm(d.map(c=>c.Abs)),'Abstracts','Submitted/planned','kb'),kpiH(sm(d.map(c=>c.Orals)),'Oral Presentations','Accepted','kg'),kpiH(sm(d.map(c=>c.KOLs)),'KOLs Engaged','At congresses','kv')].join('');
+  document.getElementById('congTbl').innerHTML=`<div class="th"><span class="th-t">Congress Intelligence & Planning</span></div><div class="tbl-scroll"><table><thead><tr><th>Congress</th><th>Date</th><th>Location</th><th>TA</th><th>Abstracts</th><th>Posters</th><th>Orals</th><th>Symposia</th><th>KOLs</th><th>Status</th><th>Key Data</th></tr></thead><tbody>${d.map(c=>`<tr><td><strong style="color:var(--blue)">${c.Congress}</strong></td><td>${c.Date}</td><td>${c.Loc}</td><td>${c.TA}</td><td>${c.Abs}</td><td>${c.Posters}</td><td>${c.Orals}</td><td>${c.Symposia}</td><td>${c.KOLs}</td><td><span class="p ${pillCls(c.Status)}">${c.Status}</span></td><td style="color:var(--cyan);font-size:.68rem;max-width:190px;white-space:normal">${c.Key}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderEv(){
+  const d=evD;
+  document.getElementById('evK').innerHTML=[kpiH(d.length,'Evidence Gaps','Identified','kr'),kpiH(d.filter(e=>e.Priority==='Critical').length,'Critical','Urgent action','kc'),kpiH(d.filter(e=>e.Status.includes('Plan')||e.Status.includes('Initiat')).length,'In Pipeline','Studies planned','kg'),kpiH([...new Set(d.map(e=>e.TA))].length,'TAs Covered','Therapeutic areas','kb')].join('');
+  document.getElementById('evTbl').innerHTML=`<div class="th"><span class="th-t">Evidence Gap Analysis & Action Plan</span></div><div class="tbl-scroll"><table><thead><tr><th>Evidence Gap</th><th>TA</th><th>Brand</th><th>Priority</th><th>Status</th><th>Source</th><th>Timeline</th><th>Action</th></tr></thead><tbody>${d.map(e=>`<tr><td style="max-width:200px;white-space:normal;line-height:1.3"><strong style="color:var(--blue)">${e.Gap}</strong></td><td>${e.TA}</td><td>${e.Brand}</td><td><span class="p ${e.Priority==='Critical'?'pre':e.Priority==='High'?'po':'py'}">${e.Priority}</span></td><td><span class="p ${pillCls(e.Status)}">${e.Status}</span></td><td style="font-size:.66rem;max-width:140px;white-space:normal;color:var(--t2)">${e.Source}</td><td>${e.Timeline}</td><td style="color:var(--cyan);font-size:.68rem;max-width:200px;white-space:normal">${e.Action}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderCt(){document.getElementById('ctK').innerHTML=[kpiH('12','Content Pieces','Generated this month','kc'),kpiH('94%','Compliance Rate','MLR approval rate','kg'),kpiH('3.2 days','Avg Turnaround','Creation to approval','kb'),kpiH('5','Active Campaigns','In progress','kv')].join('')}
+
+// ====== UPLOAD ======
+function openUpload(){document.getElementById('upOv').classList.add('show')}
+function closeUpload(){document.getElementById('upOv').classList.remove('show')}
+function switchUpTab(i){document.querySelectorAll('.up-t').forEach((t,j)=>{t.classList.toggle('on',j===i)});document.querySelectorAll('.up-panel').forEach((p,j)=>{p.classList.toggle('on',j===i)})}
+const dz=document.getElementById('dz');dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over')});dz.addEventListener('dragleave',()=>dz.classList.remove('over'));dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');if(e.dataTransfer.files.length)handleFile(e.dataTransfer.files[0])});
+
+function handleFile(file){
+  if(!file)return;const msg=document.getElementById('umsg');
+  const reader=new FileReader();
+  reader.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];const rows=XLSX.utils.sheet_to_json(ws);if(!rows.length)throw new Error('Empty');genAll();// ensure base data
+  const keys=Object.keys(rows[0]).join(' ').toLowerCase();
+  if(keys.includes('ae')||keys.includes('pharmacov')||keys.includes('adverse'))pvD=rows;
+  else if(keys.includes('study')||keys.includes('rwe')||keys.includes('endpoint'))rweD=rows;
+  else if(keys.includes('msl')||keys.includes('interaction'))mslD=rows;
+  else if(keys.includes('kol')||keys.includes('h-index'))kolD=rows;
+  else if(keys.includes('journal')||keys.includes('publication'))pubD=rows;
+  else if(keys.includes('inquiry')||keys.includes('miq'))inqD=rows;
+  else rweD=rows;
+  loaded=true;msg.className='umsg umsg-ok';msg.style.display='block';msg.textContent=`✓ ${rows.length} rows × ${Object.keys(rows[0]).length} cols from "${file.name}"`;
+  document.getElementById('srcLine').textContent=`${file.name} — ${rows.length} records | ${new Date().toLocaleString()}`;
+  setTimeout(()=>{closeUpload();renderAll()},900);
+  }catch(err){msg.className='umsg umsg-err';msg.style.display='block';msg.textContent=`✗ ${err.message}`}};
+  reader.readAsArrayBuffer(file);
+}
+
+async function processUnstructured(){
+  const txt=document.getElementById('unstIn').value.trim();if(!txt){alert('Paste unstructured text');return}
+  const msg=document.getElementById('umsg2');msg.innerHTML='<div class="ai-ld"><span></span><span></span><span></span></div> Processing with AI...';msg.style.display='block';msg.style.background='var(--blue-g)';msg.style.color='var(--blue)';
+  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`Analyze this unstructured medical affairs text and classify it. Return JSON only (no markdown): {"type":"msl|kol|rwe|pv|inquiry|general","summary":"brief summary","key_entities":["entity1"],"insights":["insight1"],"actions":["action1"]}\n\nTEXT: ${txt}`}]})});
+  const data=await r.json();let t=data.content?.[0]?.text||'';t=t.replace(/```json|```/g,'').trim();
+  const parsed=JSON.parse(t);msg.innerHTML=`✓ Classified as <strong>${parsed.type.toUpperCase()}</strong>: ${parsed.summary}<br>Insights: ${parsed.insights?.join('; ')||'N/A'}`;msg.style.background='var(--green-g)';msg.style.color='var(--green)';
+  if(!loaded)loadDemo();
+  setTimeout(closeUpload,2000);
+  }catch(err){msg.innerHTML=`⚠ ${err.message}`;msg.style.background='var(--red-g)';msg.style.color='var(--red)'}
+}
+
+// ====== MSL ENGINE ======
+function loadSampleMSL(){document.getElementById('mslIn').value=`Met with Dr. Maria Ramirez at Boston Medical Center on March 15, 2025. She is a Tier 1 KOL in NSCLC immunotherapy with H-index 52 and 120+ publications.\n\nWe had an in-depth scientific exchange about OncaVax-7 Phase 3 data from ASCO 2024. She was very positive about overall survival results (HR 0.72, p<0.001) but expressed significant concern about the myocarditis signal (2.3% incidence with checkpoint inhibitor combinations) reported in the subgroup analysis.\n\nCompetitive intelligence: She is currently prescribing Keytruda (pembrolizumab) as first-line for most NSCLC patients but would consider switching to OncaVax-7 if 5-year OS data confirms survival benefit. She noted Merck is aggressively promoting Keytruda + chemo combinations.\n\nShe brought up a potential investigator-initiated study on OncaVax-7 + radiation in oligometastatic NSCLC (estimated N=200). Wants to discuss protocol design with our clinical team.\n\nShe's chairing a session at ASCO 2025 on "Biomarker-Driven Therapy Selection in Lung Cancer" and invited us to submit a late-breaking abstract on our ctDNA data.\n\nShe also mentioned concerns from patients about long-term immunotherapy costs and asked if we have health economics data on OncaVax-7.\n\nFollow-up: (1) Send 5-yr OS interim when available (2) Connect biomarker team re: ctDNA validation timeline (3) Route IIS proposal to grants committee (4) Prepare ASCO 2025 abstract submission (5) Share HE analysis data package`}
+function clearMSL(){document.getElementById('mslIn').value='';document.getElementById('mslOut').classList.remove('show')}
+
+async function processMSL(){
+  const note=document.getElementById('mslIn').value.trim();if(!note){alert('Enter MSL notes');return}
+  const out=document.getElementById('mslOut');out.innerHTML='<div class="ai-ld"><span></span><span></span><span></span></div><p style="color:var(--t3);font-size:.7rem;margin-top:6px">AI extracting structured insights from unstructured field notes...</p>';out.classList.add('show');
+  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`You are a Medical Affairs AI. Extract structured insights from MSL notes. Return ONLY valid JSON:\n{"kol":{"name":"","specialty":"","institution":"","tier":"","h_index":"","sentiment":""},"interaction":{"date":"","type":"","brand":""},"clinical_insights":[""],"competitive_intel":[""],"safety_signals":[""],"evidence_gaps":[""],"opportunities":[""],"actions":[{"action":"","priority":"High/Medium/Low","owner":""}],"congress_mentions":[""],"sentiment":{"overall":"","concerns":[""],"positives":[""]}}\n\nNOTES:\n${note}`}]})});
+  const data=await r.json();let t=data.content?.[0]?.text||'';t=t.replace(/```json|```/g,'').trim();const p=JSON.parse(t);
+  let h=`<h4>✅ Structured Insights Extracted Successfully</h4>`;
+  if(p.kol)h+=`<div class="ai-sec"><h5>👨‍⚕️ KOL Profile</h5><p><strong>${p.kol.name}</strong> | ${p.kol.specialty} | ${p.kol.institution} | ${p.kol.tier} | H-index: ${p.kol.h_index||'N/A'} | Sentiment: <span class="p ${(p.kol.sentiment||'').toLowerCase().includes('positive')?'pg':'py'}">${p.kol.sentiment}</span></p></div>`;
+  if(p.interaction)h+=`<div class="ai-sec"><h5>📅 Interaction</h5><p>Date: ${p.interaction.date} | Type: ${p.interaction.type} | Brand: ${p.interaction.brand}</p></div>`;
+  if(p.clinical_insights?.length)h+=`<div class="ai-sec" style="border-color:var(--blue)"><h5>🔬 Clinical Insights</h5><ul>${p.clinical_insights.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
+  if(p.competitive_intel?.length&&p.competitive_intel[0])h+=`<div class="ai-sec" style="border-color:var(--rose)"><h5>⚔️ Competitive Intelligence</h5><ul>${p.competitive_intel.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
+  if(p.safety_signals?.length&&p.safety_signals[0])h+=`<div class="ai-sec" style="border-color:var(--red)"><h5>⚠️ Safety Signals</h5><ul>${p.safety_signals.map(i=>`<li style="color:var(--rose)">${i}</li>`).join('')}</ul></div>`;
+  if(p.evidence_gaps?.length&&p.evidence_gaps[0])h+=`<div class="ai-sec" style="border-color:var(--gold)"><h5>🔍 Evidence Gaps</h5><ul>${p.evidence_gaps.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
+  if(p.opportunities?.length)h+=`<div class="ai-sec" style="border-color:var(--green)"><h5>🎯 Opportunities</h5><ul>${p.opportunities.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
+  if(p.actions?.length)h+=`<div class="ai-sec" style="border-color:var(--blue)"><h5>📋 Action Items</h5><table><thead><tr><th>Action</th><th>Priority</th><th>Owner</th></tr></thead><tbody>${p.actions.map(a=>`<tr><td>${a.action}</td><td><span class="p ${a.priority==='High'?'pre':a.priority==='Medium'?'py':'pg'}">${a.priority}</span></td><td>${a.owner||'MSL'}</td></tr>`).join('')}</tbody></table></div>`;
+  if(p.congress_mentions?.length&&p.congress_mentions[0])h+=`<div class="ai-sec"><h5>🏛 Congress Mentions</h5><ul>${p.congress_mentions.map(i=>`<li>${i}</li>`).join('')}</ul></div>`;
+  if(p.sentiment)h+=`<div class="ai-sec"><h5>📊 Sentiment</h5><p>Overall: <strong>${p.sentiment.overall}</strong></p>${p.sentiment.positives?.length?`<p style="color:var(--green)">✓ ${p.sentiment.positives.join('; ')}</p>`:''}${p.sentiment.concerns?.length?`<p style="color:var(--rose)">⚠ ${p.sentiment.concerns.join('; ')}</p>`:''}</div>`;
+  out.innerHTML=h;
+  }catch(err){out.innerHTML=`<p style="color:var(--rose)">⚠ ${err.message}</p>`}
+}
+
+// ====== LANDSCAPE ANALYZER ======
+async function analyzeLandscape(){
+  const q=document.getElementById('lsIn').value.trim();if(!q){alert('Enter a query');return}
+  const out=document.getElementById('lsOut');out.innerHTML='<div class="ai-ld"><span></span><span></span><span></span></div><p style="color:var(--t3);font-size:.7rem;margin-top:6px">AI analyzing therapeutic landscape...</p>';out.classList.add('show');
+  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`You are a Medical Affairs landscape analyst. Provide a comprehensive competitive landscape analysis. Structure with clear sections using **bold** headers. Include: Market Overview, Key Competitors & Differentiation, Clinical Evidence Comparison, Pipeline Threats, Regulatory Landscape, Strategic Implications, and Recommended Actions. Be specific with drug names, clinical data points, and market share estimates.\n\nQUERY: ${q}`}]})});
+  const data=await r.json();let t=data.content?.[0]?.text||'';t=t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>').replace(/- /g,'• ');
+  out.innerHTML=`<h4>🌍 Landscape Analysis Complete</h4><div class="ai-sec" style="border-color:var(--blue)">${t}</div>`;
+  }catch(err){out.innerHTML=`<p style="color:var(--rose)">⚠ ${err.message}</p>`}
+}
+
+// ====== PLAIN LANGUAGE SUMMARIZER ======
+function loadSamplePLS(){document.getElementById('plsIn').value=`BACKGROUND: In a phase 3, randomized, double-blind trial (CARDIO-RWE-001), we evaluated the efficacy and safety of CardioStabil XR (sacubitril/valsartan analog) versus enalapril in patients with heart failure and reduced ejection fraction (HFrEF, LVEF ≤40%). The primary composite endpoint was cardiovascular death or hospitalization for heart failure.\n\nMETHODS: 45,200 patients from 1,043 centers across 47 countries were randomized 1:1 to CardioStabil XR (200mg BID) or enalapril (10mg BID). Median follow-up was 27 months. Key inclusion: NYHA class II-IV, NT-proBNP ≥600 pg/mL.\n\nRESULTS: CardioStabil XR significantly reduced the primary endpoint compared with enalapril (hazard ratio 0.72; 95% CI 0.65-0.80; p<0.001). The number needed to treat (NNT) was 21 over 27 months. All-cause mortality was reduced by 16% (HR 0.84; 95% CI 0.76-0.93; p<0.001). Hospitalizations for heart failure were reduced by 21%. The most common adverse events were hypotension (18% vs 12%), hyperkalemia (12% vs 10%), and renal impairment (5% vs 4%). Angioedema occurred in 0.5% vs 0.2%.\n\nCONCLUSION: CardioStabil XR demonstrated superior efficacy to enalapril in reducing cardiovascular death and heart failure hospitalization in HFrEF patients, establishing a new standard of care for this population.`}
+
+async function plainLang(audience='general'){
+  const txt=document.getElementById('plsIn').value.trim();if(!txt){alert('Enter text');return}
+  const out=document.getElementById('plsOut');out.innerHTML='<div class="ai-ld"><span></span><span></span><span></span></div><p style="color:var(--t3);font-size:.7rem;margin-top:6px">Generating plain language summary...</p>';out.classList.add('show');
+  const aud=audience==='patient'?'Write for patients and caregivers at a 6th-grade reading level. Use simple language, avoid medical jargon, explain all terms. Include: What was studied, Why it matters, What they found, What it means for patients.':audience==='hcp'?'Write a concise clinical brief for busy HCPs. Include key efficacy numbers, NNT, safety profile, and clinical implications. 250 words max.':'Write a plain language summary accessible to non-specialist audiences. Explain medical terms in parentheses. Balance accuracy with readability. Include key findings, what they mean, and limitations.';
+  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`${aud}\n\nSOURCE TEXT:\n${txt}\n\nFormat with clear sections using **bold** headers. Include a readability score estimate at the end.`}]})});
+  const data=await r.json();let t=data.content?.[0]?.text||'';t=t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>').replace(/- /g,'• ');
+  const label=audience==='patient'?'👤 Patient-Friendly':audience==='hcp'?'👨‍⚕️ HCP Brief':'📝 Plain Language';
+  out.innerHTML=`<h4>${label} Summary Generated</h4><div class="ai-sec" style="border-color:var(--cyan)">${t}</div>`;
+  }catch(err){out.innerHTML=`<p style="color:var(--rose)">⚠ ${err.message}</p>`}
+}
+function plainLangPatient(){plainLang('patient')}
+function plainLangHCP(){plainLang('hcp')}
+
+// ====== CONTENT GENERATOR ======
+async function genContent(type){
+  const txt=document.getElementById('ctIn').value.trim();if(!txt){alert('Describe the content needed');return}
+  const out=document.getElementById('ctOut');out.innerHTML='<div class="ai-ld"><span></span><span></span><span></span></div><p style="color:var(--t3);font-size:.7rem;margin-top:6px">AI generating compliant scientific content...</p>';out.classList.add('show');
+  const prompts={scientific:'Generate scientific content suitable for Medical Affairs use. Include proper citations format, balanced language, and fair balance. Structure with clear sections.',hcp_email:'Draft a compliant HCP communication email. Include subject line, greeting, key message (max 3 points), call to action, and required fair balance/ISI language placeholder. Keep under 300 words.',slide_deck:'Create a detailed slide deck outline (8-12 slides). For each slide provide: Title, Key Messages (bullet points), Speaker Notes, Visual Suggestions. Include title slide, agenda, and summary.',formulary:'Generate a formulary dossier executive summary. Include: Product Overview, Mechanism of Action, Clinical Efficacy Summary, Safety Profile, Pharmacoeconomic Value, Place in Therapy, Key Differentiators.'};
+  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`You are a Persado-class compliant medical content generator. ${prompts[type]}\n\nIMPORTANT: All content must be balanced, evidence-based, and suitable for MLR review. Include [REF] placeholders for citations. Mark promotional claims with [CLAIM]. Include fair balance language.\n\nCONTENT REQUEST: ${txt}\n\nFormat with **bold** headers and clear structure.`}]})});
+  const data=await r.json();let t=data.content?.[0]?.text||'';t=t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>').replace(/- /g,'• ');
+  const labels={scientific:'🔬 Scientific Content',hcp_email:'📧 HCP Communication',slide_deck:'📊 Slide Deck Outline',formulary:'📋 Formulary Brief'};
+  out.innerHTML=`<h4>${labels[type]} Generated</h4><div class="ai-sec" style="border-color:var(--violet)"><h5>⚠ Draft — Requires MLR Review Before Use</h5>${t}</div>`;
+  }catch(err){out.innerHTML=`<p style="color:var(--rose)">⚠ ${err.message}</p>`}
+}
+
+// ====== TABS ======
+document.querySelectorAll('.tt').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.tt').forEach(x=>x.classList.remove('on'));document.querySelectorAll('.pn').forEach(x=>x.classList.remove('on'));t.classList.add('on');document.getElementById('p-'+t.dataset.p).classList.add('on')})});
+
+// ====== AI COPILOT ======
+function toggleAI(){document.getElementById('aiDw').classList.toggle('open');document.getElementById('aiSh').classList.toggle('show')}
+function qAI(t){document.getElementById('aiIn').value=t;sendAI()}
+
+async function sendAI(){
+  const inp=document.getElementById('aiIn');const msg=inp.value.trim();if(!msg)return;inp.value='';
+  const c=document.getElementById('aiMs');c.innerHTML+=`<div class="ai-m u">${msg}</div><div class="ai-ld" id="aiLd"><span></span><span></span><span></span></div>`;c.scrollTop=c.scrollHeight;
+  let ctx='No data loaded.';
+  if(loaded){ctx=`DATA SUMMARY:\nRWE: ${rweD.length} studies (${rweD.filter(s=>s.status==='Published').length} published, N=${fm(sm(rweD.map(s=>s.n||0)))})\nTop studies: ${rweD.slice(0,5).map(s=>`${s.name}: ${s.ta}/${s.ind}, ${s.fx}, ${s.status}`).join('; ')}\nMSL: ${mslD.length} interactions, ${[...new Set(mslD.map(m=>m.MSL))].length} MSLs, ${Math.round(mslD.filter(m=>(m.Sentiment||'').includes('Positive')).length/mslD.length*100)}% positive\nKOLs: ${kolD.length} (${kolD.filter(k=>k.Tier.includes('1')).length} Tier 1), avg H-index ${av(kolD.map(k=>k.HIndex)).toFixed(0)}\nPubs: ${pubD.length} (${pubD.filter(p=>p.Status==='Published').length} published), avg IF ${av(pubD.map(p=>parseFloat(p.IF)||0)).toFixed(1)}\nPV: ${pvD.length} cases (${pvD.filter(p=>p.Serious==='Yes').length} serious, ${pvD.filter(p=>p.Signal==='Under Review').length} signals)\nEvidence Gaps: ${evD.length} (${evD.filter(e=>e.Priority==='Critical').length} critical)\nNBA: Top actions: ${nbaD.slice(0,3).map(n=>`${n.Name}: ${n.Action} (Score ${n.NBAScore})`).join('; ')}`}
+  try{const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`You are MedAffairs IQ Pro AI Copilot — expert in Medical Affairs strategy including RWE, MSL operations, KOL engagement (H1/ODAIA style), pharmacovigilance (DrugCard style), evidence generation, publication planning, and medical inquiry management. Provide specific, actionable insights with study names, KOL names, and data points.\n\n${ctx}\n\nQUESTION: ${msg}\n\nProvide: 1) Key findings 2) Strategic recommendations 3) Specific actions. Use **bold** for emphasis.`}]})});
+  const data=await r.json();document.getElementById('aiLd')?.remove();
+  let t=data.content?.[0]?.text||'No response';t=t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>').replace(/- /g,'• ');
+  c.innerHTML+=`<div class="ai-m a">${t}</div>`;
+  }catch(err){document.getElementById('aiLd')?.remove();c.innerHTML+=`<div class="ai-m a" style="border-color:var(--rose)">⚠ ${err.message}</div>`}
+  c.scrollTop=c.scrollHeight;
+}
+document.getElementById('aiIn').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendAI()}});
+
+// INIT
+window.addEventListener('load',()=>setTimeout(loadDemo,250));
+</script>
+</body>
+</html>

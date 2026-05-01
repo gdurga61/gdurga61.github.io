@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrandIQ Analytics Enterprise — Pharma Commercial Intelligence Platform</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:#060a13;color:#e2e8f0;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:#0f1629}::-webkit-scrollbar-thumb{background:#2d3a5c;border-radius:3px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(6,182,212,.15)}50%{box-shadow:0 0 20px rgba(6,182,212,.3)}}
+.fu{animation:fadeUp .4s ease-out both}
+.glow{animation:glow 2s infinite}
+input,select,textarea{font-family:inherit}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState,useEffect,useRef,useCallback}=React;
+
+/* ═══════════════════ CONSTANTS ═══════════════════ */
+const MO=["Jan-24","Feb-24","Mar-24","Apr-24","May-24","Jun-24","Jul-24","Aug-24","Sep-24","Oct-24","Nov-24","Dec-24","Jan-25","Feb-25","Mar-25"];
+const BRANDS=["CardioStabil XR","HeartGuard Plus","PulseFix 10","Cardivance","Generic Enalapril"];
+const REGIONS=["Northeast","Southeast","Midwest","West","Mid-Atlantic"];
+const CHANNELS=["Field Detailing","Speaker Programs","Email/Digital","Peer-to-Peer","DTC TV","Medical Journals","Samples","Conferences"];
+const SPECS=["Cardiologist","Internist","Family Practice","NP/PA","Hospitalist"];
+const PAYERS=["Commercial","Medicare Part D","Medicaid","Managed Medicaid","Cash/Self-Pay"];
+const BC={"CardioStabil XR":"#06b6d4","HeartGuard Plus":"#8b5cf6","PulseFix 10":"#f59e0b","Cardivance":"#ef4444","Generic Enalapril":"#64748b"};
+
+const g=(b,gr,n)=>MO.map((_,i)=>Math.round(b*(1+gr*i/14)*(1+(Math.random()-.5)*n)));
+const gd=(b,gr,n)=>MO.map((_,i)=>+(b*(1+gr*i/14)*(1+(Math.random()-.5)*n)).toFixed(1));
+
+/* ═══════════════════ MASSIVE SAMPLE DATA ═══════════════════ */
+const D={
+  // IQVIA NPA
+  trx:{"CardioStabil XR":g(42000,.18,.06),"HeartGuard Plus":g(38000,.05,.05),"PulseFix 10":g(28000,.02,.07),"Cardivance":g(22000,-.03,.06),"Generic Enalapril":g(65000,.01,.04)},
+  nrx:{"CardioStabil XR":g(8200,.22,.08),"HeartGuard Plus":g(6800,.03,.07),"PulseFix 10":g(4500,.01,.09),"Cardivance":g(3200,-.05,.08),"Generic Enalapril":g(9500,0,.05)},
+  nbrx:{"CardioStabil XR":g(5100,.25,.09),"HeartGuard Plus":g(4100,.02,.08),"PulseFix 10":g(2800,0,.10),"Cardivance":g(2000,-.06,.09),"Generic Enalapril":g(5800,-.01,.06)},
+  share:{"CardioStabil XR":gd(21.5,.15,.04),"HeartGuard Plus":gd(19.5,-.02,.03),"PulseFix 10":gd(14.3,-.03,.04),"Cardivance":gd(11.3,-.05,.05),"Generic Enalapril":gd(33.4,.01,.02)},
+};
+
+// Portfolio KPIs
+const PORTFOLIO=[
+  {brand:"CardioStabil XR",ta:"Cardiology",stage:"Growth",trx:D.trx["CardioStabil XR"].slice(-1)[0],share:D.share["CardioStabil XR"].slice(-1)[0],yoy:18.2,nps:72,persist:78.5,digitalIdx:8.2,payerAccess:82,somRank:2,avgPrice:385,speakerCov:68,awareness:74},
+  {brand:"NeuroShield Pro",ta:"Neurology",stage:"Launch",trx:18500,share:12.3,yoy:45.1,nps:68,persist:71.2,digitalIdx:7.8,payerAccess:65,somRank:4,avgPrice:1250,speakerCov:42,awareness:48},
+  {brand:"ImmunoFlex 200",ta:"Immunology",stage:"Mature",trx:52000,share:28.7,yoy:3.2,nps:81,persist:85.3,digitalIdx:6.5,payerAccess:91,somRank:1,avgPrice:620,speakerCov:78,awareness:89},
+  {brand:"GlucoBalance AI",ta:"Endocrinology",stage:"Growth",trx:31000,share:15.8,yoy:22.5,nps:65,persist:68.9,digitalIdx:9.1,payerAccess:72,somRank:3,avgPrice:480,speakerCov:55,awareness:62},
+  {brand:"OncaVax-7",ta:"Oncology",stage:"Launch",trx:8200,share:8.5,yoy:128.5,nps:78,persist:82.1,digitalIdx:7.2,payerAccess:58,somRank:5,avgPrice:8500,speakerCov:35,awareness:41},
+];
+
+// Channel ROI
+const CH_ROI=CHANNELS.map((ch,ci)=>({ch,spend:[3200000,1800000,950000,1100000,4500000,600000,2100000,800000][ci],incTrx:[12500,8200,6800,5400,9200,2100,11000,3800][ci],roi:[3.91,4.56,7.16,4.91,2.04,3.50,5.24,4.75][ci],sat:[72,45,38,52,85,30,68,42][ci],curve:["Diminishing","S-Curve","Linear","S-Curve","Diminishing","Diminishing","Linear","S-Curve"][ci]}));
+CH_ROI.sort((a,b)=>b.roi-a.roi);
+
+// Regional
+const REG=REGIONS.map((r,i)=>({region:r,trx:[48500,41200,38700,44100,35800][i],nrx:[9800,7900,7200,8600,6800][i],share:[24.1,21.8,19.5,22.7,18.3][i],growth:[12.4,8.1,5.3,15.2,-1.8][i],calls:[1420,1180,1050,1340,980][i],reach:[78.5,72.1,65.8,81.2,58.4][i],freq:[4.2,3.8,3.5,4.5,3.1][i],coverage:[82,76,71,85,62][i]}));
+
+// Top HCPs (30)
+const HCPS=Array.from({length:30},(_,i)=>{
+  const names=["Smith","Johnson","Williams","Brown","Jones","Garcia","Miller","Davis","Rodriguez","Martinez","Hernandez","Lopez","Gonzalez","Wilson","Anderson","Thomas","Taylor","Moore","Jackson","Martin","Lee","Perez","Thompson","White","Harris","Sanchez","Clark","Ramirez","Lewis","Robinson"];
+  const seg=i<5?"Champion":i<12?"Growth Target":i<20?"Maintain":"Monitor";
+  return{id:i+1,name:`Dr. ${names[i]}`,spec:SPECS[i%5],region:REGIONS[i%5],decile:Math.max(1,10-Math.floor(i/3)),trx:Math.round(195-i*5.5+Math.random()*15),nrx:Math.round(52-i*1.5+Math.random()*8),share:+(32-i*.8+Math.random()*5).toFixed(1),calls:Math.round(10+Math.random()*8),lastCall:Math.round(2+Math.random()*28),trend:["↑","↑","→","↑","↓","↑","→","↑","↓","→"][i%10],segment:seg,potential:i<8?"High":i<18?"Medium":"Low",digitalPref:["Email","Rep Visit","Webinar","Email","Portal"][i%5],mslInteract:Math.round(Math.random()*4)};
+});
+
+// Hub Metrics
+const HUB={enrollment:MO.map((_,i)=>Math.round(1200*(1+.15*i/14)*(1+(Math.random()-.5)*.1))),
+  paApproval:MO.map((_,i)=>+(72+i*.5+Math.random()*3).toFixed(1)),
+  refToFill:MO.map((_,i)=>+(65+i*.8+Math.random()*4).toFixed(1)),
+  daysToFill:MO.map((_,i)=>+(12-i*.3+Math.random()*2).toFixed(1)),
+  copayAssist:MO.map((_,i)=>Math.round(800*(1+.12*i/14)*(1+(Math.random()-.5)*.08)))};
+
+// CRM/Field
+const CRM={totalCalls:MO.map((_,i)=>Math.round(5800*(1+.05*i/14)*(1+(Math.random()-.5)*.08))),
+  uniqueHCPs:MO.map((_,i)=>Math.round(2400*(1+.08*i/14)*(1+(Math.random()-.5)*.06))),
+  samples:MO.map((_,i)=>Math.round(18000*(1-.02*i/14)*(1+(Math.random()-.5)*.1))),
+  avgCallLen:MO.map((_,i)=>+(6.2+Math.random()*1.5).toFixed(1)),
+  rxPerCall:MO.map((_,i)=>+(1.8+i*.03+Math.random()*.3).toFixed(2)),
+  emailOpen:MO.map((_,i)=>+(22+i*.8+Math.random()*4).toFixed(1)),
+  webinarAtt:MO.map((_,i)=>Math.round(120+i*8+Math.random()*30)),
+  mslKol:MO.map((_,i)=>Math.round(85+i*3+Math.random()*15))};
+
+// Komodo Patient
+const KOM={funnel:{l:["Diagnosed HFrEF","Treated (any Rx)","On ARNI/SGLT2i","On CardioStabil XR","Hub Enrolled","PA Approved","Filled 1st Rx","Adherent (PDC≥80%)","Persistent (12mo)"],v:[850000,720000,410000,185000,142000,128000,118000,96000,78000]},
+  switchFrom:{"ACE Inhibitor":35,"ARB":28,"Other ARNI":18,"Diuretic Only":12,"New Start":7},
+  switchTo:{"HeartGuard Plus":22,"PulseFix 10":15,"Generic":38,"Discontinued":25},
+  adherence:MO.map((_,i)=>+(82-i*.25+Math.random()*2.5).toFixed(1)),
+  discontinue:{"Side Effects":32,"Cost":28,"Efficacy Concern":18,"Lost to Follow-up":15,"Switched":7}};
+
+// MMIT Payer
+const MMIT=PAYERS.map((p,i)=>({payer:p,lives:[145,98,52,38,22][i],trxShare:[38,32,12,10,8][i],status:["Preferred","Preferred","Non-Preferred","Preferred","N/A"][i],tier:["T2","T2","T3","T2","N/A"][i],copay:[35,47,5,8,285][i],pa:["No","No","Yes","Yes","No"][i],step:["No","No","Yes (ACEi first)","No","No"][i],ql:["No","90-day","30-day","No","No"][i],nbrTrend:[8.2,5.1,-1.2,3.4,12.5][i],rejRate:[8,12,28,15,0][i]}));
+
+// DDD Channel
+const DDD=CHANNELS.map((ch,i)=>({channel:ch,retail:[62,0,0,0,0,0,58,0][i],mail:[28,0,0,0,0,0,32,0][i],specialty:[10,0,0,0,0,0,10,0][i],total:[100,0,0,0,0,0,100,0][i],trend:[2.1,-0.5,8.4,3.2,-1.8,0.5,1.2,5.8][i],inventory:[22,0,0,0,0,0,18,0][i]}));
+
+// IPSOS
+const IPSOS={attr:["Efficacy","Safety","Ease of Use","Value","Clinical Data","Outcomes","Tolerability","Access"],
+  scores:{"CardioStabil XR":[82,74,78,65,85,80,76,71],"HeartGuard Plus":[78,80,72,60,76,75,82,68],"PulseFix 10":[70,76,80,72,68,70,78,75]}};
+
+/* ═══════════════════ APP ═══════════════════ */
+function App(){
+  const[pg,setPg]=useState("home");
+  const[tab,setTab]=useState("portfolio");
+  const[ai,setAi]=useState("");
+  const[aiL,setAiL]=useState(false);
+  const[key,setKey]=useState("");
+  const[showK,setShowK]=useState(false);
+  const[userData,setUserData]=useState(null);
+  const[uploadName,setUploadName]=useState("");
+  const R=useRef({});
+
+  // Styles
+  const C={bg:"rgba(12,18,35,0.85)",br:14,bd:"1px solid #1e2744"};
+  const cd={background:C.bg,borderRadius:C.br,border:C.bd,padding:18,backdropFilter:"blur(8px)"};
+  const bt=(c="#06b6d4",f)=>({padding:"8px 16px",borderRadius:8,border:"none",background:c,color:"#fff",cursor:"pointer",fontSize:12,fontWeight:700,width:f?"100%":"auto"});
+  const bg=(c)=>({display:"inline-block",padding:"2px 9px",borderRadius:14,fontSize:10,fontWeight:700,background:c+"18",color:c,border:"1px solid "+c+"35"});
+  const inp={padding:"8px 11px",borderRadius:6,border:"1px solid #2d3a5c",background:"#0f1629",color:"#e2e8f0",fontSize:12,width:"100%",outline:"none"};
+  const th={textAlign:"left",padding:"6px 8px",color:"#6b7280",fontSize:9,textTransform:"uppercase",letterSpacing:"1px",borderBottom:"1px solid #1e2744",whiteSpace:"nowrap"};
+  const td={padding:"6px 8px",borderBottom:"1px solid #111827",fontSize:11};
+  const tdf={...td,fontWeight:700};
+
+  const kpi=(v,l,d,c="#06b6d4")=>(<div style={{...cd,textAlign:"center",padding:12}}><div style={{fontSize:22,fontWeight:900,color:c}}>{v}</div><div style={{fontSize:9,color:"#6b7280",textTransform:"uppercase",letterSpacing:1,marginTop:2}}>{l}</div>{d!=null&&<div style={{fontSize:10,marginTop:2,color:d>=0?"#10b981":"#ef4444",fontWeight:700}}>{d>=0?"▲":"▼"}{Math.abs(d)}%</div>}</div>);
+
+  const callAI=async(p)=>{
+    if(!key){setShowK(true);return}setAiL(true);
+    try{const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1500,system:"You are a senior pharma commercial analytics VP. Provide concise, data-driven, actionable insights using pharma KPIs (TRx,NRx,NBRx,SOV,PDC,NPS). Format with bold headers and bullets.",messages:[{role:"user",content:p}]})});const d=await r.json();setAi(d.content?.[0]?.text||"Error")}catch(e){setAi("Error: "+e.message)}setAiL(false);
+  };
+
+  const handleUpload=(e)=>{
+    const f=e.target.files[0];if(!f)return;setUploadName(f.name);
+    Papa.parse(f,{header:true,skipEmptyLines:true,complete:(res)=>{setUserData(res.data);alert(`Loaded ${res.data.length} rows from ${f.name}`)}});
+  };
+
+  // Charts
+  useEffect(()=>{
+    if(pg!=="dash")return;
+    setTimeout(()=>{
+      if(tab==="brand"&&R.current.trx){
+        Plotly.newPlot(R.current.trx,BRANDS.map(b=>({x:MO,y:D.trx[b],name:b,type:"scatter",mode:"lines+markers",line:{width:b==="CardioStabil XR"?3:1.5,color:BC[b]},marker:{size:b==="CardioStabil XR"?5:3}})),{paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#6b7280",size:9},xaxis:{gridcolor:"#1e2744",tickangle:-45},yaxis:{gridcolor:"#1e2744",title:{text:"TRx",font:{size:10}}},margin:{t:8,b:55,l:50,r:8},legend:{orientation:"h",y:1.12,font:{size:8}},height:270},{responsive:true,displayModeBar:false});
+      }
+      if(tab==="brand"&&R.current.sh){
+        Plotly.newPlot(R.current.sh,BRANDS.filter(b=>b!=="Generic Enalapril").map(b=>({x:MO,y:D.share[b],name:b,type:"scatter",fill:"tonexty",line:{width:1.5,color:BC[b]}})),{paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#6b7280",size:9},xaxis:{gridcolor:"#1e2744",tickangle:-45},yaxis:{gridcolor:"#1e2744",title:{text:"Share %",font:{size:10}}},margin:{t:8,b:55,l:40,r:8},legend:{orientation:"h",y:1.12,font:{size:8}},height:270},{responsive:true,displayModeBar:false});
+      }
+      if(tab==="brand"&&R.current.nrx){
+        Plotly.newPlot(R.current.nrx,[{x:MO,y:D.nrx["CardioStabil XR"],name:"NRx",type:"bar",marker:{color:"#06b6d4"}},{x:MO,y:D.nbrx["CardioStabil XR"],name:"NBRx",type:"bar",marker:{color:"#8b5cf6"}}],{barmode:"group",paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#6b7280",size:9},xaxis:{gridcolor:"#1e2744",tickangle:-45},yaxis:{gridcolor:"#1e2744"},margin:{t:8,b:55,l:45,r:8},legend:{orientation:"h",y:1.1,font:{size:8}},height:260},{responsive:true,displayModeBar:false});
+      }
+      if(tab==="mmx"&&R.current.roi){
+        Plotly.newPlot(R.current.roi,[{y:CH_ROI.map(c=>c.ch),x:CH_ROI.map(c=>c.roi),type:"bar",orientation:"h",marker:{color:CH_ROI.map(c=>c.roi>4?"#10b981":c.roi>2?"#06b6d4":"#f59e0b")},text:CH_ROI.map(c=>c.roi+"x"),textposition:"outside"}],{paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#6b7280",size:9},xaxis:{gridcolor:"#1e2744",title:{text:"ROI",font:{size:10}}},yaxis:{gridcolor:"#1e2744"},margin:{t:8,b:35,l:100,r:40},height:280},{responsive:true,displayModeBar:false});
+      }
+      if(tab==="patient"&&R.current.fn){
+        Plotly.newPlot(R.current.fn,[{type:"funnel",y:KOM.funnel.l,x:KOM.funnel.v,textinfo:"value+percent initial",marker:{color:["#1e2744","#2d3a5c","#374151","#06b6d4","#0891b2","#0e7490","#10b981","#059669","#047857"]}}],{paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#6b7280",size:9},margin:{t:8,b:8,l:120,r:8},height:320},{responsive:true,displayModeBar:false});
+      }
+      if(tab==="patient"&&R.current.adh){
+        Plotly.newPlot(R.current.adh,[{x:MO,y:KOM.adherence,type:"scatter",mode:"lines+markers",fill:"tozeroy",line:{color:"#10b981",width:2},marker:{size:4}}],{paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#6b7280",size:9},xaxis:{gridcolor:"#1e2744",tickangle:-45},yaxis:{gridcolor:"#1e2744",range:[70,88],title:{text:"PDC %",font:{size:10}}},margin:{t:8,b:55,l:40,r:8},height:250},{responsive:true,displayModeBar:false});
+      }
+      if(tab==="hub"&&R.current.hub1){
+        Plotly.newPlot(R.current.hub1,[{x:MO,y:HUB.enrollment,name:"Enrollments",type:"bar",marker:{color:"#06b6d4"}},{x:MO,y:HUB.copayAssist,name:"Copay Assist",type:"bar",marker:{color:"#8b5cf6"}}],{barmode:"group",paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#6b7280",size:9},xaxis:{gridcolor:"#1e2744",tickangle:-45},yaxis:{gridcolor:"#1e2744"},margin:{t:8,b:55,l:45,r:8},legend:{orientation:"h",y:1.1,font:{size:8}},height:260},{responsive:true,displayModeBar:false});
+      }
+      if(tab==="hub"&&R.current.hub2){
+        Plotly.newPlot(R.current.hub2,[{x:MO,y:HUB.paApproval,name:"PA Approval %",type:"scatter",mode:"lines+markers",line:{color:"#10b981"}},{x:MO,y:HUB.refToFill,name:"Ref-to-Fill %",type:"scatter",mode:"lines+markers",line:{color:"#f59e0b"}}],{paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#6b7280",size:9},xaxis:{gridcolor:"#1e2744",tickangle:-45},yaxis:{gridcolor:"#1e2744",range:[50,95]},margin:{t:8,b:55,l:40,r:8},legend:{orientation:"h",y:1.1,font:{size:8}},height:260},{responsive:true,displayModeBar:false});
+      }
+      if(tab==="crm"&&R.current.crm1){
+        Plotly.newPlot(R.current.crm1,[{x:MO,y:CRM.totalCalls,name:"Total Calls",type:"bar",marker:{color:"#06b6d4"}},{x:MO,y:CRM.uniqueHCPs,name:"Unique HCPs",type:"bar",marker:{color:"#8b5cf6"}}],{barmode:"group",paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#6b7280",size:9},xaxis:{gridcolor:"#1e2744",tickangle:-45},yaxis:{gridcolor:"#1e2744"},margin:{t:8,b:55,l:50,r:8},legend:{orientation:"h",y:1.1,font:{size:8}},height:250},{responsive:true,displayModeBar:false});
+      }
+      if(tab==="crm"&&R.current.crm2){
+        Plotly.newPlot(R.current.crm2,[{x:MO,y:CRM.rxPerCall,name:"Rx/Call",type:"scatter",mode:"lines+markers",line:{color:"#10b981",width:2},yaxis:"y"},{x:MO,y:CRM.emailOpen,name:"Email Open %",type:"scatter",mode:"lines+markers",line:{color:"#f59e0b",width:2},yaxis:"y2"}],{paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{color:"#6b7280",size:9},xaxis:{gridcolor:"#1e2744",tickangle:-45},yaxis:{gridcolor:"#1e2744",title:{text:"Rx/Call",font:{size:10}},side:"left"},yaxis2:{overlaying:"y",side:"right",title:{text:"Email Open %",font:{size:10}},gridcolor:"transparent"},margin:{t:8,b:55,l:45,r:45},legend:{orientation:"h",y:1.1,font:{size:8}},height:250},{responsive:true,displayModeBar:false});
+      }
+      if(tab==="perception"&&R.current.radar){
+        Plotly.newPlot(R.current.radar,Object.keys(IPSOS.scores).map(b=>({type:"scatterpolar",r:[...IPSOS.scores[b],IPSOS.scores[b][0]],theta:[...IPSOS.attr,IPSOS.attr[0]],fill:"toself",name:b,line:{color:BC[b]},opacity:.7})),{polar:{radialaxis:{visible:true,range:[0,100],gridcolor:"#1e2744"},angularaxis:{gridcolor:"#1e2744"}},paper_bgcolor:"rgba(0,0,0,0)",font:{color:"#6b7280",size:8},legend:{orientation:"h",y:-.1,font:{size:8}},margin:{t:25,b:25,l:35,r:35},height:300},{responsive:true,displayModeBar:false});
+      }
+    },200);
+  },[pg,tab]);
+
+  /* ═══ TABS ═══ */
+  const TABS=[
+    {id:"portfolio",l:"🏢 Portfolio",ic:"🏢"},
+    {id:"brand",l:"📊 Brand Rx",ic:"📊"},
+    {id:"mmx",l:"📈 Channel ROI",ic:"📈"},
+    {id:"field",l:"🗺️ Field/SFE",ic:"🗺️"},
+    {id:"hcp",l:"👨‍⚕️ Prescriber Seg",ic:"👨‍⚕️"},
+    {id:"patient",l:"🏥 Patient Journey",ic:"🏥"},
+    {id:"hub",l:"💊 Hub Metrics",ic:"💊"},
+    {id:"payer",l:"💳 Payer/MMIT",ic:"💳"},
+    {id:"crm",l:"📱 CRM/Digital",ic:"📱"},
+    {id:"perception",l:"🔬 Perception",ic:"🔬"},
+    {id:"upload",l:"📁 Data Upload",ic:"📁"},
+  ];
+
+  /* ═══ HOME ═══ */
+  const Home=()=>(
+    <div style={{maxWidth:960,margin:"0 auto",padding:"40px 20px",textAlign:"center"}} className="fu">
+      <div style={{fontSize:11,color:"#06b6d4",fontWeight:800,letterSpacing:3,marginBottom:6}}>PHARMA COMMERCIAL INTELLIGENCE PLATFORM</div>
+      <h1 style={{fontSize:48,fontWeight:900,background:"linear-gradient(135deg,#06b6d4,#3b82f6,#8b5cf6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",lineHeight:1.1,marginBottom:14}}>BrandIQ Analytics</h1>
+      <p style={{color:"#6b7280",fontSize:14,maxWidth:560,margin:"0 auto 28px"}}>End-to-end marketing analytics: Portfolio KPIs, Rx Analysis, Marketing Mix, Field Optimization, Prescriber Segmentation, Patient Journey, Hub Operations, Payer Access, CRM Intelligence.</p>
+      <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap",marginBottom:32}}>
+        <button onClick={()=>setPg("dash")} style={{...bt("#06b6d4"),padding:"13px 28px",fontSize:14}} className="glow">🚀 Launch Dashboard</button>
+        <button onClick={()=>setShowK(true)} style={bt(key?"#10b981":"#374151")}>{key?"🔑 Key Set":"🔑 Set API Key"}</button>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:10,maxWidth:900,margin:"0 auto"}}>
+        {[{i:"📊",t:"IQVIA NPA",d:"TRx/NRx/NBRx"},{i:"🔬",t:"IPSOS",d:"HCP Perception"},{i:"💊",t:"Healthplix",d:"Digital eRx"},{i:"🏥",t:"Komodo",d:"Patient Claims"},{i:"💳",t:"MMIT",d:"Payer Access"}].map((s,i)=>(
+          <div key={i} style={{...cd,textAlign:"center",padding:14}} className="fu"><div style={{fontSize:22}}>{s.i}</div><div style={{fontSize:11,fontWeight:700,marginTop:4}}>{s.t}</div><div style={{fontSize:9,color:"#4b5563",marginTop:2}}>{s.d}</div></div>
+        ))}
+      </div>
+    </div>
+  );
+
+  /* ═══ DASHBOARD ═══ */
+  const Dash=()=>{
+    const lt=D.trx["CardioStabil XR"].slice(-1)[0],pt=D.trx["CardioStabil XR"].slice(-2)[0];
+    const ls=D.share["CardioStabil XR"].slice(-1)[0];
+    const ln=D.nbrx["CardioStabil XR"].slice(-1)[0],pn=D.nbrx["CardioStabil XR"].slice(-2)[0];
+    return(
+    <div style={{maxWidth:1350,margin:"0 auto",padding:"12px 16px"}} className="fu">
+      {/* Header */}
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+        <div><h2 style={{fontSize:18,fontWeight:800,margin:0}}>Commercial Intelligence Dashboard</h2><span style={{fontSize:10,color:"#4b5563"}}>Jan 2024 – Mar 2025 | IQVIA • IPSOS • Healthplix • Komodo • MMIT</span></div>
+        <div style={{display:"flex",gap:6}}>
+          <button onClick={()=>callAI(`Portfolio summary for 5 brands: ${PORTFOLIO.map(p=>p.brand+": TRx="+p.trx+", Share="+p.share+"%, YoY="+p.yoy+"%").join("; ")}. Top channel ROI: ${CH_ROI[0].ch}=${CH_ROI[0].roi}x. Hub PA approval=${HUB.paApproval.slice(-1)[0]}%. PDC adherence=${KOM.adherence.slice(-1)[0]}%. Provide: 1)Portfolio Summary 2)Top Growth Opportunities 3)Risk Alerts 4)Budget Actions 5)Field Force Priorities`)} disabled={aiL} style={bt("#8b5cf6")}>{aiL?"⏳...":"🤖 AI Insights"}</button>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div style={{display:"flex",gap:3,marginBottom:10,overflowX:"auto",paddingBottom:4}}>
+        {TABS.map(t=><button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"6px 12px",borderRadius:6,border:"none",background:tab===t.id?"#06b6d4":"transparent",color:tab===t.id?"#fff":"#6b7280",cursor:"pointer",fontSize:11,fontWeight:600,whiteSpace:"nowrap"}}>{t.l}</button>)}
+      </div>
+
+      {/* ── PORTFOLIO ── */}
+      {tab==="portfolio"&&(<div className="fu">
+        <div style={{...cd,overflowX:"auto"}}>
+          <h4 style={{fontSize:13,color:"#9ca3af",margin:"0 0 10px"}}>Total Portfolio Performance — All Brands</h4>
+          <table style={{width:"100%",borderCollapse:"separate",borderSpacing:"0 3px",fontSize:11}}>
+            <thead><tr>{["Brand","TA","Stage","TRx","Share%","YoY%","NPS","12mo Persist%","Digital Idx","Payer Access%","SOM Rank","Avg Price","Speaker Cov%","Awareness%"].map(h=><th key={h} style={th}>{h}</th>)}</tr></thead>
+            <tbody>{PORTFOLIO.map((p,i)=><tr key={i}>
+              <td style={tdf}>{p.brand}</td><td style={td}>{p.ta}</td>
+              <td style={td}><span style={bg(p.stage==="Launch"?"#f59e0b":p.stage==="Growth"?"#10b981":"#06b6d4")}>{p.stage}</span></td>
+              <td style={tdf}>{p.trx.toLocaleString()}</td>
+              <td style={td}>{p.share}%</td>
+              <td style={{...td,color:p.yoy>0?"#10b981":"#ef4444",fontWeight:700}}>{p.yoy>0?"+":""}{p.yoy}%</td>
+              <td style={td}><span style={bg(p.nps>=75?"#10b981":p.nps>=60?"#f59e0b":"#ef4444")}>{p.nps}</span></td>
+              <td style={td}>{p.persist}%</td>
+              <td style={td}>{p.digitalIdx}/10</td>
+              <td style={td}>{p.payerAccess}%</td>
+              <td style={td}>#{p.somRank}</td>
+              <td style={td}>${p.avgPrice}</td>
+              <td style={td}>{p.speakerCov}%</td>
+              <td style={td}>{p.awareness}%</td>
+            </tr>)}</tbody>
+          </table>
+        </div>
+      </div>)}
+
+      {/* ── BRAND Rx ── */}
+      {tab==="brand"&&(<div className="fu">
+        <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8,marginBottom:10}}>
+          {kpi(lt.toLocaleString(),"TRx Latest",+((lt-pt)/pt*100).toFixed(1),"#06b6d4")}
+          {kpi(ls+"%","Mkt Share",+(ls-D.share["CardioStabil XR"][0]).toFixed(1),"#3b82f6")}
+          {kpi(ln.toLocaleString(),"NBRx",+((ln-pn)/pn*100).toFixed(1),"#8b5cf6")}
+          {kpi(CH_ROI[0].roi+"x","Top ROI",null,"#10b981")}
+          {kpi(KOM.adherence.slice(-1)[0]+"%","PDC",+(KOM.adherence.slice(-1)[0]-KOM.adherence[0]).toFixed(1),"#f59e0b")}
+          {kpi(CRM.mslKol.slice(-1)[0],"MSL-KOL",+((CRM.mslKol.slice(-1)[0]-CRM.mslKol[0])/CRM.mslKol[0]*100).toFixed(0),"#ec4899")}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          <div style={cd}><h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 6px"}}>TRx Trend — All Brands (IQVIA NPA)</h4><div ref={el=>R.current.trx=el}/></div>
+          <div style={cd}><h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 6px"}}>Branded Market Share</h4><div ref={el=>R.current.sh=el}/></div>
+          <div style={{...cd,gridColumn:"1/3"}}><h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 6px"}}>NRx vs NBRx — CardioStabil XR</h4><div ref={el=>R.current.nrx=el}/></div>
+        </div>
+      </div>)}
+
+      {/* ── CHANNEL ROI ── */}
+      {tab==="mmx"&&(<div className="fu">
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          <div style={{...cd,gridColumn:"1/3"}}><h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 6px"}}>Channel ROI — Marketing Mix Model</h4><div ref={el=>R.current.roi=el}/></div>
+          <div style={cd}>
+            <h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 8px"}}>Channel Investment & Saturation</h4>
+            <table style={{width:"100%",fontSize:10,borderCollapse:"separate",borderSpacing:"0 2px"}}>
+              <thead><tr>{["Channel","Spend","Incr TRx","ROI","Sat%","Curve"].map(h=><th key={h} style={th}>{h}</th>)}</tr></thead>
+              <tbody>{CH_ROI.map((c,i)=><tr key={i}>
+                <td style={tdf}>{c.ch}</td><td style={td}>${(c.spend/1e6).toFixed(1)}M</td><td style={td}>{c.incTrx.toLocaleString()}</td>
+                <td style={td}><span style={bg(c.roi>4?"#10b981":c.roi>2?"#06b6d4":"#f59e0b")}>{c.roi}x</span></td>
+                <td style={td}><div style={{width:60,height:5,borderRadius:3,background:"#1e2744",display:"inline-block",verticalAlign:"middle"}}><div style={{width:c.sat+"%",height:"100%",borderRadius:3,background:c.sat>70?"#ef4444":c.sat>50?"#f59e0b":"#10b981"}}/></div> {c.sat}%</td>
+                <td style={{...td,fontSize:9}}>{c.curve}</td>
+              </tr>)}</tbody>
+            </table>
+          </div>
+          <div style={cd}>
+            <h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 8px"}}>Budget Optimization Actions</h4>
+            <div style={{fontSize:11,lineHeight:1.7}}>
+              <div style={{padding:8,background:"#064e3b22",borderRadius:6,border:"1px solid #064e3b44",marginBottom:6}}>✅ <b>Increase:</b> Email/Digital (7.16x ROI, only 38% saturated)</div>
+              <div style={{padding:8,background:"#064e3b22",borderRadius:6,border:"1px solid #064e3b44",marginBottom:6}}>✅ <b>Increase:</b> Samples (5.24x ROI, 68% — room to grow)</div>
+              <div style={{padding:8,background:"#7c2d1222",borderRadius:6,border:"1px solid #7c2d1244",marginBottom:6}}>⚠️ <b>Optimize:</b> DTC TV (2.04x ROI, 85% saturated)</div>
+              <div style={{padding:8,background:"#1e2744",borderRadius:6}}>💡 Reallocate 15% of DTC budget → Digital for projected +5-8% incr. TRx</div>
+            </div>
+          </div>
+        </div>
+      </div>)}
+
+      {/* ── FIELD/SFE ── */}
+      {tab==="field"&&(<div className="fu">
+        <div style={cd}>
+          <h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 8px"}}>Sales Force Effectiveness by Region</h4>
+          <table style={{width:"100%",fontSize:11,borderCollapse:"separate",borderSpacing:"0 3px"}}>
+            <thead><tr>{["Region","TRx","NRx","Share%","YoY Growth","Total Calls","Reach%","Frequency","HCP Coverage%"].map(h=><th key={h} style={th}>{h}</th>)}</tr></thead>
+            <tbody>{REG.map((r,i)=><tr key={i}>
+              <td style={tdf}>{r.region}</td><td style={tdf}>{r.trx.toLocaleString()}</td><td style={td}>{r.nrx.toLocaleString()}</td>
+              <td style={td}>{r.share}%</td>
+              <td style={{...td,color:r.growth>0?"#10b981":"#ef4444",fontWeight:700}}>{r.growth>0?"+":""}{r.growth}%</td>
+              <td style={td}>{r.calls.toLocaleString()}</td>
+              <td style={td}><span style={bg(r.reach>75?"#10b981":r.reach>60?"#f59e0b":"#ef4444")}>{r.reach}%</span></td>
+              <td style={td}>{r.freq}x</td>
+              <td style={td}><span style={bg(r.coverage>75?"#10b981":r.coverage>60?"#f59e0b":"#ef4444")}>{r.coverage}%</span></td>
+            </tr>)}</tbody>
+          </table>
+        </div>
+      </div>)}
+
+      {/* ── PRESCRIBER SEGMENTATION ── */}
+      {tab==="hcp"&&(<div className="fu">
+        <div style={cd}>
+          <h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 8px"}}>Prescriber Segmentation & Targeting — Top 30 HCPs</h4>
+          <div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",fontSize:10,borderCollapse:"separate",borderSpacing:"0 2px"}}>
+            <thead><tr>{["#","HCP","Spec","Region","Dec","Segment","Potential","TRx","NRx","Share%","Calls","Last","Trend","Dig Pref","MSL"].map(h=><th key={h} style={th}>{h}</th>)}</tr></thead>
+            <tbody>{HCPS.map((h,i)=><tr key={i} style={{background:h.segment==="Champion"?"rgba(6,182,212,.04)":"transparent"}}>
+              <td style={td}>{h.id}</td><td style={tdf}>{h.name}</td><td style={td}>{h.spec}</td><td style={td}>{h.region}</td>
+              <td style={td}><span style={bg(h.decile>=8?"#10b981":h.decile>=5?"#06b6d4":"#6b7280")}>D{h.decile}</span></td>
+              <td style={td}><span style={bg(h.segment==="Champion"?"#10b981":h.segment==="Growth Target"?"#06b6d4":h.segment==="Maintain"?"#f59e0b":"#6b7280")}>{h.segment}</span></td>
+              <td style={td}><span style={bg(h.potential==="High"?"#10b981":h.potential==="Medium"?"#f59e0b":"#6b7280")}>{h.potential}</span></td>
+              <td style={tdf}>{h.trx}</td><td style={td}>{h.nrx}</td><td style={td}>{h.share}%</td>
+              <td style={td}>{h.calls}</td><td style={td}>{h.lastCall}d</td>
+              <td style={{...td,color:h.trend==="↑"?"#10b981":h.trend==="↓"?"#ef4444":"#6b7280",fontSize:13}}>{h.trend}</td>
+              <td style={td}>{h.digitalPref}</td><td style={td}>{h.mslInteract}</td>
+            </tr>)}</tbody>
+          </table></div>
+        </div>
+      </div>)}
+
+      {/* ── PATIENT JOURNEY ── */}
+      {tab==="patient"&&(<div className="fu">
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          <div style={cd}><h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 6px"}}>Patient Journey Funnel (Komodo)</h4><div ref={el=>R.current.fn=el}/></div>
+          <div style={cd}><h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 6px"}}>Adherence Trend (PDC ≥80%)</h4><div ref={el=>R.current.adh=el}/></div>
+          <div style={cd}>
+            <h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 8px"}}>Source of Switch (Into CardioStabil XR)</h4>
+            <table style={{width:"100%",fontSize:11,borderCollapse:"separate",borderSpacing:"0 2px"}}>
+              <tbody>{Object.entries(KOM.switchFrom).map(([k,v],i)=><tr key={i}><td style={tdf}>{k}</td><td style={td}>{v}%</td>
+                <td style={td}><div style={{width:"100%",height:8,borderRadius:4,background:"#1e2744"}}><div style={{width:v+"%",height:"100%",borderRadius:4,background:"#06b6d4"}}/></div></td>
+              </tr>)}</tbody>
+            </table>
+          </div>
+          <div style={cd}>
+            <h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 8px"}}>Discontinuation Reasons</h4>
+            <table style={{width:"100%",fontSize:11,borderCollapse:"separate",borderSpacing:"0 2px"}}>
+              <tbody>{Object.entries(KOM.discontinue).map(([k,v],i)=><tr key={i}><td style={tdf}>{k}</td><td style={td}>{v}%</td>
+                <td style={td}><div style={{width:"100%",height:8,borderRadius:4,background:"#1e2744"}}><div style={{width:v+"%",height:"100%",borderRadius:4,background:v>25?"#ef4444":"#f59e0b"}}/></div></td>
+              </tr>)}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>)}
+
+      {/* ── HUB METRICS ── */}
+      {tab==="hub"&&(<div className="fu">
+        <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8,marginBottom:10}}>
+          {kpi(HUB.enrollment.slice(-1)[0].toLocaleString(),"Hub Enrollments",+((HUB.enrollment.slice(-1)[0]-HUB.enrollment[0])/HUB.enrollment[0]*100).toFixed(0),"#06b6d4")}
+          {kpi(HUB.paApproval.slice(-1)[0]+"%","PA Approval",+(HUB.paApproval.slice(-1)[0]-HUB.paApproval[0]).toFixed(1),"#10b981")}
+          {kpi(HUB.refToFill.slice(-1)[0]+"%","Ref-to-Fill",+(HUB.refToFill.slice(-1)[0]-HUB.refToFill[0]).toFixed(1),"#f59e0b")}
+          {kpi(HUB.daysToFill.slice(-1)[0],"Avg Days to Fill",+(HUB.daysToFill.slice(-1)[0]-HUB.daysToFill[0]).toFixed(1),"#8b5cf6")}
+          {kpi(HUB.copayAssist.slice(-1)[0].toLocaleString(),"Copay Assists",+((HUB.copayAssist.slice(-1)[0]-HUB.copayAssist[0])/HUB.copayAssist[0]*100).toFixed(0),"#ec4899")}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          <div style={cd}><h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 6px"}}>Hub Enrollments & Copay Assists</h4><div ref={el=>R.current.hub1=el}/></div>
+          <div style={cd}><h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 6px"}}>PA Approval Rate & Referral-to-Fill</h4><div ref={el=>R.current.hub2=el}/></div>
+        </div>
+      </div>)}
+
+      {/* ── PAYER / MMIT ── */}
+      {tab==="payer"&&(<div className="fu">
+        <div style={cd}>
+          <h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 8px"}}>Payer Mix & Market Access — MMIT Data</h4>
+          <table style={{width:"100%",fontSize:11,borderCollapse:"separate",borderSpacing:"0 3px"}}>
+            <thead><tr>{["Payer","Lives (M)","TRx Share","Status","Tier","Copay","PA","Step Therapy","Qty Limit","NBRx Growth","Rej Rate"].map(h=><th key={h} style={th}>{h}</th>)}</tr></thead>
+            <tbody>{MMIT.map((m,i)=><tr key={i}>
+              <td style={tdf}>{m.payer}</td><td style={td}>{m.lives}M</td><td style={td}>{m.trxShare}%</td>
+              <td style={td}><span style={bg(m.status==="Preferred"?"#10b981":m.status==="Non-Preferred"?"#f59e0b":"#6b7280")}>{m.status}</span></td>
+              <td style={td}>{m.tier}</td><td style={td}>${m.copay}</td>
+              <td style={td}><span style={bg(m.pa==="Yes"?"#ef4444":"#10b981")}>{m.pa}</span></td>
+              <td style={td}>{m.step}</td><td style={td}>{m.ql}</td>
+              <td style={{...td,color:m.nbrTrend>0?"#10b981":"#ef4444",fontWeight:700}}>{m.nbrTrend>0?"+":""}{m.nbrTrend}%</td>
+              <td style={td}><span style={bg(m.rejRate>20?"#ef4444":m.rejRate>10?"#f59e0b":"#10b981")}>{m.rejRate}%</span></td>
+            </tr>)}</tbody>
+          </table>
+        </div>
+      </div>)}
+
+      {/* ── CRM / DIGITAL ── */}
+      {tab==="crm"&&(<div className="fu">
+        <div style={{display:"grid",gridTemplateColumns:"repeat(6,1fr)",gap:8,marginBottom:10}}>
+          {kpi(CRM.totalCalls.slice(-1)[0].toLocaleString(),"Total Calls",null,"#06b6d4")}
+          {kpi(CRM.uniqueHCPs.slice(-1)[0].toLocaleString(),"Unique HCPs",null,"#3b82f6")}
+          {kpi(CRM.rxPerCall.slice(-1)[0],"Rx/Call",null,"#10b981")}
+          {kpi(CRM.emailOpen.slice(-1)[0]+"%","Email Open",null,"#f59e0b")}
+          {kpi(CRM.webinarAtt.slice(-1)[0],"Webinar Att",null,"#8b5cf6")}
+          {kpi(CRM.mslKol.slice(-1)[0],"MSL-KOL",null,"#ec4899")}
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          <div style={cd}><h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 6px"}}>Field Activity — Calls & Reach</h4><div ref={el=>R.current.crm1=el}/></div>
+          <div style={cd}><h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 6px"}}>Rx/Call & Email Open Rate</h4><div ref={el=>R.current.crm2=el}/></div>
+        </div>
+      </div>)}
+
+      {/* ── PERCEPTION ── */}
+      {tab==="perception"&&(<div className="fu">
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          <div style={cd}><h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 6px"}}>HCP Brand Perception — IPSOS</h4><div ref={el=>R.current.radar=el}/></div>
+          <div style={cd}>
+            <h4 style={{fontSize:12,color:"#6b7280",margin:"0 0 8px"}}>Attribute Scores</h4>
+            <table style={{width:"100%",fontSize:11,borderCollapse:"separate",borderSpacing:"0 2px"}}>
+              <thead><tr><th style={th}>Attribute</th>{Object.keys(IPSOS.scores).map(b=><th key={b} style={{...th,color:BC[b],textAlign:"center"}}>{b}</th>)}</tr></thead>
+              <tbody>{IPSOS.attr.map((a,i)=><tr key={i}><td style={tdf}>{a}</td>
+                {Object.keys(IPSOS.scores).map(b=>{const v=IPSOS.scores[b][i];const best=Math.max(...Object.values(IPSOS.scores).map(s=>s[i]));
+                  return <td key={b} style={{...td,textAlign:"center",fontWeight:v===best?800:400,color:v===best?"#10b981":"#d1d5db"}}>{v}</td>})}
+              </tr>)}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>)}
+
+      {/* ── DATA UPLOAD ── */}
+      {tab==="upload"&&(<div className="fu">
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+          <div style={cd}>
+            <h4 style={{fontSize:13,color:"#e2e8f0",margin:"0 0 12px"}}>📁 Upload External Data</h4>
+            <p style={{fontSize:11,color:"#6b7280",marginBottom:14}}>Upload CSV files from IQVIA, IPSOS, Healthplix, Komodo, MMIT, CRM, or any pharma data source. The platform will auto-detect columns and visualize.</p>
+            <input type="file" accept=".csv,.tsv,.txt,.xlsx" onChange={handleUpload} style={{...inp,padding:"10px",marginBottom:10}}/>
+            <div style={{fontSize:10,color:"#4b5563"}}>Supported: CSV, TSV, TXT (comma/tab delimited)</div>
+            {uploadName&&<div style={{marginTop:10,padding:8,background:"#064e3b22",borderRadius:6,border:"1px solid #064e3b44",fontSize:11,color:"#10b981"}}>✅ Loaded: {uploadName} ({userData?.length} rows)</div>}
+            <div style={{marginTop:16,borderTop:"1px solid #1e2744",paddingTop:14}}>
+              <div style={{fontSize:12,color:"#9ca3af",fontWeight:600,marginBottom:8}}>Expected Column Headers (any combination):</div>
+              <div style={{fontSize:10,color:"#6b7280",lineHeight:1.8}}>
+                <b>Rx Data:</b> date, product, trx, nrx, nbrx, market_share, region, territory<br/>
+                <b>HCP Data:</b> hcp_name, specialty, decile, trx, nrx, calls, segment<br/>
+                <b>Patient Data:</b> patient_id, diagnosis, treatment, adherence, switch_from<br/>
+                <b>Channel Data:</b> channel, spend, impressions, clicks, conversions, roi<br/>
+                <b>Payer Data:</b> payer, formulary_status, copay, pa_required, lives<br/>
+                <b>CRM Data:</b> rep_id, hcp_id, call_date, call_type, samples, details
+              </div>
+            </div>
+          </div>
+          <div style={cd}>
+            <h4 style={{fontSize:13,color:"#e2e8f0",margin:"0 0 12px"}}>📋 Uploaded Data Preview</h4>
+            {userData?(
+              <div style={{overflowX:"auto",maxHeight:400,overflow:"auto"}}>
+                <table style={{width:"100%",fontSize:10,borderCollapse:"separate",borderSpacing:"0 1px"}}>
+                  <thead><tr>{Object.keys(userData[0]||{}).map(h=><th key={h} style={th}>{h}</th>)}</tr></thead>
+                  <tbody>{userData.slice(0,50).map((r,i)=><tr key={i}>{Object.values(r).map((v,j)=><td key={j} style={td}>{String(v).substring(0,30)}</td>)}</tr>)}</tbody>
+                </table>
+                {userData.length>50&&<div style={{fontSize:10,color:"#4b5563",marginTop:6}}>Showing 50 of {userData.length} rows</div>}
+              </div>
+            ):<div style={{textAlign:"center",padding:40,color:"#4b5563"}}>No data uploaded yet</div>}
+          </div>
+        </div>
+      </div>)}
+
+      {/* AI Insight */}
+      {ai&&<div style={{...cd,marginTop:10,border:"1px solid #8b5cf633"}}><h4 style={{fontSize:13,color:"#8b5cf6",margin:"0 0 8px"}}>🤖 AI Executive Insights</h4><div style={{whiteSpace:"pre-wrap",fontSize:11,lineHeight:1.7,color:"#d1d5db",background:"#0a0f1a",padding:16,borderRadius:8}}>{ai}</div></div>}
+    </div>);
+  };
+
+  /* ═══ RENDER ═══ */
+  return(<div style={{minHeight:"100vh"}}>
+    <nav style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"10px 18px",borderBottom:"1px solid #1e2744",background:"rgba(6,10,19,0.95)",backdropFilter:"blur(10px)",position:"sticky",top:0,zIndex:50}}>
+      <div style={{display:"flex",alignItems:"center",gap:8}}>
+        <span style={{fontSize:18}}>💊</span>
+        <span style={{fontSize:16,fontWeight:900,background:"linear-gradient(135deg,#06b6d4,#3b82f6)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>BrandIQ Analytics</span>
+        <span style={{fontSize:8,color:"#374151"}}>ENTERPRISE</span>
+      </div>
+      <div style={{display:"flex",gap:4}}>
+        <button onClick={()=>setPg("home")} style={{padding:"5px 12px",borderRadius:6,border:"none",background:pg==="home"?"#06b6d4":"transparent",color:pg==="home"?"#fff":"#6b7280",cursor:"pointer",fontSize:11,fontWeight:600}}>🏠 Home</button>
+        <button onClick={()=>setPg("dash")} style={{padding:"5px 12px",borderRadius:6,border:"none",background:pg==="dash"?"#06b6d4":"transparent",color:pg==="dash"?"#fff":"#6b7280",cursor:"pointer",fontSize:11,fontWeight:600}}>📊 Dashboard</button>
+      </div>
+    </nav>
+    {pg==="home"&&<Home/>}{pg==="dash"&&<Dash/>}
+    <footer style={{textAlign:"center",padding:"12px",borderTop:"1px solid #1e2744",marginTop:24}}><div style={{fontSize:9,color:"#2d3a5c"}}>BrandIQ Analytics Enterprise — IQVIA • IPSOS • Healthplix • Komodo • MMIT • Veeva CRM</div></footer>
+    {showK&&<div style={{position:"fixed",inset:0,background:"rgba(0,0,0,.85)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200}}><div style={{...cd,maxWidth:420,width:"90%",padding:22}} className="fu"><h3 style={{margin:"0 0 6px",fontSize:15}}>🔑 API Key</h3><p style={{fontSize:11,color:"#4b5563",marginBottom:12}}>For AI Insights. Stays in browser only.</p><input type="password" placeholder="sk-ant-..." value={key} onChange={e=>setKey(e.target.value)} style={{...inp,marginBottom:10}}/><div style={{display:"flex",gap:6,justifyContent:"flex-end"}}><button onClick={()=>setShowK(false)} style={bt("#374151")}>Cancel</button><button onClick={()=>{if(key.trim())setShowK(false)}} style={bt("#10b981")}>Save</button></div></div></div>}
+  </div>);
+}
+
+ReactDOM.render(<App/>,document.getElementById("root"));
+</script>
+</body>
+</html>
