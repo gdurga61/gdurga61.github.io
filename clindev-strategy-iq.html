@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClinDev Strategy IQ — Pharma R&D Clinical Development Strategy Platform</title>
+<meta name="description" content="AI-powered Pharma R&D and Clinical Development Strategy platform. Trial feasibility, protocol optimization, portfolio strategy, regulatory pathway, R&D operating model diagnostic, and CDP architect.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050810;--bg2:#0a0f1c;--bg3:#111828;--bg4:#182038;--bdr:#1a2844;
+  --t1:#eaf0fa;--t2:#96a4be;--t3:#5d6e8c;
+  --blue:#3b7dff;--cyan:#00c9a7;--gold:#f0b429;--rose:#ff4d6d;
+  --violet:#8b5cf6;--green:#22c55e;--orange:#f97316;--red:#ef4444;
+  --f:'Inter',system-ui,sans-serif;--fd:'Fraunces',Georgia,serif;--fm:'JetBrains Mono',monospace
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--bg);color:var(--t1);overflow-x:hidden;min-height:100vh}
+a{color:var(--cyan);text-decoration:none}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:6px}
+button{font-family:var(--f);cursor:pointer;border:none}
+input,select{font-family:var(--f)}
+
+/* ---------- App layout ---------- */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.tb-brand{display:flex;align-items:center;gap:12px}
+.tb-logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff;letter-spacing:.5px}
+.tb-name{font-size:.95rem;font-weight:700;line-height:1.15}
+.tb-name .sub{display:block;font-size:.62rem;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.8px;margin-top:1px}
+.tb-actions{display:flex;gap:8px;align-items:center}
+.tb-btn{padding:6px 14px;border-radius:8px;font-size:.72rem;font-weight:600;background:var(--bg3);border:1px solid var(--bdr);color:var(--t2);transition:all .2s}
+.tb-btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.tb-btn.primary{background:linear-gradient(135deg,var(--cyan),#0a9e83);color:#fff;border-color:transparent}
+.tb-back{font-size:.7rem;color:var(--t2);padding:6px 12px;border-radius:8px;border:1px solid var(--bdr);background:transparent}
+.tb-back:hover{border-color:var(--cyan);color:var(--cyan)}
+
+/* ---------- Tabs ---------- */
+.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:14px 20px;font-size:.75rem;font-weight:600;color:var(--t2);background:transparent;border:none;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:8px}
+.tab:hover{color:var(--t1);background:rgba(255,255,255,.02)}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan);background:rgba(0,201,167,.05)}
+.tab-icon{font-size:1rem}
+.tab-num{font-size:.6rem;color:var(--t3);font-family:var(--fm);font-weight:500}
+.tab.active .tab-num{color:var(--cyan)}
+
+/* ---------- Module page ---------- */
+.module{display:none;padding:24px;max-width:1400px;margin:0 auto}
+.module.active{display:block}
+
+.mod-header{margin-bottom:24px}
+.mod-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;background:rgba(0,201,167,.1);color:var(--cyan);border:1px solid rgba(0,201,167,.2);margin-bottom:10px}
+.mod-title{font-family:var(--fd);font-size:1.9rem;font-weight:700;letter-spacing:-.6px;margin-bottom:6px}
+.mod-desc{font-size:.88rem;color:var(--t2);max-width:780px;line-height:1.55}
+
+/* ---------- Grid layouts ---------- */
+.grid-2{display:grid;grid-template-columns:1fr 2fr;gap:18px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid-12{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+@media(max-width:900px){
+  .grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .grid-12{grid-template-columns:1fr}
+}
+
+/* ---------- Cards ---------- */
+.card{background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:18px}
+.card.compact{padding:14px}
+.card-title{font-size:.82rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-title .lbl{display:flex;align-items:center;gap:8px}
+.card-title .ic{font-size:1rem}
+.card-sub{font-size:.7rem;color:var(--t2);margin-bottom:14px;line-height:1.5}
+
+/* ---------- KPI ---------- */
+.kpi{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px}
+.kpi-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);font-weight:600;margin-bottom:4px}
+.kpi-val{font-family:var(--fd);font-size:1.7rem;font-weight:700;line-height:1;color:var(--t1)}
+.kpi-val.cyan{color:var(--cyan)}
+.kpi-val.green{color:var(--green)}
+.kpi-val.gold{color:var(--gold)}
+.kpi-val.rose{color:var(--rose)}
+.kpi-val.violet{color:var(--violet)}
+.kpi-sub{font-size:.65rem;color:var(--t2);margin-top:4px}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;padding:2px 6px;border-radius:6px;font-weight:600;margin-top:4px}
+.kpi-trend.up{background:rgba(34,197,94,.1);color:var(--green)}
+.kpi-trend.down{background:rgba(239,68,68,.1);color:var(--red)}
+.kpi-trend.neutral{background:rgba(150,164,190,.1);color:var(--t2)}
+
+/* ---------- Form controls ---------- */
+.field{margin-bottom:14px}
+.field-lbl{font-size:.7rem;font-weight:600;color:var(--t2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.field-input,.field-select{width:100%;padding:9px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);font-size:.82rem;transition:border-color .2s}
+.field-input:focus,.field-select:focus{outline:none;border-color:var(--cyan)}
+.field-help{font-size:.62rem;color:var(--t3);margin-top:4px}
+.field-row{display:flex;gap:10px}
+.field-row .field{flex:1}
+
+.slider{width:100%;-webkit-appearance:none;height:4px;border-radius:4px;background:var(--bdr);outline:none}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--cyan);cursor:pointer;border:2px solid var(--bg3);box-shadow:0 0 0 2px var(--cyan)}
+.slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--cyan);cursor:pointer;border:2px solid var(--bg3)}
+.slider-val{font-family:var(--fm);font-size:.85rem;font-weight:600;color:var(--cyan);margin-left:8px}
+.slider-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.slider-row .label{font-size:.7rem;color:var(--t2);font-weight:600}
+
+.btn-run{width:100%;padding:11px;background:linear-gradient(135deg,var(--cyan),#0a9e83);color:#fff;border-radius:9px;font-weight:700;font-size:.82rem;transition:all .2s;margin-top:6px}
+.btn-run:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,201,167,.3)}
+.btn-run:disabled{opacity:.6;cursor:not-allowed;transform:none}
+
+/* ---------- Table ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:.75rem}
+.tbl th{text-align:left;padding:9px 10px;background:var(--bg2);color:var(--t2);font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bdr)}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(26,40,68,.4);color:var(--t1)}
+.tbl tr:hover td{background:rgba(0,201,167,.04)}
+.tbl .num{font-family:var(--fm);font-weight:500;text-align:right}
+.tbl .score-bar{display:inline-flex;align-items:center;gap:6px;width:100%}
+.tbl .bar{flex:1;height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;min-width:50px}
+.tbl .bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--cyan),var(--blue))}
+.tbl .tier{padding:2px 7px;border-radius:5px;font-size:.6rem;font-weight:700;text-transform:uppercase}
+.tier-1{background:rgba(34,197,94,.12);color:var(--green)}
+.tier-2{background:rgba(0,201,167,.12);color:var(--cyan)}
+.tier-3{background:rgba(240,180,41,.12);color:var(--gold)}
+.tier-4{background:rgba(239,68,68,.12);color:var(--red)}
+
+/* ---------- Insight box ---------- */
+.insight{background:linear-gradient(135deg,rgba(59,125,255,.08),rgba(0,201,167,.05));border:1px solid rgba(0,201,167,.2);border-radius:10px;padding:14px 16px;margin-top:14px}
+.insight-hd{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--cyan);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.insight-body{font-size:.78rem;color:var(--t1);line-height:1.6}
+.insight-body strong{color:var(--cyan);font-weight:600}
+.insight-body ul{margin:6px 0 0 18px}
+.insight-body li{margin-bottom:3px}
+
+.insight.warn{background:linear-gradient(135deg,rgba(240,180,41,.06),rgba(249,115,22,.04));border-color:rgba(240,180,41,.2)}
+.insight.warn .insight-hd{color:var(--gold)}
+.insight.warn .insight-body strong{color:var(--gold)}
+
+.insight.danger{background:linear-gradient(135deg,rgba(239,68,68,.06),rgba(255,77,109,.04));border-color:rgba(239,68,68,.2)}
+.insight.danger .insight-hd{color:var(--red)}
+.insight.danger .insight-body strong{color:var(--red)}
+
+/* ---------- Chart container ---------- */
+.chart-wrap{position:relative;height:260px;width:100%}
+.chart-wrap.tall{height:340px}
+.chart-wrap.short{height:200px}
+
+/* ---------- Pills / tags ---------- */
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:14px;font-size:.62rem;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--t2)}
+.pill-cyan{background:rgba(0,201,167,.1);color:var(--cyan);border-color:rgba(0,201,167,.25)}
+.pill-blue{background:rgba(59,125,255,.1);color:var(--blue);border-color:rgba(59,125,255,.25)}
+.pill-violet{background:rgba(139,92,246,.1);color:var(--violet);border-color:rgba(139,92,246,.25)}
+.pill-gold{background:rgba(240,180,41,.1);color:var(--gold);border-color:rgba(240,180,41,.25)}
+.pill-green{background:rgba(34,197,94,.1);color:var(--green);border-color:rgba(34,197,94,.25)}
+.pill-rose{background:rgba(255,77,109,.1);color:var(--rose);border-color:rgba(255,77,109,.25)}
+
+/* ---------- Score badge ---------- */
+.score{display:inline-flex;align-items:center;justify-content:center;width:46px;height:46px;border-radius:12px;font-family:var(--fd);font-size:1.05rem;font-weight:700}
+.score-hi{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.score-mid{background:rgba(240,180,41,.12);color:var(--gold);border:1px solid rgba(240,180,41,.3)}
+.score-lo{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+
+/* ---------- Heatmap ---------- */
+.heatmap{display:grid;grid-template-columns:160px repeat(6,1fr);gap:3px;font-size:.7rem}
+.hm-hd{padding:8px 6px;background:var(--bg2);color:var(--t2);font-weight:600;font-size:.62rem;text-transform:uppercase;letter-spacing:.4px;text-align:center;border-radius:5px}
+.hm-row-lbl{padding:8px 10px;background:var(--bg2);color:var(--t1);font-weight:600;font-size:.7rem;border-radius:5px;display:flex;align-items:center}
+.hm-cell{padding:8px 6px;text-align:center;font-weight:600;font-size:.72rem;border-radius:5px;color:#fff}
+
+/* ---------- Phase Gantt ---------- */
+.gantt{display:flex;flex-direction:column;gap:6px}
+.gantt-row{display:grid;grid-template-columns:130px 1fr 70px;gap:10px;align-items:center;font-size:.72rem}
+.gantt-lbl{color:var(--t2);font-weight:600}
+.gantt-track{height:22px;background:var(--bg2);border-radius:5px;position:relative;overflow:hidden}
+.gantt-bar{position:absolute;top:0;bottom:0;border-radius:5px;display:flex;align-items:center;padding:0 8px;font-size:.6rem;color:#fff;font-weight:700;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.gantt-mile{font-family:var(--fm);font-size:.7rem;color:var(--t2);font-weight:500;text-align:right}
+
+/* ---------- Radar wrap ---------- */
+.radar-wrap{position:relative;height:340px}
+
+/* ---------- Misc ---------- */
+.row-flex{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.spacer{height:14px}
+.divider{height:1px;background:var(--bdr);margin:18px 0}
+.center{text-align:center}
+.muted{color:var(--t3);font-size:.65rem}
+
+/* ---------- Sticky sidebar ---------- */
+@media(min-width:901px){
+  .sticky-side{position:sticky;top:120px;align-self:start}
+}
+
+/* ---------- Toast ---------- */
+.toast{position:fixed;top:80px;right:24px;background:var(--bg3);border:1px solid var(--cyan);border-radius:10px;padding:12px 18px;font-size:.78rem;color:var(--t1);box-shadow:0 12px 32px rgba(0,0,0,.4);transform:translateX(120%);transition:transform .3s;z-index:200;max-width:320px}
+.toast.show{transform:translateX(0)}
+</style>
+</head>
+<body>
+
+<!-- ===== Top bar ===== -->
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">CDS</div>
+    <div class="tb-name">
+      ClinDev Strategy IQ
+      <span class="sub">Pharma R&D · Clinical Development Strategy Platform</span>
+    </div>
+  </div>
+  <div class="tb-actions">
+    <a href="index.html" class="tb-back">← Portfolio</a>
+    <button class="tb-btn" onclick="loadDemoData()">📥 Load Demo Data</button>
+    <button class="tb-btn primary" onclick="exportReport()">📤 Export Report</button>
+  </div>
+</div>
+
+<!-- ===== Tab navigation ===== -->
+<div class="tabs">
+  <button class="tab active" data-tab="feasibility">
+    <span class="tab-icon">🌍</span>
+    <span class="tab-num">01</span>
+    Trial Feasibility AI
+  </button>
+  <button class="tab" data-tab="protocol">
+    <span class="tab-icon">📋</span>
+    <span class="tab-num">02</span>
+    Protocol Optimizer
+  </button>
+  <button class="tab" data-tab="portfolio">
+    <span class="tab-icon">🎯</span>
+    <span class="tab-num">03</span>
+    R&D Portfolio Strategy
+  </button>
+  <button class="tab" data-tab="regulatory">
+    <span class="tab-icon">⚖️</span>
+    <span class="tab-num">04</span>
+    Regulatory Pathway
+  </button>
+  <button class="tab" data-tab="opmodel">
+    <span class="tab-icon">🏗️</span>
+    <span class="tab-num">05</span>
+    R&D Operating Model
+  </button>
+  <button class="tab" data-tab="cdp">
+    <span class="tab-icon">🗺️</span>
+    <span class="tab-num">06</span>
+    CDP Architect
+  </button>
+</div>
+
+<!-- ===== Module 1: Clinical Trial Feasibility AI ===== -->
+<section class="module active" id="mod-feasibility">
+  <div class="mod-header">
+    <div class="mod-tag">⚙️ Module 01 · Clinical Trial Feasibility</div>
+    <h1 class="mod-title">Clinical Trial Feasibility AI</h1>
+    <p class="mod-desc">Country prioritization, site selection, and enrollment forecasting for global clinical trial design. Inputs flow into a multi-factor scoring engine weighing patient pool, regulatory speed, site experience, competitive density, and cost index.</p>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- ===== Inputs panel ===== -->
+    <div class="card sticky-side">
+      <div class="card-title"><span class="lbl"><span class="ic">🎛️</span> Trial Inputs</span></div>
+
+      <div class="field">
+        <label class="field-lbl">Indication / Therapeutic Area</label>
+        <select class="field-select" id="f-indication">
+          <option value="nsclc">NSCLC (Oncology)</option>
+          <option value="breast">HER2+ Breast Cancer (Oncology)</option>
+          <option value="ad">Alzheimer's Disease (CNS)</option>
+          <option value="ms">Multiple Sclerosis (CNS)</option>
+          <option value="ra">Rheumatoid Arthritis (Immunology)</option>
+          <option value="ibd">Inflammatory Bowel Disease (Immunology)</option>
+          <option value="t2d">Type 2 Diabetes (Cardiometabolic)</option>
+          <option value="hf">Heart Failure (Cardiometabolic)</option>
+          <option value="rare">Rare Disease (Pompe / SMA)</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="field-lbl">Phase</label>
+          <select class="field-select" id="f-phase">
+            <option value="1">Phase 1</option>
+            <option value="2" selected>Phase 2</option>
+            <option value="3">Phase 3</option>
+            <option value="4">Phase 4 / RWE</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-lbl">Design</label>
+          <select class="field-select" id="f-design">
+            <option value="rct">RCT (Open-label)</option>
+            <option value="rct-blind" selected>RCT (Blinded)</option>
+            <option value="single">Single-arm</option>
+            <option value="adaptive">Adaptive</option>
+            <option value="basket">Basket / Umbrella</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="slider-row">
+          <span class="label">Target Enrollment</span>
+          <span class="slider-val" id="f-enroll-v">450</span>
+        </div>
+        <input type="range" min="50" max="2000" step="50" value="450" class="slider" id="f-enroll" oninput="document.getElementById('f-enroll-v').textContent=this.value">
+      </div>
+
+      <div class="field">
+        <div class="slider-row">
+          <span class="label">I/E Criteria Strictness</span>
+          <span class="slider-val" id="f-strict-v">7</span>
+        </div>
+        <input type="range" min="1" max="10" step="1" value="7" class="slider" id="f-strict" oninput="document.getElementById('f-strict-v').textContent=this.value">
+      </div>
+
+      <div class="field">
+        <div class="slider-row">
+          <span class="label">Number of Sites</span>
+          <span class="slider-val" id="f-sites-v">35</span>
+        </div>
+        <input type="range" min="5" max="120" step="5" value="35" class="slider" id="f-sites" oninput="document.getElementById('f-sites-v').textContent=this.value">
+      </div>
+
+      <div class="field">
+        <label class="field-lbl">Comparator Available?</label>
+        <select class="field-select" id="f-comp">
+          <option value="placebo">Placebo</option>
+          <option value="soc" selected>Standard of Care</option>
+          <option value="active">Active Competitor</option>
+          <option value="none">None (Single-arm)</option>
+        </select>
+      </div>
+
+      <button class="btn-run" onclick="runFeasibility()">🚀 Run Feasibility Analysis</button>
+    </div>
+
+    <!-- ===== Outputs panel ===== -->
+    <div>
+      <!-- KPI strip -->
+      <div class="grid-4" style="margin-bottom:14px">
+        <div class="kpi">
+          <div class="kpi-lbl">Overall Feasibility</div>
+          <div class="kpi-val cyan" id="kpi-feas">72</div>
+          <div class="kpi-sub">out of 100</div>
+          <span class="kpi-trend up">▲ Moderate-High</span>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl">Time to FPI</div>
+          <div class="kpi-val gold" id="kpi-fpi">7.4</div>
+          <div class="kpi-sub">months (median)</div>
+          <span class="kpi-trend neutral">vs 8.2 benchmark</span>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl">Enrollment Duration</div>
+          <div class="kpi-val violet" id="kpi-enroll">16.8</div>
+          <div class="kpi-sub">months to LPI</div>
+          <span class="kpi-trend up">▲ -2.1 vs base</span>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl">Est. Total Cost</div>
+          <div class="kpi-val green" id="kpi-cost">$48.6M</div>
+          <div class="kpi-sub">trial budget</div>
+          <span class="kpi-trend neutral">±15% range</span>
+        </div>
+      </div>
+
+      <!-- Country prioritization heatmap -->
+      <div class="card">
+        <div class="card-title">
+          <span class="lbl"><span class="ic">🗺️</span> Country Prioritization Heatmap</span>
+          <span class="pill pill-cyan">8 countries scored</span>
+        </div>
+        <p class="card-sub">Multi-factor country scoring across 5 dimensions. Dark cells indicate stronger feasibility for the selected indication.</p>
+        <div class="heatmap" id="heatmap-countries">
+          <div class="hm-hd">Country</div>
+          <div class="hm-hd">Patient Pool</div>
+          <div class="hm-hd">Reg. Speed</div>
+          <div class="hm-hd">Site Quality</div>
+          <div class="hm-hd">Competition</div>
+          <div class="hm-hd">Cost Index</div>
+          <div class="hm-hd">Composite</div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <!-- Site selection table -->
+      <div class="card">
+        <div class="card-title">
+          <span class="lbl"><span class="ic">🏥</span> Top-Ranked Sites</span>
+          <span class="pill pill-blue">PI track record · Past enrollment · IRB cycle</span>
+        </div>
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Site / Institution</th>
+              <th>Country</th>
+              <th>PI Experience</th>
+              <th>Hist. Enroll Rate</th>
+              <th>IRB Cycle</th>
+              <th>Feasibility Score</th>
+              <th>Tier</th>
+            </tr>
+          </thead>
+          <tbody id="sites-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="spacer"></div>
+
+      <!-- Enrollment forecast -->
+      <div class="card">
+        <div class="card-title">
+          <span class="lbl"><span class="ic">📈</span> Enrollment Forecast (24 months)</span>
+          <span class="pill pill-violet">Monte Carlo p10 / p50 / p90</span>
+        </div>
+        <p class="card-sub">Cumulative randomized patients across base, optimistic, and conservative scenarios — based on site count, recruitment rate per site-month, and seasonal drop-offs.</p>
+        <div class="chart-wrap tall">
+          <canvas id="chart-enroll"></canvas>
+        </div>
+      </div>
+
+      <!-- Insights -->
+      <div class="insight" id="feasibility-insight">
+        <div class="insight-hd">⚡ AI Strategic Insight</div>
+        <div class="insight-body">
+          For <strong>NSCLC Phase 2</strong> with 450-patient target across 35 sites, the model recommends a <strong>US + Western EU + Asia-Pacific mix</strong>. Spain and South Korea are unexpectedly strong on the Pareto frontier (high site quality × low competitive density). Consider <strong>de-prioritizing US-only sites in major academic centers</strong> due to competitive trial saturation (~14 active NSCLC IO trials at MSK, MD Anderson, Dana-Farber) — this will erode enrollment velocity by an estimated 28%.
+          <ul>
+            <li><strong>Risk flag:</strong> I/E strictness of 7/10 with biomarker requirement implies ~32% screen-fail rate. Plan for 1.5× over-screening capacity.</li>
+            <li><strong>Operating model implication:</strong> Hybrid in-house + CRO model for 35 sites across 8 countries — full CRO outsourcing adds $7-9M and 2.4 months.</li>
+            <li><strong>Regulatory cadence:</strong> Tier-1 countries (US, Germany, UK) enable parallel IND/CTA filings — staged approach saves 3.2 months on global FPI.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 2: Protocol Design Optimizer ===== -->
+<section class="module" id="mod-protocol">
+  <div class="mod-header">
+    <div class="mod-tag">📋 Module 02 · Protocol Design</div>
+    <h1 class="mod-title">Protocol Design Optimizer</h1>
+    <p class="mod-desc">Score and stress-test trial protocol design across endpoint reliability, eligibility complexity, sample size, and amendment risk. Benchmarks against industry-standard protocols by phase and therapeutic area.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card sticky-side">
+      <div class="card-title"><span class="lbl"><span class="ic">🎛️</span> Protocol Inputs</span></div>
+
+      <div class="field">
+        <label class="field-lbl">Primary Endpoint Type</label>
+        <select class="field-select" id="p-endpoint">
+          <option value="os">Overall Survival (OS)</option>
+          <option value="pfs" selected>Progression-Free Survival (PFS)</option>
+          <option value="orr">Objective Response Rate (ORR)</option>
+          <option value="hba1c">HbA1c reduction</option>
+          <option value="das28">DAS28 / Clinical composite</option>
+          <option value="adcs">ADCS-ADL / Cognitive composite</option>
+          <option value="biomarker">Surrogate biomarker</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <div class="slider-row">
+          <span class="label">Inclusion Criteria Count</span>
+          <span class="slider-val" id="p-inc-v">12</span>
+        </div>
+        <input type="range" min="3" max="40" step="1" value="12" class="slider" id="p-inc" oninput="document.getElementById('p-inc-v').textContent=this.value">
+      </div>
+
+      <div class="field">
+        <div class="slider-row">
+          <span class="label">Exclusion Criteria Count</span>
+          <span class="slider-val" id="p-exc-v">22</span>
+        </div>
+        <input type="range" min="3" max="50" step="1" value="22" class="slider" id="p-exc" oninput="document.getElementById('p-exc-v').textContent=this.value">
+      </div>
+
+      <div class="field">
+        <div class="slider-row">
+          <span class="label">Biomarker Requirement</span>
+          <span class="slider-val" id="p-bio-v">2</span>
+        </div>
+        <input type="range" min="0" max="5" step="1" value="2" class="slider" id="p-bio" oninput="document.getElementById('p-bio-v').textContent=this.value">
+      </div>
+
+      <div class="field">
+        <div class="slider-row">
+          <span class="label">Visit Frequency (per month)</span>
+          <span class="slider-val" id="p-visit-v">2</span>
+        </div>
+        <input type="range" min="0.5" max="8" step="0.5" value="2" class="slider" id="p-visit" oninput="document.getElementById('p-visit-v').textContent=this.value">
+      </div>
+
+      <div class="field">
+        <label class="field-lbl">DCT / Hybrid Elements</label>
+        <select class="field-select" id="p-dct">
+          <option value="none">None (fully in-clinic)</option>
+          <option value="epro">ePRO only</option>
+          <option value="hybrid" selected>Hybrid (home visits + ePRO)</option>
+          <option value="full-dct">Fully decentralized</option>
+        </select>
+      </div>
+
+      <button class="btn-run" onclick="runProtocol()">🚀 Optimize Protocol</button>
+    </div>
+
+    <div>
+      <div class="grid-4" style="margin-bottom:14px">
+        <div class="kpi">
+          <div class="kpi-lbl">Protocol Complexity</div>
+          <div class="kpi-val gold" id="p-kpi-complex">7.8</div>
+          <div class="kpi-sub">vs 6.4 industry avg</div>
+          <span class="kpi-trend down">▲ +22% complexity</span>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl">Est. Screen Fail Rate</div>
+          <div class="kpi-val rose" id="p-kpi-screen">34%</div>
+          <div class="kpi-sub">based on I/E + biomarker</div>
+          <span class="kpi-trend down">▲ Above target</span>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl">Amendment Risk</div>
+          <div class="kpi-val gold" id="p-kpi-amend">62%</div>
+          <div class="kpi-sub">prob. ≥1 substantial amend.</div>
+          <span class="kpi-trend neutral">Moderate</span>
+        </div>
+        <div class="kpi">
+          <div class="kpi-lbl">Pt. Burden Index</div>
+          <div class="kpi-val cyan" id="p-kpi-burden">5.6</div>
+          <div class="kpi-sub">out of 10</div>
+          <span class="kpi-trend up">▲ DCT-reduced</span>
+        </div>
+      </div>
+
+      <div class="grid-2" style="grid-template-columns:1fr 1fr">
+        <div class="card">
+          <div class="card-title"><span class="lbl"><span class="ic">🎯</span> Endpoint Quality Matrix</span></div>
+          <div class="chart-wrap"><canvas id="chart-endpoint"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="lbl"><span class="ic">📊</span> Complexity vs Industry Benchmark</span></div>
+          <div class="chart-wrap"><canvas id="chart-complex"></canvas></div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="card">
+        <div class="card-title"><span class="lbl"><span class="ic">⚠️</span> Protocol Risk Diagnostic</span></div>
+        <table class="tbl">
+          <thead>
+            <tr><th>Risk Driver</th><th>Current Score</th><th>Industry P50</th><th>Recommendation</th><th>Δ Impact</th></tr>
+          </thead>
+          <tbody id="protocol-risks"></tbody>
+        </table>
+      </div>
+
+      <div class="insight" id="protocol-insight">
+        <div class="insight-hd">⚡ Optimization Recommendation</div>
+        <div class="insight-body">
+          Protocol scores <strong>7.8 / 10 on complexity</strong> — above the industry P75 (7.2). The main drivers: 34 total I/E criteria, dual biomarker requirement, and bi-weekly clinic visits. Three high-leverage simplifications:
+          <ul>
+            <li><strong>Consolidate exclusion criteria</strong> — 8 of 22 exclusions are duplicative of historical safety profile; removing them reduces screen-fail by ~6 percentage points without changing risk-benefit.</li>
+            <li><strong>Move 4 PK timepoints to home-based dried blood spot</strong> — drops patient burden 1.4 points, supports DCT positioning for FDA/EMA.</li>
+            <li><strong>Lock primary endpoint at PFS, move ORR + DoR to secondary</strong> — reduces alpha-spending split and improves statistical power by 11%.</li>
+          </ul>
+          <strong>Amendment risk reduction:</strong> Estimated 62% → 41% with above changes, avoiding ~$2.4M in median amendment costs.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 3: R&D Portfolio Strategy ===== -->
+<section class="module" id="mod-portfolio">
+  <div class="mod-header">
+    <div class="mod-tag">🎯 Module 03 · Drug Development Strategy</div>
+    <h1 class="mod-title">R&D Portfolio Strategy</h1>
+    <p class="mod-desc">Asset-level prioritization across the R&D portfolio. Plots probability of technical and regulatory success (PTRS) against risk-adjusted NPV to generate Prioritize / Pause / Partner / Divest recommendations.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi">
+      <div class="kpi-lbl">Portfolio Assets</div>
+      <div class="kpi-val">12</div>
+      <div class="kpi-sub">across 4 therapeutic areas</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Risk-Adj. NPV (Total)</div>
+      <div class="kpi-val cyan">$8.4B</div>
+      <div class="kpi-sub">expected lifetime value</div>
+      <span class="kpi-trend up">▲ $1.2B vs LY</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Avg. PTRS</div>
+      <div class="kpi-val gold">31%</div>
+      <div class="kpi-sub">portfolio-weighted</div>
+      <span class="kpi-trend neutral">vs 28% industry</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">5-Yr R&D Spend</div>
+      <div class="kpi-val rose">$3.2B</div>
+      <div class="kpi-sub">cumulative</div>
+      <span class="kpi-trend down">▼ +14% YoY</span>
+    </div>
+  </div>
+
+  <div class="grid-2" style="grid-template-columns:3fr 2fr">
+    <div class="card">
+      <div class="card-title">
+        <span class="lbl"><span class="ic">📊</span> PTRS × NPV Portfolio Matrix</span>
+        <span class="pill pill-cyan">12 assets · Bubble = R&D spend to launch</span>
+      </div>
+      <p class="card-sub">Strategic quadrants: <strong style="color:var(--green)">Prioritize</strong> (high PTRS, high NPV) · <strong style="color:var(--cyan)">Partner</strong> (high NPV, lower PTRS) · <strong style="color:var(--gold)">Optimize</strong> (high PTRS, lower NPV) · <strong style="color:var(--rose)">Divest/Pause</strong> (low both).</p>
+      <div class="chart-wrap tall"><canvas id="chart-portfolio"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="lbl"><span class="ic">💊</span> Therapeutic Area Allocation</span></div>
+      <div class="chart-wrap"><canvas id="chart-ta-alloc"></canvas></div>
+      <div class="divider"></div>
+      <div class="card-title" style="font-size:.75rem"><span class="lbl">Phase Distribution</span></div>
+      <div class="chart-wrap short"><canvas id="chart-phase-dist"></canvas></div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="lbl"><span class="ic">📋</span> Asset-Level Recommendations</span>
+      <span class="pill pill-violet">Prioritize · Partner · Optimize · Divest</span>
+    </div>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th>Asset</th>
+          <th>Indication</th>
+          <th>Phase</th>
+          <th>PTRS</th>
+          <th>Peak Sales ($B)</th>
+          <th>Risk-Adj. NPV ($M)</th>
+          <th>R&D to Launch ($M)</th>
+          <th>Recommendation</th>
+        </tr>
+      </thead>
+      <tbody id="portfolio-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Portfolio Strategic Brief</div>
+    <div class="insight-body">
+      Portfolio is <strong>over-indexed on early-phase oncology</strong> (47% of spend, 31% of risk-adjusted NPV). Three high-leverage rebalancing moves:
+      <ul>
+        <li><strong>Prioritize:</strong> ASC-301 (NSCLC, Phase 3, PTRS 64%) and IMD-118 (UC, Phase 2, PTRS 48%) — combined risk-adj NPV $3.1B. Accelerate to FPI within 6 months.</li>
+        <li><strong>Partner / Out-license:</strong> NEU-204 (early MS, Phase 1) — strong scientific rationale but capability gap in neuro late-stage. Consider deal with established CNS player.</li>
+        <li><strong>Divest / Pause:</strong> CDM-091 (Type 2 diabetes, Phase 2) — PTRS 14%, NPV negative under competitive forecast (GLP-1 saturation). Redeploy $180M to oncology priority assets.</li>
+      </ul>
+      <strong>R&D operating model implication:</strong> Capability buildout needed in immunology biomarker discovery and adaptive trial design — recommend Center of Excellence model rather than hiring siloed function leads.
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 4: Regulatory Strategy ===== -->
+<section class="module" id="mod-regulatory">
+  <div class="mod-header">
+    <div class="mod-tag">⚖️ Module 04 · Regulatory Affairs</div>
+    <h1 class="mod-title">Regulatory Pathway Selector</h1>
+    <p class="mod-desc">Recommends optimal regulatory pathways across FDA, EMA, PMDA, and NMPA based on innovation level, unmet need, existing evidence base, and breakthrough / fast-track eligibility. Compares parallel vs sequential submission strategies.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card sticky-side">
+      <div class="card-title"><span class="lbl"><span class="ic">🎛️</span> Regulatory Profile</span></div>
+
+      <div class="field">
+        <label class="field-lbl">Product Type</label>
+        <select class="field-select" id="r-product">
+          <option value="nme" selected>New Molecular Entity (NME)</option>
+          <option value="biologic">Novel Biologic</option>
+          <option value="biosimilar">Biosimilar</option>
+          <option value="reform">Reformulation / Combination</option>
+          <option value="generic">Generic / ANDA route</option>
+          <option value="cgt">Cell / Gene Therapy</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-lbl">Unmet Medical Need</label>
+        <select class="field-select" id="r-need">
+          <option value="high" selected>High (no approved therapy)</option>
+          <option value="moderate">Moderate (limited options)</option>
+          <option value="low">Low (crowded space)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-lbl">Patient Population</label>
+        <select class="field-select" id="r-pop">
+          <option value="rare" selected>Rare disease (&lt;200K US)</option>
+          <option value="orphan">Orphan-eligible</option>
+          <option value="common">Common (broad pop.)</option>
+          <option value="pediatric">Pediatric-only</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-lbl">Evidence Strength</label>
+        <select class="field-select" id="r-evidence">
+          <option value="strong">Strong (Ph2 + biomarker confirmed)</option>
+          <option value="moderate" selected>Moderate (Ph2 efficacy signal)</option>
+          <option value="early">Early (Ph1 / surrogate)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field-lbl">Reference Product Available?</label>
+        <select class="field-select" id="r-ref">
+          <option value="yes">Yes (505(b)(2) eligible)</option>
+          <option value="no" selected>No (full NDA/BLA)</option>
+        </select>
+      </div>
+
+      <button class="btn-run" onclick="runRegulatory()">🚀 Generate Strategy</button>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">
+          <span class="lbl"><span class="ic">🛤️</span> Recommended Regulatory Pathway</span>
+          <span class="pill pill-green" id="r-confidence">High Confidence (87%)</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px" id="r-pathways"></div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="card">
+        <div class="card-title"><span class="lbl"><span class="ic">📅</span> Multi-Region Timeline Comparison</span></div>
+        <p class="card-sub">Time-to-approval scenarios across major regulators. Bars represent pre-IND/CTA through approval.</p>
+        <div class="chart-wrap"><canvas id="chart-reg-timeline"></canvas></div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="card">
+        <div class="card-title"><span class="lbl"><span class="ic">🤝</span> Agency Interaction Plan</span></div>
+        <table class="tbl">
+          <thead>
+            <tr><th>Meeting / Submission</th><th>Agency</th><th>Timing</th><th>Strategic Purpose</th><th>Priority</th></tr>
+          </thead>
+          <tbody id="r-meetings"></tbody>
+        </table>
+      </div>
+
+      <div class="insight" id="reg-insight">
+        <div class="insight-hd">⚡ Regulatory Strategic Brief</div>
+        <div class="insight-body">
+          For an <strong>NME in a rare disease with high unmet need + moderate Phase 2 evidence</strong>, the optimal pathway is <strong>FDA Breakthrough Therapy Designation + Accelerated Approval</strong>, paralleled with <strong>EMA PRIME + Conditional Marketing Authorization</strong>. PMDA SAKIGAKE designation is additive if Japan is a launch market.
+          <ul>
+            <li><strong>Surrogate endpoint strategy:</strong> Confirm with FDA Type B meeting before Phase 3 design lock — biomarker validation reduces full-approval timeline by 18-24 months.</li>
+            <li><strong>Parallel filing risk:</strong> Concurrent US/EU/Japan filing requires CMC alignment — recommend single global manufacturing strategy from Phase 2b.</li>
+            <li><strong>Post-marketing commitments:</strong> Plan for confirmatory Phase 4 trial as accelerated approval condition — design embedded in pivotal study extension to minimize incremental cost.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 5: R&D Operating Model ===== -->
+<section class="module" id="mod-opmodel">
+  <div class="mod-header">
+    <div class="mod-tag">🏗️ Module 05 · R&D Operating Model</div>
+    <h1 class="mod-title">R&D Operating Model Diagnostic</h1>
+    <p class="mod-desc">Function-by-function maturity assessment across Clinical Operations, Regulatory, Pharmacovigilance, Biostatistics, Data Sciences, and Medical Affairs. Benchmarks cycle time, FTE allocation, and outsourcing posture against industry peers.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi">
+      <div class="kpi-lbl">Composite Maturity</div>
+      <div class="kpi-val cyan">3.4</div>
+      <div class="kpi-sub">out of 5.0 (industry P50: 3.6)</div>
+      <span class="kpi-trend down">▲ Below benchmark</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Avg. Trial Cycle Time</div>
+      <div class="kpi-val gold">7.8</div>
+      <div class="kpi-sub">months FPI → DBL</div>
+      <span class="kpi-trend down">▲ +1.2 vs P50</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Outsourcing Mix</div>
+      <div class="kpi-val">58%</div>
+      <div class="kpi-sub">CRO / FSP spend</div>
+      <span class="kpi-trend neutral">vs 62% peer</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Cost per Patient</div>
+      <div class="kpi-val violet">$94K</div>
+      <div class="kpi-sub">portfolio-weighted</div>
+      <span class="kpi-trend up">▼ -8% YoY</span>
+    </div>
+  </div>
+
+  <div class="grid-2" style="grid-template-columns:1fr 1fr">
+    <div class="card">
+      <div class="card-title"><span class="lbl"><span class="ic">🕸️</span> Function Maturity Radar</span></div>
+      <p class="card-sub">Current state vs target state vs industry P75 across 6 R&D functions.</p>
+      <div class="radar-wrap"><canvas id="chart-radar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="lbl"><span class="ic">⏱️</span> Cycle Time Benchmarks</span></div>
+      <p class="card-sub">Time-to-milestone vs industry P25 / P50 / P75.</p>
+      <div class="chart-wrap tall"><canvas id="chart-cycletime"></canvas></div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">📊</span> Function-Level Diagnostic</span></div>
+    <table class="tbl">
+      <thead>
+        <tr><th>R&D Function</th><th>Current Maturity</th><th>Target</th><th>Industry P75</th><th>Key Gap</th><th>Priority</th></tr>
+      </thead>
+      <tbody id="opmodel-tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Operating Model Transformation Roadmap</div>
+    <div class="insight-body">
+      Composite maturity of <strong>3.4 / 5.0 places the organization in the industry P40</strong> — below peer median. Three transformation priorities with highest ROI:
+      <ul>
+        <li><strong>Year 1 — Data Sciences buildout:</strong> Largest gap (current 2.4 vs target 4.0). Establish a centralized AI/ML CoE for trial feasibility, RWE, and protocol optimization. Estimated $18M investment, ~9-month payback through cycle time reduction.</li>
+        <li><strong>Year 2 — Clinical Operations target operating model:</strong> Shift from study-by-study CRO model to therapeutic-area FSP partnerships with 3 strategic CROs. Reduces cycle time 1.4 months and CRO spend 12%.</li>
+        <li><strong>Year 3 — Regulatory and PV consolidation:</strong> Move from regional model to global functional model with embedded therapeutic area leads. Single source of truth platform across IND/CTA/MAA submissions.</li>
+      </ul>
+      <strong>Total expected impact:</strong> Composite maturity 3.4 → 4.1, cycle time -2.1 months per trial, $42M cumulative cost takeout over 3 years, +8% improvement in trial start-up KPIs.
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 6: CDP Architect ===== -->
+<section class="module" id="mod-cdp">
+  <div class="mod-header">
+    <div class="mod-tag">🗺️ Module 06 · Clinical Development Plan</div>
+    <h1 class="mod-title">Clinical Development Plan (CDP) Architect</h1>
+    <p class="mod-desc">End-to-end clinical development timeline with phase-by-phase planning, go/no-go gates, budget allocation, and risk-adjusted milestones. Integrates with portfolio strategy and regulatory pathway to generate launch-ready CDPs.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi">
+      <div class="kpi-lbl">Target Launch</div>
+      <div class="kpi-val cyan">Q2 2031</div>
+      <div class="kpi-sub">5.3 years from now</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Total R&D Investment</div>
+      <div class="kpi-val gold">$612M</div>
+      <div class="kpi-sub">FIH → Approval</div>
+      <span class="kpi-trend down">▲ +8% vs P50</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Cumulative PTRS</div>
+      <div class="kpi-val violet">47%</div>
+      <div class="kpi-sub">Phase 2 → Approval</div>
+      <span class="kpi-trend up">▲ Above benchmark</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-lbl">Go/No-Go Gates</div>
+      <div class="kpi-val">5</div>
+      <div class="kpi-sub">decision points</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">📅</span> Integrated Development Timeline</span></div>
+    <p class="card-sub">Risk-adjusted phase timeline with parallel work streams. Bars sized by phase duration; milestones above.</p>
+    <div id="gantt-cdp" class="gantt"></div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="grid-2" style="grid-template-columns:1fr 1fr">
+    <div class="card">
+      <div class="card-title"><span class="lbl"><span class="ic">💰</span> R&D Budget Allocation by Phase</span></div>
+      <div class="chart-wrap"><canvas id="chart-budget"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="lbl"><span class="ic">🎯</span> Go/No-Go Decision Gates</span></div>
+      <table class="tbl">
+        <thead>
+          <tr><th>Gate</th><th>Timing</th><th>Criteria</th><th>PTRS Δ</th></tr>
+        </thead>
+        <tbody id="gates-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ CDP Strategic Brief</div>
+    <div class="insight-body">
+      Target launch Q2 2031 requires <strong>aggressive parallelization of Phase 2 dose-finding with biomarker validation</strong>. Three timeline-critical decisions:
+      <ul>
+        <li><strong>Phase 2 design:</strong> Recommend adaptive 2-stage design (Simon's two-stage or Bayesian adaptive) — accelerates decision point by 4 months vs traditional Phase 2a/2b sequential.</li>
+        <li><strong>Regulatory parallelization:</strong> File IND + CTA + JIND in lockstep starting Q3 2026. Type B meeting Q1 2027 to confirm Phase 3 endpoints and accelerated approval pathway.</li>
+        <li><strong>Phase 3 readiness:</strong> Lock Phase 3 protocol design 12 weeks before EoP2 meeting. Pre-allocate CMC scale-up budget to avoid late-stage manufacturing bottleneck.</li>
+      </ul>
+      <strong>Risk-adjusted scenario:</strong> Base case launch Q2 2031 ($612M). Aggressive scenario Q4 2030 with breakthrough designation (-$48M, -2 quarters). Conservative scenario Q4 2031 if Phase 2 amends required.
+    </div>
+  </div>
+</section>
+
+<!-- ===== Toast ===== -->
+<div class="toast" id="toast">Analysis updated</div>
+
+<script>
+// ===================================================
+// ClinDev Strategy IQ — interactive logic
+// ===================================================
+
+// ----- Tab switching -----
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.module').forEach(m=>m.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('mod-'+btn.dataset.tab).classList.add('active');
+    setTimeout(()=>{window.scrollTo({top:0,behavior:'smooth'})},50);
+  });
+});
+
+// ----- Toast -----
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+// ----- Demo data loader & export stub -----
+function loadDemoData(){toast('Demo data loaded across 6 modules');}
+function exportReport(){toast('Executive PDF report queued for export');}
+
+// ===================================================
+// MODULE 1: Trial Feasibility
+// ===================================================
+
+const COUNTRY_DATA = {
+  nsclc:[
+    {c:'United States',pp:88,rs:78,sq:92,cm:42,ci:35},
+    {c:'Germany',pp:74,rs:82,sq:90,cm:58,ci:62},
+    {c:'United Kingdom',pp:68,rs:75,sq:85,cm:65,ci:60},
+    {c:'Spain',pp:62,rs:78,sq:82,cm:78,ci:78},
+    {c:'South Korea',pp:71,rs:88,sq:84,cm:82,ci:72},
+    {c:'Japan',pp:78,rs:64,sq:90,cm:55,ci:48},
+    {c:'Australia',pp:48,rs:84,sq:86,cm:80,ci:55},
+    {c:'Brazil',pp:65,rs:48,sq:65,cm:72,ci:82}
+  ],
+  ad:[
+    {c:'United States',pp:92,rs:78,sq:88,cm:38,ci:32},
+    {c:'Germany',pp:78,rs:82,sq:88,cm:55,ci:60},
+    {c:'United Kingdom',pp:72,rs:75,sq:84,cm:62,ci:58},
+    {c:'Italy',pp:68,rs:62,sq:78,cm:75,ci:72},
+    {c:'France',pp:74,rs:72,sq:82,cm:62,ci:58},
+    {c:'Canada',pp:58,rs:80,sq:84,cm:78,ci:62},
+    {c:'Australia',pp:48,rs:84,sq:82,cm:82,ci:55},
+    {c:'Japan',pp:82,rs:64,sq:88,cm:52,ci:48}
+  ]
+};
+
+const SITES_DATA = {
+  nsclc:[
+    {name:'Samsung Medical Center',country:'South Korea',pi:9.2,enroll:'1.8 pt/site-mo',irb:'21 days',score:92,tier:1},
+    {name:'Vall d\'Hebron Inst. Oncology',country:'Spain',pi:9.0,enroll:'1.6 pt/site-mo',irb:'25 days',score:89,tier:1},
+    {name:'Memorial Sloan Kettering',country:'United States',pi:9.5,enroll:'0.9 pt/site-mo',irb:'42 days',score:84,tier:2},
+    {name:'Charité Berlin',country:'Germany',pi:8.8,enroll:'1.4 pt/site-mo',irb:'30 days',score:86,tier:2},
+    {name:'Royal Marsden',country:'United Kingdom',pi:8.6,enroll:'1.2 pt/site-mo',irb:'35 days',score:82,tier:2},
+    {name:'Peter MacCallum',country:'Australia',pi:8.4,enroll:'1.5 pt/site-mo',irb:'28 days',score:84,tier:2},
+    {name:'National Cancer Center',country:'Japan',pi:8.9,enroll:'1.3 pt/site-mo',irb:'48 days',score:78,tier:3},
+    {name:'Hospital A.C. Camargo',country:'Brazil',pi:7.8,enroll:'1.4 pt/site-mo',irb:'58 days',score:71,tier:3}
+  ]
+};
+
+function heatColor(v){
+  // 0-100 -> color gradient
+  if(v>=80) return 'background:rgba(34,197,94,'+(0.25+v/200)+')';
+  if(v>=65) return 'background:rgba(0,201,167,'+(0.2+v/250)+')';
+  if(v>=50) return 'background:rgba(240,180,41,'+(0.15+v/280)+')';
+  return 'background:rgba(239,68,68,'+(0.15+v/320)+')';
+}
+
+function renderHeatmap(){
+  const ind = document.getElementById('f-indication').value;
+  const data = COUNTRY_DATA[ind] || COUNTRY_DATA.nsclc;
+  const wrap = document.getElementById('heatmap-countries');
+  // clear all but headers
+  while(wrap.children.length>7) wrap.removeChild(wrap.lastChild);
+  data.forEach(row=>{
+    const composite = Math.round((row.pp*0.25+row.rs*0.2+row.sq*0.25+row.cm*0.15+row.ci*0.15));
+    [['hm-row-lbl',row.c,''],
+     ['hm-cell',row.pp,heatColor(row.pp)],
+     ['hm-cell',row.rs,heatColor(row.rs)],
+     ['hm-cell',row.sq,heatColor(row.sq)],
+     ['hm-cell',row.cm,heatColor(row.cm)],
+     ['hm-cell',row.ci,heatColor(row.ci)],
+     ['hm-cell',composite,heatColor(composite)+';font-weight:800']
+    ].forEach(([cls,val,style])=>{
+      const div = document.createElement('div');
+      div.className = cls;
+      div.style.cssText = style;
+      div.textContent = val;
+      wrap.appendChild(div);
+    });
+  });
+}
+
+function renderSites(){
+  const tbody = document.getElementById('sites-tbody');
+  const sites = SITES_DATA.nsclc;
+  tbody.innerHTML = sites.map(s=>`
+    <tr>
+      <td><strong>${s.name}</strong></td>
+      <td>${s.country}</td>
+      <td class="num">${s.pi}</td>
+      <td class="num">${s.enroll}</td>
+      <td class="num">${s.irb}</td>
+      <td><span class="score-bar"><span class="bar"><span class="bar-fill" style="width:${s.score}%"></span></span><strong>${s.score}</strong></span></td>
+      <td><span class="tier tier-${s.tier}">Tier ${s.tier}</span></td>
+    </tr>
+  `).join('');
+}
+
+let enrollChart;
+function renderEnrollChart(){
+  const ctx = document.getElementById('chart-enroll');
+  if(!ctx) return;
+  if(enrollChart) enrollChart.destroy();
+  const target = parseInt(document.getElementById('f-enroll').value);
+  const sites = parseInt(document.getElementById('f-sites').value);
+  const strict = parseInt(document.getElementById('f-strict').value);
+  const ratePerSite = 1.4 * (1 - (strict-5)*0.05);
+  const months = Array.from({length:24},(_,i)=>i+1);
+  const p50 = months.map(m=>Math.min(target, Math.round(sites*ratePerSite*m * (m<3?0.4:1))));
+  const p10 = p50.map(v=>Math.round(v*0.65));
+  const p90 = p50.map(v=>Math.min(target, Math.round(v*1.18)));
+  enrollChart = new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:months.map(m=>'M'+m),
+      datasets:[
+        {label:'P90 (Optimistic)',data:p90,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.08)',fill:'+1',tension:.3,borderWidth:2,pointRadius:0},
+        {label:'P50 (Base case)',data:p50,borderColor:'#00c9a7',backgroundColor:'rgba(0,201,167,.12)',fill:'+1',tension:.3,borderWidth:3,pointRadius:0},
+        {label:'P10 (Conservative)',data:p10,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.06)',fill:false,tension:.3,borderWidth:2,pointRadius:0},
+        {label:'Target Enrollment',data:Array(24).fill(target),borderColor:'#f0b429',borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#96a4be',font:{size:11}}}},
+      scales:{
+        x:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}},
+        y:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'},title:{display:true,text:'Cumulative randomized',color:'#96a4be',font:{size:11}}}
+      }
+    }
+  });
+}
+
+function runFeasibility(){
+  renderHeatmap();
+  renderSites();
+  renderEnrollChart();
+  toast('Feasibility analysis complete');
+}
+
+document.getElementById('f-indication').addEventListener('change',runFeasibility);
+['f-enroll','f-sites','f-strict'].forEach(id=>document.getElementById(id).addEventListener('change',renderEnrollChart));
+
+// ===================================================
+// MODULE 2: Protocol Optimizer
+// ===================================================
+
+let endpointChart, complexChart;
+function renderProtocolCharts(){
+  const ctx1 = document.getElementById('chart-endpoint');
+  const ctx2 = document.getElementById('chart-complex');
+  if(!ctx1||!ctx2) return;
+  if(endpointChart) endpointChart.destroy();
+  if(complexChart) complexChart.destroy();
+
+  endpointChart = new Chart(ctx1,{
+    type:'radar',
+    data:{
+      labels:['Validation','Sensitivity','Regulatory Acceptance','Patient Relevance','Time-to-Read','Reproducibility'],
+      datasets:[{
+        label:'Selected Endpoint',
+        data:[85,72,90,78,55,82],
+        backgroundColor:'rgba(0,201,167,.15)',
+        borderColor:'#00c9a7',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00c9a7'
+      },{
+        label:'Industry P50',
+        data:[72,70,75,68,72,76],
+        backgroundColor:'rgba(139,92,246,.08)',
+        borderColor:'#8b5cf6',borderWidth:1.5,pointRadius:2,pointBackgroundColor:'#8b5cf6',borderDash:[4,4]
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},
+      scales:{r:{
+        ticks:{display:false},
+        grid:{color:'rgba(26,40,68,.5)'},
+        angleLines:{color:'rgba(26,40,68,.5)'},
+        pointLabels:{color:'#96a4be',font:{size:10}},
+        min:0,max:100
+      }}
+    }
+  });
+
+  complexChart = new Chart(ctx2,{
+    type:'bar',
+    data:{
+      labels:['I/E Burden','Visit Freq','Biomarker','Endpoint Count','Pt. Burden','DCT Adjustment'],
+      datasets:[{
+        label:'Your Protocol',
+        data:[8.2,6.8,7.4,5.5,5.6,3.2],
+        backgroundColor:'rgba(0,201,167,.7)',borderColor:'#00c9a7',borderWidth:1
+      },{
+        label:'Industry P50',
+        data:[6.0,5.5,5.0,5.0,6.4,5.0],
+        backgroundColor:'rgba(139,92,246,.3)',borderColor:'#8b5cf6',borderWidth:1
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},
+      scales:{
+        x:{ticks:{color:'#5d6e8c',font:{size:9}},grid:{display:false}},
+        y:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'},min:0,max:10}
+      }
+    }
+  });
+}
+
+function renderProtocolRisks(){
+  const risks = [
+    ['Exclusion criteria count','22','14','Cut 8 duplicative exclusions','−6 pp screen-fail'],
+    ['Biomarker requirement (n)','2','1','Stratify rather than enrich','+18% accrual rate'],
+    ['Visit frequency','Bi-weekly','Monthly','Add hybrid DCT visits','−1.4 pt burden'],
+    ['Endpoint complexity','3 primary','1 primary','Move 2 to secondary','+11% statistical power'],
+    ['Sample size assumption','δ=0.25 HR','δ=0.30 HR','Validate via meta-analysis','Robust to amendment']
+  ];
+  document.getElementById('protocol-risks').innerHTML = risks.map(r=>`
+    <tr>
+      <td><strong>${r[0]}</strong></td>
+      <td class="num">${r[1]}</td>
+      <td class="num">${r[2]}</td>
+      <td>${r[3]}</td>
+      <td><span class="pill pill-cyan">${r[4]}</span></td>
+    </tr>
+  `).join('');
+}
+
+function runProtocol(){
+  renderProtocolCharts();
+  renderProtocolRisks();
+  toast('Protocol diagnostic complete');
+}
+
+// ===================================================
+// MODULE 3: Portfolio Strategy
+// ===================================================
+
+const PORTFOLIO = [
+  {asset:'ASC-301',ind:'NSCLC (1L)',ta:'Oncology',phase:'Ph3',ptrs:64,sales:3.8,npv:1820,rd:240,rec:'Prioritize'},
+  {asset:'IMD-118',ind:'Ulcerative Colitis',ta:'Immunology',phase:'Ph2',ptrs:48,sales:2.4,npv:1290,rd:185,rec:'Prioritize'},
+  {asset:'CDM-091',ind:'Type 2 Diabetes',ta:'Cardiometabolic',phase:'Ph2',ptrs:14,sales:0.9,npv:-180,rd:155,rec:'Divest'},
+  {asset:'NEU-204',ind:'Multiple Sclerosis',ta:'CNS',phase:'Ph1',ptrs:22,sales:2.1,npv:560,rd:280,rec:'Partner'},
+  {asset:'ONC-447',ind:'TNBC',ta:'Oncology',phase:'Ph2',ptrs:31,sales:1.6,npv:780,rd:165,rec:'Optimize'},
+  {asset:'IMD-256',ind:'Psoriatic Arthritis',ta:'Immunology',phase:'Ph3',ptrs:58,sales:1.4,npv:920,rd:130,rec:'Prioritize'},
+  {asset:'ASC-512',ind:'Pancreatic (2L)',ta:'Oncology',phase:'Ph1',ptrs:18,sales:1.8,npv:340,rd:220,rec:'Partner'},
+  {asset:'CDM-188',ind:'Heart Failure (HFpEF)',ta:'Cardiometabolic',phase:'Ph2',ptrs:26,sales:2.6,npv:840,rd:195,rec:'Optimize'},
+  {asset:'NEU-378',ind:'Alzheimer\'s (early)',ta:'CNS',phase:'Ph2',ptrs:12,sales:4.2,npv:480,rd:310,rec:'Partner'},
+  {asset:'IMD-091',ind:'RA (refractory)',ta:'Immunology',phase:'Ph1',ptrs:24,sales:1.1,npv:280,rd:140,rec:'Optimize'},
+  {asset:'ONC-322',ind:'CRC (MSS)',ta:'Oncology',phase:'Ph2',ptrs:19,sales:1.4,npv:240,rd:170,rec:'Partner'},
+  {asset:'RD-901',ind:'Pompe Disease',ta:'Rare',phase:'Ph3',ptrs:71,sales:0.8,npv:610,rd:95,rec:'Prioritize'}
+];
+
+const recColor = {
+  'Prioritize':'tier-1',
+  'Optimize':'tier-2',
+  'Partner':'tier-3',
+  'Divest':'tier-4'
+};
+
+let portfolioChart, taChart, phaseChart;
+function renderPortfolio(){
+  const ctx = document.getElementById('chart-portfolio');
+  if(portfolioChart) portfolioChart.destroy();
+  const colorMap = {
+    'Oncology':'#00c9a7','Immunology':'#3b7dff','CNS':'#8b5cf6',
+    'Cardiometabolic':'#f0b429','Rare':'#ff4d6d'
+  };
+  const datasets = ['Oncology','Immunology','CNS','Cardiometabolic','Rare'].map(ta=>({
+    label:ta,
+    data:PORTFOLIO.filter(a=>a.ta===ta).map(a=>({x:a.ptrs,y:a.npv,r:Math.sqrt(a.rd)/1.2,asset:a.asset,ind:a.ind})),
+    backgroundColor:colorMap[ta]+'cc',borderColor:colorMap[ta],borderWidth:1.5
+  }));
+  portfolioChart = new Chart(ctx,{
+    type:'bubble',
+    data:{datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'#96a4be',font:{size:11},usePointStyle:true}},
+        tooltip:{
+          callbacks:{
+            label:(c)=>`${c.raw.asset} (${c.raw.ind}) — PTRS ${c.raw.x}%, NPV $${c.raw.y}M`
+          }
+        }
+      },
+      scales:{
+        x:{title:{display:true,text:'PTRS (%)',color:'#96a4be'},ticks:{color:'#5d6e8c'},grid:{color:'rgba(26,40,68,.4)'},min:0,max:80},
+        y:{title:{display:true,text:'Risk-Adj. NPV ($M)',color:'#96a4be'},ticks:{color:'#5d6e8c'},grid:{color:'rgba(26,40,68,.4)'},min:-400,max:2000}
+      }
+    }
+  });
+
+  // TA allocation
+  const ctxTA = document.getElementById('chart-ta-alloc');
+  if(taChart) taChart.destroy();
+  const taSpend = {};
+  PORTFOLIO.forEach(a=>{taSpend[a.ta]=(taSpend[a.ta]||0)+a.rd});
+  taChart = new Chart(ctxTA,{
+    type:'doughnut',
+    data:{
+      labels:Object.keys(taSpend),
+      datasets:[{data:Object.values(taSpend),backgroundColor:Object.keys(taSpend).map(t=>colorMap[t]),borderColor:'#0a0f1c',borderWidth:2}]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#96a4be',font:{size:10}}}}}
+  });
+
+  // Phase distribution
+  const ctxP = document.getElementById('chart-phase-dist');
+  if(phaseChart) phaseChart.destroy();
+  const phaseCount = {Ph1:0,Ph2:0,Ph3:0};
+  PORTFOLIO.forEach(a=>phaseCount[a.phase]++);
+  phaseChart = new Chart(ctxP,{
+    type:'bar',
+    data:{
+      labels:['Phase 1','Phase 2','Phase 3'],
+      datasets:[{data:[phaseCount.Ph1,phaseCount.Ph2,phaseCount.Ph3],backgroundColor:['#8b5cf6','#00c9a7','#22c55e'],borderRadius:6}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{display:false}},
+        y:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}}
+      }
+    }
+  });
+
+  // Asset table
+  document.getElementById('portfolio-tbody').innerHTML = PORTFOLIO.map(a=>`
+    <tr>
+      <td><strong>${a.asset}</strong></td>
+      <td>${a.ind}</td>
+      <td><span class="pill">${a.phase}</span></td>
+      <td class="num">${a.ptrs}%</td>
+      <td class="num">$${a.sales}B</td>
+      <td class="num"><strong style="color:${a.npv>0?'#22c55e':'#ef4444'}">$${a.npv}M</strong></td>
+      <td class="num">$${a.rd}M</td>
+      <td><span class="tier ${recColor[a.rec]}">${a.rec}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ===================================================
+// MODULE 4: Regulatory
+// ===================================================
+
+let regChart;
+function renderRegulatory(){
+  // Pathway cards
+  const need = document.getElementById('r-need').value;
+  const pop = document.getElementById('r-pop').value;
+  const evidence = document.getElementById('r-evidence').value;
+
+  const isRare = pop==='rare'||pop==='orphan'||pop==='pediatric';
+  const isHighNeed = need==='high';
+
+  const pathways = [];
+  if(isHighNeed && isRare){
+    pathways.push({a:'FDA',d:'Breakthrough Therapy + Accelerated Approval',c:'#00c9a7',score:92,time:'4.2 yr',basis:'High unmet need · rare disease'});
+    pathways.push({a:'EMA',d:'PRIME + Conditional Marketing Authorization',c:'#3b7dff',score:88,time:'4.5 yr',basis:'PRIME scheme for unmet need'});
+    pathways.push({a:'PMDA',d:'SAKIGAKE Designation',c:'#f0b429',score:78,time:'5.0 yr',basis:'Innovative therapy + Japan first'});
+    pathways.push({a:'NMPA',d:'Priority Review + Conditional Approval',c:'#ff4d6d',score:72,time:'5.8 yr',basis:'Urgent clinical need pathway'});
+  } else if(isHighNeed){
+    pathways.push({a:'FDA',d:'Fast Track Designation',c:'#00c9a7',score:84,time:'5.0 yr',basis:'Serious condition + unmet need'});
+    pathways.push({a:'EMA',d:'Accelerated Assessment',c:'#3b7dff',score:80,time:'5.2 yr',basis:'Major public health interest'});
+    pathways.push({a:'PMDA',d:'Standard NDA + Priority Review',c:'#f0b429',score:74,time:'5.6 yr',basis:'Severe condition'});
+    pathways.push({a:'NMPA',d:'Standard NDA',c:'#ff4d6d',score:68,time:'6.4 yr',basis:'Standard pathway'});
+  } else {
+    pathways.push({a:'FDA',d:'Standard NDA / BLA',c:'#00c9a7',score:72,time:'6.2 yr',basis:'Conventional pathway'});
+    pathways.push({a:'EMA',d:'Centralized Procedure',c:'#3b7dff',score:70,time:'6.0 yr',basis:'EU-wide market access'});
+    pathways.push({a:'PMDA',d:'Standard NDA',c:'#f0b429',score:64,time:'6.8 yr',basis:'Standard pathway'});
+    pathways.push({a:'NMPA',d:'Standard NDA',c:'#ff4d6d',score:62,time:'7.0 yr',basis:'Standard pathway'});
+  }
+
+  document.getElementById('r-pathways').innerHTML = pathways.map(p=>`
+    <div style="background:var(--bg2);border:1px solid var(--bdr);border-left:3px solid ${p.c};border-radius:9px;padding:13px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:.78rem;font-weight:700;color:${p.c}">${p.a}</span>
+        <span class="score ${p.score>=85?'score-hi':p.score>=70?'score-mid':'score-lo'}" style="width:36px;height:36px;font-size:.85rem">${p.score}</span>
+      </div>
+      <div style="font-size:.82rem;font-weight:600;margin-bottom:5px">${p.d}</div>
+      <div style="font-size:.65rem;color:var(--t2);line-height:1.5">${p.basis}</div>
+      <div style="font-size:.62rem;color:var(--t3);margin-top:6px;font-family:var(--fm)">Est. ${p.time} to approval</div>
+    </div>
+  `).join('');
+
+  // Timeline chart
+  const ctx = document.getElementById('chart-reg-timeline');
+  if(regChart) regChart.destroy();
+  regChart = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['FDA','EMA','PMDA','NMPA'],
+      datasets:[
+        {label:'Pre-IND/CTA',data:[0.5,0.7,0.6,0.8],backgroundColor:'rgba(139,92,246,.7)'},
+        {label:'Ph1 + Ph2',data:[2.2,2.4,2.3,2.6],backgroundColor:'rgba(0,201,167,.7)'},
+        {label:'Ph3 pivotal',data:[2.5,2.5,2.8,3.0],backgroundColor:'rgba(59,125,255,.7)'},
+        {label:'Review',data:[0.7,0.8,1.1,1.4],backgroundColor:'rgba(240,180,41,.7)'}
+      ]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},
+      scales:{
+        x:{stacked:true,ticks:{color:'#5d6e8c',font:{size:10},callback:v=>v+' yr'},grid:{color:'rgba(26,40,68,.4)'}},
+        y:{stacked:true,ticks:{color:'#96a4be',font:{size:11}},grid:{display:false}}
+      }
+    }
+  });
+
+  // Meetings table
+  const meetings = [
+    ['Pre-IND meeting','FDA','Q1 2026','Confirm IND-enabling tox package','Critical'],
+    ['Scientific Advice','EMA','Q1 2026','Align EU CTA + endpoint','Critical'],
+    ['Type B (End of Phase 2)','FDA','Q4 2027','Lock Phase 3 design + endpoints','Critical'],
+    ['Pre-NDA / Pre-BLA','FDA','Q3 2030','Submission readiness, format','High'],
+    ['Pre-MAA Briefing','EMA','Q4 2030','Filing strategy, rapporteur','High'],
+    ['PMDA Consultation','PMDA','Q2 2027','J-NDA bridging strategy','Medium']
+  ];
+  document.getElementById('r-meetings').innerHTML = meetings.map(m=>`
+    <tr>
+      <td><strong>${m[0]}</strong></td>
+      <td>${m[1]}</td>
+      <td><span class="pill pill-cyan">${m[2]}</span></td>
+      <td>${m[3]}</td>
+      <td><span class="tier ${m[4]==='Critical'?'tier-1':m[4]==='High'?'tier-2':'tier-3'}">${m[4]}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ===================================================
+// MODULE 5: Operating Model
+// ===================================================
+
+let radarChart, cycleChart;
+function renderOpModel(){
+  const ctx1 = document.getElementById('chart-radar');
+  const ctx2 = document.getElementById('chart-cycletime');
+  if(!ctx1||!ctx2) return;
+  if(radarChart) radarChart.destroy();
+  if(cycleChart) cycleChart.destroy();
+
+  radarChart = new Chart(ctx1,{
+    type:'radar',
+    data:{
+      labels:['Clinical Ops','Regulatory','Pharmacovigilance','Biostatistics','Data Sciences','Medical Affairs'],
+      datasets:[
+        {label:'Current State',data:[3.6,3.8,3.4,3.2,2.4,3.8],backgroundColor:'rgba(0,201,167,.15)',borderColor:'#00c9a7',borderWidth:2,pointRadius:3,pointBackgroundColor:'#00c9a7'},
+        {label:'Target State',data:[4.4,4.2,4.0,4.0,4.2,4.4],backgroundColor:'rgba(59,125,255,.1)',borderColor:'#3b7dff',borderWidth:2,pointRadius:2.5,pointBackgroundColor:'#3b7dff',borderDash:[4,4]},
+        {label:'Industry P75',data:[4.0,3.9,3.8,3.8,3.6,4.0],backgroundColor:'rgba(139,92,246,.08)',borderColor:'#8b5cf6',borderWidth:1.5,pointRadius:2,pointBackgroundColor:'#8b5cf6',borderDash:[2,4]}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},
+      scales:{r:{
+        ticks:{display:false},
+        grid:{color:'rgba(26,40,68,.5)'},
+        angleLines:{color:'rgba(26,40,68,.5)'},
+        pointLabels:{color:'#96a4be',font:{size:10}},
+        min:0,max:5
+      }}
+    }
+  });
+
+  cycleChart = new Chart(ctx2,{
+    type:'bar',
+    data:{
+      labels:['IND Filing','FPI','LPI','DBL','CSR Final','MAA/NDA'],
+      datasets:[
+        {label:'Your Org',data:[12.4,8.2,18.6,4.2,5.8,9.4],backgroundColor:'rgba(0,201,167,.8)'},
+        {label:'Industry P50',data:[10.8,7.0,16.2,3.5,4.8,8.4],backgroundColor:'rgba(139,92,246,.5)'},
+        {label:'Industry P25 (Best)',data:[8.4,5.4,13.5,2.8,3.6,6.8],backgroundColor:'rgba(34,197,94,.4)'}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},
+      scales:{
+        x:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{display:false}},
+        y:{ticks:{color:'#5d6e8c',font:{size:10},callback:v=>v+' mo'},grid:{color:'rgba(26,40,68,.4)'},title:{display:true,text:'Cycle time (months)',color:'#96a4be',font:{size:10}}}
+      }
+    }
+  });
+
+  const funcs = [
+    ['Clinical Operations','3.6','4.4','4.0','Study startup cycle time +1.4 mo vs P75','High'],
+    ['Regulatory Affairs','3.8','4.2','3.9','Regional model, lacks global TA leads','Medium'],
+    ['Pharmacovigilance','3.4','4.0','3.8','Manual ICSR processing in 38% of cases','High'],
+    ['Biostatistics','3.2','4.0','3.8','Limited adaptive trial capability','Medium'],
+    ['Data Sciences / AI','2.4','4.2','3.6','No centralized AI/ML CoE','Critical'],
+    ['Medical Affairs','3.8','4.4','4.0','Strong field, weak medical strategy ops','Medium']
+  ];
+  document.getElementById('opmodel-tbody').innerHTML = funcs.map(f=>`
+    <tr>
+      <td><strong>${f[0]}</strong></td>
+      <td class="num">${f[1]} / 5</td>
+      <td class="num">${f[2]} / 5</td>
+      <td class="num">${f[3]} / 5</td>
+      <td>${f[4]}</td>
+      <td><span class="tier ${f[5]==='Critical'?'tier-4':f[5]==='High'?'tier-3':'tier-2'}">${f[5]}</span></td>
+    </tr>
+  `).join('');
+}
+
+// ===================================================
+// MODULE 6: CDP Architect
+// ===================================================
+
+const PHASES = [
+  {name:'IND-Enabling',start:0,dur:14,color:'#8b5cf6',mile:'IND Filed'},
+  {name:'Phase 1 (SAD/MAD)',start:14,dur:14,color:'#3b7dff',mile:'POC Met'},
+  {name:'Phase 2 (Adaptive)',start:24,dur:20,color:'#00c9a7',mile:'EoP2 Meeting'},
+  {name:'Phase 3 Pivotal',start:42,dur:24,color:'#22c55e',mile:'Topline Read'},
+  {name:'NDA/BLA Filing',start:64,dur:10,color:'#f0b429',mile:'Submission'},
+  {name:'FDA Review',start:74,dur:10,color:'#f97316',mile:'PDUFA Date'},
+  {name:'Launch Prep',start:60,dur:18,color:'#ff4d6d',mile:'Approval'}
+];
+
+function renderCDP(){
+  const wrap = document.getElementById('gantt-cdp');
+  const totalMo = 90;
+  wrap.innerHTML = PHASES.map(p=>{
+    const left = (p.start/totalMo*100).toFixed(1);
+    const width = (p.dur/totalMo*100).toFixed(1);
+    return `<div class="gantt-row">
+      <div class="gantt-lbl">${p.name}</div>
+      <div class="gantt-track">
+        <div class="gantt-bar" style="left:${left}%;width:${width}%;background:linear-gradient(135deg,${p.color},${p.color}cc)">${p.mile}</div>
+      </div>
+      <div class="gantt-mile">M${p.start}-${p.start+p.dur}</div>
+    </div>`;
+  }).join('');
+
+  // Budget chart
+  const ctx = document.getElementById('chart-budget');
+  if(window.budgetChart) window.budgetChart.destroy();
+  window.budgetChart = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['IND-Enabling','Phase 1','Phase 2','Phase 3','Filing','Launch Prep'],
+      datasets:[{
+        label:'$ Million',
+        data:[42,68,124,285,38,55],
+        backgroundColor:['#8b5cf6','#3b7dff','#00c9a7','#22c55e','#f0b429','#ff4d6d'],
+        borderRadius:6
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{display:false}},
+        y:{ticks:{color:'#5d6e8c',font:{size:10},callback:v=>'$'+v+'M'},grid:{color:'rgba(26,40,68,.4)'}}
+      }
+    }
+  });
+
+  // Go/no-go gates
+  const gates = [
+    ['G1 — End of Ph1','M28','SAD/MAD safety + PK/PD POC','+18 pp'],
+    ['G2 — Ph2 Dose Selection','M38','Biomarker engagement + tolerability','+12 pp'],
+    ['G3 — End of Phase 2','M44','Efficacy signal vs SoC, safety profile','+22 pp'],
+    ['G4 — Phase 3 Interim','M58','Conditional power analysis','+8 pp'],
+    ['G5 — Pre-NDA Filing','M66','Topline efficacy + reg alignment','+15 pp']
+  ];
+  document.getElementById('gates-tbody').innerHTML = gates.map(g=>`
+    <tr>
+      <td><strong>${g[0]}</strong></td>
+      <td><span class="pill pill-cyan">${g[1]}</span></td>
+      <td>${g[2]}</td>
+      <td class="num" style="color:#22c55e"><strong>${g[3]}</strong></td>
+    </tr>
+  `).join('');
+}
+
+// ===================================================
+// Initialize all modules
+// ===================================================
+
+window.addEventListener('load',()=>{
+  runFeasibility();
+  runProtocol();
+  renderPortfolio();
+  renderRegulatory();
+  renderOpModel();
+  renderCDP();
+});
+</script>
+
+</body>
+</html>
