@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market Access, HEOR & RWE Strategy IQ — Value & Access Intelligence Platform</title>
+<meta name="description" content="AI-powered Market Access, Health Economics Outcomes Research, and Real-World Evidence strategy platform. Payer landscape, HEOR study designer, GVD/AMCP builder, HTA pathway scorer, RWE data source matcher.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#050810;--bg2:#0a0f1c;--bg3:#111828;--bg4:#182038;--bdr:#1a2844;--t1:#eaf0fa;--t2:#96a4be;--t3:#5d6e8c;--blue:#3b7dff;--cyan:#00c9a7;--gold:#f0b429;--rose:#ff4d6d;--violet:#8b5cf6;--green:#22c55e;--orange:#f97316;--red:#ef4444;--f:'Inter',system-ui,sans-serif;--fd:'Fraunces',Georgia,serif;--fm:'JetBrains Mono',monospace}
+html{font-size:15px;scroll-behavior:smooth}body{font-family:var(--f);background:var(--bg);color:var(--t1);overflow-x:hidden;min-height:100vh}
+a{color:var(--cyan);text-decoration:none}button{font-family:var(--f);cursor:pointer;border:none}input,select{font-family:var(--f)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:6px}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.tb-brand{display:flex;align-items:center;gap:12px}.tb-logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--green),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff}
+.tb-name{font-size:.95rem;font-weight:700;line-height:1.15}.tb-name .sub{display:block;font-size:.62rem;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.8px;margin-top:1px}
+.tb-actions{display:flex;gap:8px;align-items:center}.tb-btn{padding:6px 14px;border-radius:8px;font-size:.72rem;font-weight:600;background:var(--bg3);border:1px solid var(--bdr);color:var(--t2)}.tb-btn:hover{border-color:var(--green);color:var(--green)}.tb-btn.primary{background:linear-gradient(135deg,var(--green),#16a34a);color:#fff;border-color:transparent}
+.tb-back{font-size:.7rem;color:var(--t2);padding:6px 12px;border-radius:8px;border:1px solid var(--bdr);background:transparent}.tb-back:hover{border-color:var(--green);color:var(--green)}
+.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{padding:14px 20px;font-size:.75rem;font-weight:600;color:var(--t2);background:transparent;border:none;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:8px}
+.tab:hover{color:var(--t1);background:rgba(255,255,255,.02)}.tab.active{color:var(--green);border-bottom-color:var(--green);background:rgba(34,197,94,.05)}
+.tab-icon{font-size:1rem}.tab-num{font-size:.6rem;color:var(--t3);font-family:var(--fm);font-weight:500}.tab.active .tab-num{color:var(--green)}
+.module{display:none;padding:24px;max-width:1400px;margin:0 auto}.module.active{display:block}
+.mod-header{margin-bottom:24px}.mod-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2);margin-bottom:10px}
+.mod-title{font-family:var(--fd);font-size:1.9rem;font-weight:700;letter-spacing:-.6px;margin-bottom:6px}.mod-desc{font-size:.88rem;color:var(--t2);max-width:780px;line-height:1.55}
+.grid-2{display:grid;grid-template-columns:1fr 2fr;gap:18px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid-eq2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.grid-2,.grid-4,.grid-eq2{grid-template-columns:1fr}}
+.card{background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:18px}
+.card-title{font-size:.82rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}.card-title .lbl{display:flex;align-items:center;gap:8px}.card-title .ic{font-size:1rem}
+.card-sub{font-size:.7rem;color:var(--t2);margin-bottom:14px;line-height:1.5}
+.kpi{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px}
+.kpi-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);font-weight:600;margin-bottom:4px}
+.kpi-val{font-family:var(--fd);font-size:1.7rem;font-weight:700;line-height:1;color:var(--t1)}
+.kpi-val.cyan{color:var(--cyan)}.kpi-val.green{color:var(--green)}.kpi-val.gold{color:var(--gold)}.kpi-val.rose{color:var(--rose)}.kpi-val.violet{color:var(--violet)}.kpi-val.blue{color:var(--blue)}
+.kpi-sub{font-size:.65rem;color:var(--t2);margin-top:4px}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;padding:2px 6px;border-radius:6px;font-weight:600;margin-top:4px}
+.kpi-trend.up{background:rgba(34,197,94,.1);color:var(--green)}.kpi-trend.down{background:rgba(239,68,68,.1);color:var(--red)}.kpi-trend.neutral{background:rgba(150,164,190,.1);color:var(--t2)}
+.field{margin-bottom:14px}.field-lbl{font-size:.7rem;font-weight:600;color:var(--t2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.field-input,.field-select{width:100%;padding:9px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);font-size:.82rem}.field-input:focus,.field-select:focus{outline:none;border-color:var(--green)}
+.field-row{display:flex;gap:10px}.field-row .field{flex:1}
+.slider{width:100%;-webkit-appearance:none;height:4px;border-radius:4px;background:var(--bdr);outline:none}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--green);cursor:pointer;border:2px solid var(--bg3)}
+.slider-val{font-family:var(--fm);font-size:.85rem;font-weight:600;color:var(--green);margin-left:8px}
+.slider-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}.slider-row .label{font-size:.7rem;color:var(--t2);font-weight:600}
+.btn-run{width:100%;padding:11px;background:linear-gradient(135deg,var(--green),#16a34a);color:#fff;border-radius:9px;font-weight:700;font-size:.82rem;margin-top:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:.75rem}
+.tbl th{text-align:left;padding:9px 10px;background:var(--bg2);color:var(--t2);font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bdr)}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(26,40,68,.4);color:var(--t1)}.tbl tr:hover td{background:rgba(34,197,94,.04)}
+.tbl .num{font-family:var(--fm);font-weight:500;text-align:right}
+.tbl .tier{padding:2px 7px;border-radius:5px;font-size:.6rem;font-weight:700;text-transform:uppercase}
+.tier-1{background:rgba(34,197,94,.15);color:var(--green)}.tier-2{background:rgba(0,201,167,.12);color:var(--cyan)}.tier-3{background:rgba(240,180,41,.12);color:var(--gold)}.tier-4{background:rgba(239,68,68,.12);color:var(--red)}
+.insight{background:linear-gradient(135deg,rgba(34,197,94,.08),rgba(0,201,167,.05));border:1px solid rgba(34,197,94,.2);border-radius:10px;padding:14px 16px;margin-top:14px}
+.insight-hd{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--green);margin-bottom:6px}
+.insight-body{font-size:.78rem;color:var(--t1);line-height:1.6}.insight-body strong{color:var(--green);font-weight:600}.insight-body ul{margin:6px 0 0 18px}.insight-body li{margin-bottom:3px}
+.chart-wrap{position:relative;height:260px;width:100%}.chart-wrap.tall{height:340px}.chart-wrap.short{height:200px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:14px;font-size:.62rem;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--t2)}
+.pill-green{background:rgba(34,197,94,.1);color:var(--green);border-color:rgba(34,197,94,.25)}.pill-cyan{background:rgba(0,201,167,.1);color:var(--cyan);border-color:rgba(0,201,167,.25)}.pill-gold{background:rgba(240,180,41,.1);color:var(--gold);border-color:rgba(240,180,41,.25)}
+.spacer{height:14px}
+.toast{position:fixed;top:80px;right:24px;background:var(--bg3);border:1px solid var(--green);border-radius:10px;padding:12px 18px;font-size:.78rem;color:var(--t1);box-shadow:0 12px 32px rgba(0,0,0,.4);transform:translateX(120%);transition:transform .3s;z-index:200}.toast.show{transform:translateX(0)}
+.score-circle{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:10px;font-family:var(--fd);font-size:.95rem;font-weight:700}
+.sc-hi{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}.sc-mid{background:rgba(240,180,41,.15);color:var(--gold);border:1px solid rgba(240,180,41,.3)}.sc-lo{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+@media(min-width:901px){.sticky-side{position:sticky;top:120px;align-self:start}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">MA</div>
+    <div class="tb-name">Market Access, HEOR & RWE Strategy IQ<span class="sub">Value · Access · Outcomes · Real-World Evidence</span></div>
+  </div>
+  <div class="tb-actions">
+    <a href="index.html" class="tb-back">← Portfolio</a>
+    <button class="tb-btn" onclick="t('Demo data loaded')">📥 Load Demo Data</button>
+    <button class="tb-btn primary" onclick="t('Value access report queued')">📤 Export Report</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="payer"><span class="tab-icon">💳</span><span class="tab-num">01</span>Payer Landscape</button>
+  <button class="tab" data-tab="heor"><span class="tab-icon">📐</span><span class="tab-num">02</span>HEOR Study Designer</button>
+  <button class="tab" data-tab="gvd"><span class="tab-icon">📂</span><span class="tab-num">03</span>GVD / AMCP Dossier</button>
+  <button class="tab" data-tab="hta"><span class="tab-icon">⚖️</span><span class="tab-num">04</span>HTA Pathway</button>
+  <button class="tab" data-tab="rwe"><span class="tab-icon">🌐</span><span class="tab-num">05</span>RWE & IRA Strategy</button>
+</div>
+
+<!-- ===== Module 1: Payer Landscape ===== -->
+<section class="module active" id="mod-payer">
+  <div class="mod-header">
+    <div class="mod-tag">💳 Module 01 · Payer Landscape</div>
+    <h1 class="mod-title">Global Payer Landscape Mapper</h1>
+    <p class="mod-desc">US commercial, Medicare, Medicaid + EU5 + Japan payer coverage analysis. Formulary positioning, prior authorization landscape, and competitive access benchmarking.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">US Payer Coverage</div><div class="kpi-val green">82%</div><div class="kpi-sub">commercial lives</div><span class="kpi-trend up">▲ +6 pp YoY</span></div>
+    <div class="kpi"><div class="kpi-lbl">Tier Position</div><div class="kpi-val cyan">T3</div><div class="kpi-sub">avg formulary tier</div><span class="kpi-trend neutral">PA in 78%</span></div>
+    <div class="kpi"><div class="kpi-lbl">Gross-to-Net</div><div class="kpi-val gold">42%</div><div class="kpi-sub">rebate/discount</div><span class="kpi-trend down">▲ +4 pp</span></div>
+    <div class="kpi"><div class="kpi-lbl">Time to Reimbursement</div><div class="kpi-val violet">8.4</div><div class="kpi-sub">months avg (EU5)</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🇺🇸</span> US Payer Coverage — Top 15 Payers (ASC-301)</span></div>
+    <table class="tbl">
+      <thead><tr><th>Payer</th><th>Type</th><th>Covered Lives (M)</th><th>Coverage Status</th><th>Tier</th><th>PA Required</th><th>Step Edits</th><th>GtN%</th></tr></thead>
+      <tbody>
+        <tr><td><strong>UnitedHealthcare</strong></td><td>Commercial</td><td class="num">49.2</td><td><span class="tier tier-1">Covered</span></td><td>T3</td><td>Yes</td><td>None</td><td class="num">38%</td></tr>
+        <tr><td><strong>Anthem (Elevance)</strong></td><td>Commercial</td><td class="num">47.8</td><td><span class="tier tier-1">Covered</span></td><td>T3</td><td>Yes</td><td>Failed 1L SoC</td><td class="num">42%</td></tr>
+        <tr><td><strong>Aetna (CVS)</strong></td><td>Commercial</td><td class="num">38.4</td><td><span class="tier tier-1">Covered</span></td><td>T3</td><td>Yes</td><td>None</td><td class="num">44%</td></tr>
+        <tr><td><strong>Cigna</strong></td><td>Commercial</td><td class="num">18.5</td><td><span class="tier tier-1">Covered</span></td><td>T3</td><td>Yes</td><td>Failed 1L SoC</td><td class="num">40%</td></tr>
+        <tr><td><strong>Humana</strong></td><td>Commercial + MA</td><td class="num">22.4</td><td><span class="tier tier-2">PA-restricted</span></td><td>T4</td><td>Yes</td><td>2 fails required</td><td class="num">46%</td></tr>
+        <tr><td><strong>Medicare Part B</strong></td><td>Federal</td><td class="num">63.8</td><td><span class="tier tier-1">Covered</span></td><td>—</td><td>No</td><td>None</td><td class="num">22%</td></tr>
+        <tr><td><strong>Medicaid (National)</strong></td><td>Federal+State</td><td class="num">93.5</td><td><span class="tier tier-2">PA-restricted</span></td><td>T4</td><td>Yes</td><td>State-dependent</td><td class="num">56%</td></tr>
+        <tr><td><strong>Kaiser Permanente</strong></td><td>Integrated</td><td class="num">12.6</td><td><span class="tier tier-3">Restricted</span></td><td>T5</td><td>Yes</td><td>P&T review</td><td class="num">35%</td></tr>
+        <tr><td><strong>BCBS Federal</strong></td><td>Commercial</td><td class="num">5.6</td><td><span class="tier tier-1">Covered</span></td><td>T3</td><td>Yes</td><td>None</td><td class="num">36%</td></tr>
+        <tr><td><strong>Centene/WellCare</strong></td><td>Medicaid+MA</td><td class="num">26.7</td><td><span class="tier tier-2">PA-restricted</span></td><td>T4</td><td>Yes</td><td>State-dependent</td><td class="num">52%</td></tr>
+        <tr><td><strong>Molina Healthcare</strong></td><td>Medicaid</td><td class="num">5.1</td><td><span class="tier tier-3">Restricted</span></td><td>T5</td><td>Yes</td><td>2 fails required</td><td class="num">58%</td></tr>
+        <tr><td><strong>Express Scripts (Cigna)</strong></td><td>PBM</td><td class="num">85.0</td><td><span class="tier tier-2">Restricted</span></td><td>T4</td><td>Yes</td><td>Step edit applied</td><td class="num">45%</td></tr>
+        <tr><td><strong>CVS Caremark</strong></td><td>PBM</td><td class="num">92.0</td><td><span class="tier tier-1">Covered</span></td><td>T3</td><td>Yes</td><td>None</td><td class="num">41%</td></tr>
+        <tr><td><strong>OptumRx (UHG)</strong></td><td>PBM</td><td class="num">66.0</td><td><span class="tier tier-1">Covered</span></td><td>T3</td><td>Yes</td><td>None</td><td class="num">39%</td></tr>
+        <tr><td><strong>Tricare (DoD)</strong></td><td>Federal</td><td class="num">9.6</td><td><span class="tier tier-1">Covered</span></td><td>T3</td><td>No</td><td>None</td><td class="num">28%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🌍</span> Global Coverage Comparison (EU5 + JP)</span></div>
+      <div class="chart-wrap"><canvas id="ch-global"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📈</span> Access Ramp Trajectory</span></div>
+      <div class="chart-wrap"><canvas id="ch-ramp"></canvas></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Payer Strategy Insight</div>
+    <div class="insight-body">
+      US commercial access is solid at 82% covered lives; key gap is Medicaid restriction (PA + 2 step edits in 60% of states). Three priority moves:
+      <ul>
+        <li><strong>Outcomes-based contract (OBC):</strong> Pilot with Cigna and Aetna — clinical outcome (OS at 24 months) triggers rebate refund. Demonstrates value to ICER and CMS.</li>
+        <li><strong>Medicaid supplemental rebates:</strong> Negotiate state-level supplemental rebates in 6 priority states (CA, TX, NY, FL, IL, PA) to reduce step-edit burden.</li>
+        <li><strong>IRA exposure assessment:</strong> ASC-301 is small-molecule, eligible for Medicare Drug Price Negotiation starting 2028. Model 25-40% price cut scenario impact on 5-year NPV.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 2: HEOR ===== -->
+<section class="module" id="mod-heor">
+  <div class="mod-header">
+    <div class="mod-tag">📐 Module 02 · Health Economics</div>
+    <h1 class="mod-title">HEOR Study Designer</h1>
+    <p class="mod-desc">Cost-effectiveness analysis (CEA), budget impact analysis (BIA), cost-utility analysis (CUA), and indirect treatment comparison (ITC/NMA) study design.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card sticky-side">
+      <div class="card-title"><span class="lbl"><span class="ic">🎛️</span> Study Parameters</span></div>
+      <div class="field"><label class="field-lbl">Study Type</label><select class="field-select"><option>Cost-Effectiveness Analysis (CEA)</option><option>Budget Impact Analysis (BIA)</option><option>Cost-Utility Analysis (CUA)</option><option>Cost-Minimization Analysis (CMA)</option></select></div>
+      <div class="field"><label class="field-lbl">Perspective</label><select class="field-select"><option>US Payer</option><option>US Societal</option><option>UK NHS / PSS</option><option>European Healthcare</option><option>Japan Public Insurance</option></select></div>
+      <div class="field"><label class="field-lbl">Comparator</label><select class="field-select"><option>Standard of Care</option><option>Best Supportive Care</option><option>Active Competitor</option><option>Multiple (NMA)</option></select></div>
+      <div class="field"><div class="slider-row"><span class="label">Time Horizon (years)</span><span class="slider-val">15</span></div><input type="range" min="1" max="50" value="15" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">Discount Rate (%)</span><span class="slider-val">3.0</span></div><input type="range" min="0" max="6" step="0.5" value="3" class="slider"></div>
+      <div class="field"><label class="field-lbl">Outcome Measure</label><select class="field-select"><option>QALY (Quality-Adjusted Life Year)</option><option>LYG (Life Year Gained)</option><option>DALY (Disability-Adjusted)</option><option>Other clinical</option></select></div>
+      <button class="btn-run">🚀 Run HEOR Model</button>
+    </div>
+
+    <div>
+      <div class="grid-4" style="margin-bottom:14px">
+        <div class="kpi"><div class="kpi-lbl">ICER vs SoC</div><div class="kpi-val green">$84,200</div><div class="kpi-sub">per QALY</div><span class="kpi-trend up">▲ Below threshold</span></div>
+        <div class="kpi"><div class="kpi-lbl">Incremental QALYs</div><div class="kpi-val cyan">3.84</div><div class="kpi-sub">over 15 years</div></div>
+        <div class="kpi"><div class="kpi-lbl">Incremental Cost</div><div class="kpi-val gold">$323K</div><div class="kpi-sub">per patient</div></div>
+        <div class="kpi"><div class="kpi-lbl">NMB @ $150K WTP</div><div class="kpi-val violet">$253K</div><div class="kpi-sub">net monetary benefit</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="lbl"><span class="ic">📊</span> Cost-Effectiveness Plane</span></div>
+        <p class="card-sub">Probabilistic sensitivity analysis: 1,000 simulations of incremental cost vs incremental QALYs. Dashed line is $150K/QALY willingness-to-pay threshold.</p>
+        <div class="chart-wrap tall"><canvas id="ch-cea"></canvas></div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="grid-eq2">
+        <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🌊</span> Cost Breakdown</span></div>
+          <div class="chart-wrap"><canvas id="ch-cost"></canvas></div>
+        </div>
+        <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📉</span> Tornado — Sensitivity</span></div>
+          <div class="chart-wrap"><canvas id="ch-tornado"></canvas></div>
+        </div>
+      </div>
+
+      <div class="insight">
+        <div class="insight-hd">⚡ HEOR Strategic Insight</div>
+        <div class="insight-body">
+          Base case ICER of <strong>$84,200/QALY is below the US payer-typical $150K threshold</strong> and within ICER's "high value" range. Probabilistic sensitivity analysis shows 78% probability of being cost-effective at $150K WTP.
+          <ul>
+            <li><strong>Key driver:</strong> Overall survival benefit dominates the cost-effectiveness — a 1-month change in incremental OS shifts ICER by ±$18,000.</li>
+            <li><strong>Vulnerability:</strong> Long-term extrapolation assumption (10-15 year tail) drives 32% of total QALY gain. Recommend conservative tail in payer-facing model and detailed in academic publication.</li>
+            <li><strong>NICE adaptation:</strong> If adapting for UK NICE submission, expect £30,000/QALY threshold. Base case £58,000/QALY will fail; need patient access scheme of ~50% to clear bar.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 3: GVD/AMCP ===== -->
+<section class="module" id="mod-gvd">
+  <div class="mod-header">
+    <div class="mod-tag">📂 Module 03 · Value Dossier</div>
+    <h1 class="mod-title">Global Value Dossier (GVD) & AMCP eDossier Builder</h1>
+    <p class="mod-desc">Structured value story development covering unmet need, clinical evidence, economic evidence, and patient-reported outcomes. AMCP Format 4.0-compliant eDossier sections.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">GVD Completion</div><div class="kpi-val cyan">78%</div><div class="kpi-sub">14 / 18 sections</div></div>
+    <div class="kpi"><div class="kpi-lbl">Value Pillars</div><div class="kpi-val green">5</div><div class="kpi-sub">defined</div></div>
+    <div class="kpi"><div class="kpi-lbl">Evidence Gaps</div><div class="kpi-val rose">3</div><div class="kpi-sub">requires HEOR study</div></div>
+    <div class="kpi"><div class="kpi-lbl">AMCP Sections</div><div class="kpi-val violet">12/12</div><div class="kpi-sub">Format 4.0 covered</div></div>
+  </div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🏛️</span> Value Story Pillars — ASC-301</span></div>
+      <table class="tbl">
+        <thead><tr><th>Pillar</th><th>Headline</th><th>Evidence Strength</th><th>Gap</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1. Unmet Need</strong></td><td>Limited treatment options after 1L progression</td><td><span class="tier tier-1">Strong</span></td><td>None</td></tr>
+          <tr><td><strong>2. Clinical Benefit</strong></td><td>OS HR 0.68 vs SoC, PFS 8.4 vs 5.2 months</td><td><span class="tier tier-1">Strong</span></td><td>None</td></tr>
+          <tr><td><strong>3. Quality of Life</strong></td><td>EORTC-QLQ-C30 +12.4 vs SoC at week 24</td><td><span class="tier tier-2">Moderate</span></td><td>PRO long-term</td></tr>
+          <tr><td><strong>4. Economic Value</strong></td><td>ICER $84K/QALY vs SoC</td><td><span class="tier tier-1">Strong</span></td><td>Real-world cost-effectiveness</td></tr>
+          <tr><td><strong>5. System Value</strong></td><td>Reduced hospitalization (-32%) and inpatient days</td><td><span class="tier tier-2">Moderate</span></td><td>RWE confirmation</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📋</span> AMCP Format 4.0 Compliance</span></div>
+      <table class="tbl">
+        <thead><tr><th>Section</th><th>Required Content</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>1.0 Executive Summary</td><td>≤2 pp summary of value</td><td><span class="tier tier-1">Complete</span></td></tr>
+          <tr><td>2.0 Product Information</td><td>Indication, MOA, dosing, PK</td><td><span class="tier tier-1">Complete</span></td></tr>
+          <tr><td>3.0 Disease & Population</td><td>Epidemiology, burden, unmet need</td><td><span class="tier tier-1">Complete</span></td></tr>
+          <tr><td>4.0 Clinical Evidence</td><td>Pivotal + supportive trials</td><td><span class="tier tier-1">Complete</span></td></tr>
+          <tr><td>5.0 Comparative Effectiveness</td><td>SLR + NMA / ITC</td><td><span class="tier tier-2">In review</span></td></tr>
+          <tr><td>6.0 Economic Model</td><td>BIA + CEA results</td><td><span class="tier tier-1">Complete</span></td></tr>
+          <tr><td>7.0 Patient Perspectives</td><td>PRO + patient burden</td><td><span class="tier tier-2">In review</span></td></tr>
+          <tr><td>8.0 Real-World Evidence</td><td>RWE study results</td><td><span class="tier tier-3">Drafting</span></td></tr>
+          <tr><td>9.0 References & Appendices</td><td>Citation database</td><td><span class="tier tier-1">Complete</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Value Dossier Strategic Brief</div>
+    <div class="insight-body">
+      GVD is 78% complete with strong evidence on Pillars 1, 2, and 4. Three critical gaps to close before launch:
+      <ul>
+        <li><strong>Quality-of-life long-term data (Pillar 3):</strong> Open-label extension study reading out Q2 2027. Recommend interim PRO publication at ASCO 2027 to strengthen payer narrative.</li>
+        <li><strong>Real-world cost-effectiveness (Pillar 4):</strong> Plan IQVIA Komodo claims-linked study to validate trial-based ICER in real-world setting. 12-month timeline to first publication.</li>
+        <li><strong>System value evidence (Pillar 5):</strong> Hospitalization data from trial is suggestive; need RWE confirmation via Optum or Flatiron data partnership. Position for value-based contract negotiations with major commercial payers.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 4: HTA ===== -->
+<section class="module" id="mod-hta">
+  <div class="mod-header">
+    <div class="mod-tag">⚖️ Module 04 · HTA Strategy</div>
+    <h1 class="mod-title">HTA Pathway Scorer (NICE / G-BA / AMNOG / HAS / PBAC)</h1>
+    <p class="mod-desc">Health Technology Assessment pathway prediction across major HTA bodies. Probability of positive recommendation, expected pricing constraints, and adaptive submission strategy.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">HTA Bodies Modeled</div><div class="kpi-val cyan">7</div><div class="kpi-sub">major jurisdictions</div></div>
+    <div class="kpi"><div class="kpi-lbl">Avg P(Positive)</div><div class="kpi-val green">68%</div><div class="kpi-sub">across HTAs</div></div>
+    <div class="kpi"><div class="kpi-lbl">Expected Price Cut</div><div class="kpi-val gold">22%</div><div class="kpi-sub">vs US net price</div></div>
+    <div class="kpi"><div class="kpi-lbl">Time to Reimbursement</div><div class="kpi-val violet">14</div><div class="kpi-sub">months avg</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🌍</span> HTA Body Assessment</span></div>
+    <table class="tbl">
+      <thead><tr><th>HTA Body</th><th>Country</th><th>P(Positive)</th><th>Expected Outcome</th><th>Time to Decision</th><th>Pricing Constraint</th><th>Strategy</th></tr></thead>
+      <tbody>
+        <tr><td><strong>NICE</strong></td><td>🇬🇧 UK</td><td><div class="score-circle sc-mid">52</div></td><td>Conditional w/ PAS</td><td class="num">9 mo</td><td>50% PAS discount required</td><td><span class="pill pill-gold">Patient Access Scheme</span></td></tr>
+        <tr><td><strong>G-BA / IQWiG</strong></td><td>🇩🇪 Germany</td><td><div class="score-circle sc-hi">78</div></td><td>"Considerable" added benefit</td><td class="num">6 mo</td><td>15-25% price negotiation</td><td><span class="pill pill-green">Direct negotiation</span></td></tr>
+        <tr><td><strong>HAS / CEPS</strong></td><td>🇫🇷 France</td><td><div class="score-circle sc-hi">72</div></td><td>ASMR III-IV</td><td class="num">12 mo</td><td>22-30% price discount</td><td><span class="pill pill-green">SMR strategy</span></td></tr>
+        <tr><td><strong>AIFA</strong></td><td>🇮🇹 Italy</td><td><div class="score-circle sc-mid">62</div></td><td>Innovativeness fund eligible</td><td class="num">10 mo</td><td>MEA (PbR or risk-sharing)</td><td><span class="pill pill-gold">MEA contract</span></td></tr>
+        <tr><td><strong>Spanish DGCYP</strong></td><td>🇪🇸 Spain</td><td><div class="score-circle sc-mid">58</div></td><td>Conditional reimbursement</td><td class="num">14 mo</td><td>Regional access variation</td><td><span class="pill pill-gold">National + regional</span></td></tr>
+        <tr><td><strong>CDA-AMC</strong></td><td>🇨🇦 Canada</td><td><div class="score-circle sc-hi">71</div></td><td>Conditional positive</td><td class="num">15 mo</td><td>pCPA negotiation 30-40%</td><td><span class="pill pill-green">pCPA early engagement</span></td></tr>
+        <tr><td><strong>PBAC</strong></td><td>🇦🇺 Australia</td><td><div class="score-circle sc-mid">64</div></td><td>Restricted listing</td><td class="num">11 mo</td><td>Special pricing arrangement</td><td><span class="pill pill-gold">PBAC submission Q2</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📊</span> HTA Outcome Probability</span></div>
+      <div class="chart-wrap"><canvas id="ch-hta"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">💰</span> Net Price Trajectory (Index US=100)</span></div>
+      <div class="chart-wrap"><canvas id="ch-price"></canvas></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ HTA Strategic Brief</div>
+    <div class="insight-body">
+      G-BA (Germany) and HAS (France) are the strongest pillars — submit first to anchor international reference pricing favorably. NICE (UK) requires preparation: base case fails the £30K/QALY threshold; Patient Access Scheme of ~50% discount needed for positive recommendation.
+      <ul>
+        <li><strong>Sequencing strategy:</strong> Germany Q3 2026 → France Q4 2026 → Italy + Spain Q1 2027 → UK Q2 2027 (after evidence package strengthening). Avoid UK-first to prevent low-anchor reference pricing.</li>
+        <li><strong>Risk-sharing in Italy:</strong> MEA contract (payment by result) creates 18-month bridge while AIFA finalizes innovativeness fund eligibility.</li>
+        <li><strong>EUnetHTA JCA preparation:</strong> EU Joint Clinical Assessment becomes mandatory 2026 for oncology. Pre-emptive Scientific Advice with EUnetHTA recommended Q2 2026.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 5: RWE / IRA ===== -->
+<section class="module" id="mod-rwe">
+  <div class="mod-header">
+    <div class="mod-tag">🌐 Module 05 · Real-World Evidence</div>
+    <h1 class="mod-title">RWE Data Source Matcher & IRA Pricing Strategy</h1>
+    <p class="mod-desc">Real-world data source selection across claims, EHR, registries, and tokenized datasets. Medicare Drug Price Negotiation (IRA) impact modeling and value-based contract design.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">RWE Studies Active</div><div class="kpi-val cyan">6</div><div class="kpi-sub">across portfolio</div></div>
+    <div class="kpi"><div class="kpi-lbl">Data Source Partners</div><div class="kpi-val green">8</div><div class="kpi-sub">claims + EHR + registries</div></div>
+    <div class="kpi"><div class="kpi-lbl">IRA-Eligible Assets</div><div class="kpi-val rose">3</div><div class="kpi-sub">small molecules</div><span class="kpi-trend down">▲ 2028 selection</span></div>
+    <div class="kpi"><div class="kpi-lbl">5-Yr IRA Revenue Risk</div><div class="kpi-val gold">$2.1B</div><div class="kpi-sub">at 40% MFP cut</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🗄️</span> RWE Data Source Matcher</span></div>
+    <table class="tbl">
+      <thead><tr><th>Data Source</th><th>Type</th><th>Coverage</th><th>Strengths</th><th>Use Case Fit</th><th>Annual Cost</th></tr></thead>
+      <tbody>
+        <tr><td><strong>IQVIA PharMetrics Plus</strong></td><td>Claims (Comm + MA)</td><td class="num">235M lives</td><td>Longitudinal claims, comm + MA</td><td>BIA, RWE comparative effectiveness</td><td class="num">$450K</td></tr>
+        <tr><td><strong>Komodo Healthcare Map</strong></td><td>Integrated Claims + EHR</td><td class="num">320M lives</td><td>Closed claims linkage</td><td>Real-world treatment patterns</td><td class="num">$680K</td></tr>
+        <tr><td><strong>Optum Clinformatics</strong></td><td>Claims + lab</td><td class="num">75M lives</td><td>Lab + claims linkage</td><td>Surrogate endpoint validation</td><td class="num">$520K</td></tr>
+        <tr><td><strong>Flatiron Oncology</strong></td><td>EHR (Oncology)</td><td class="num">3.5M oncology pts</td><td>Curated oncology EHR</td><td>External control arm, RWE</td><td class="num">$780K</td></tr>
+        <tr><td><strong>Truveta</strong></td><td>EHR Network</td><td class="num">120M pts</td><td>Real-time EHR, multi-system</td><td>Safety surveillance, RWE</td><td class="num">$420K</td></tr>
+        <tr><td><strong>TriNetX</strong></td><td>EHR Federation</td><td class="num">280M pts</td><td>Global EHR network, fast feasibility</td><td>Trial feasibility + RWE</td><td class="num">$380K</td></tr>
+        <tr><td><strong>Aetion Evidence Platform</strong></td><td>Tokenized + analytical</td><td class="num">N/A (platform)</td><td>FDA-grade RWE analytics</td><td>Regulatory RWE submissions</td><td class="num">$550K</td></tr>
+        <tr><td><strong>Medicare LDS / CMS</strong></td><td>Federal Claims</td><td class="num">63M lives</td><td>Federal claims, IRA-relevant</td><td>Medicare cost-effectiveness</td><td class="num">$25K</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📉</span> IRA Medicare Drug Price Negotiation Impact</span></div>
+      <p class="card-sub">Modeled NPV impact across 4 IRA scenarios for ASC-301 (small molecule, eligible 2028).</p>
+      <div class="chart-wrap"><canvas id="ch-ira"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🤝</span> Value-Based Contract Design</span></div>
+      <table class="tbl">
+        <thead><tr><th>VBC Type</th><th>Trigger Metric</th><th>Rebate %</th></tr></thead>
+        <tbody>
+          <tr><td>Outcomes-based (OS)</td><td>24-mo OS &lt; 65%</td><td class="num">15%</td></tr>
+          <tr><td>Outcomes-based (PFS)</td><td>Median PFS &lt; 7 mo</td><td class="num">10%</td></tr>
+          <tr><td>Annuity/Installment</td><td>Spread over 60 months</td><td class="num">N/A</td></tr>
+          <tr><td>Indication-specific</td><td>Earlier-line failure</td><td class="num">8%</td></tr>
+          <tr><td>Adherence-based</td><td>&lt;80% adherence</td><td class="num">12%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ RWE & IRA Strategic Brief</div>
+    <div class="insight-body">
+      ASC-301 is a small-molecule small-molecule oncology asset and falls within the IRA Medicare Drug Price Negotiation 9-year post-approval window starting 2028. Two-pronged strategy required:
+      <ul>
+        <li><strong>RWE program:</strong> Lock data partnership with Flatiron (oncology EHR) + Komodo (claims linkage) by Q3 2026. Use combined cohort for external control arm support, post-marketing OS validation, and IRA pre-negotiation evidence package.</li>
+        <li><strong>IRA negotiation preparation:</strong> CMS evaluates "comparable therapeutic alternatives," clinical benefit, and unmet need. Build defensible value case using G-BA + NICE-style HTA evidence package. Pre-emptive submission to ICER for independent value assessment.</li>
+        <li><strong>VBC pivot:</strong> Outcomes-based contracts with top-5 commercial payers create non-IRA revenue protection and demonstrate confidence in efficacy claims. Target Cigna and Aetna as first pilots — both have published OBC frameworks.</li>
+      </ul>
+      <strong>Expected impact:</strong> Combined RWE + VBC + IRA preparation reduces NPV erosion from 40% (worst case) to 18% (base case) under MFP scenarios.
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast">Updated</div>
+
+<script>
+function t(m){const x=document.getElementById('toast');x.textContent=m;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2400);}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.module').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');document.getElementById('mod-'+b.dataset.tab).classList.add('active');
+  setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),50);
+}));
+const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},scales:{x:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}},y:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}}}};
+window.addEventListener('load',()=>{
+  new Chart(document.getElementById('ch-global'),{type:'bar',data:{labels:['UK','Germany','France','Italy','Spain','Japan'],datasets:[{label:'Covered',data:[68,78,72,62,58,82],backgroundColor:'rgba(34,197,94,.7)'},{label:'Restricted',data:[24,18,22,28,32,15],backgroundColor:'rgba(240,180,41,.6)'},{label:'Not covered',data:[8,4,6,10,10,3],backgroundColor:'rgba(239,68,68,.5)'}]},options:{...opts,scales:{x:{stacked:true,ticks:{color:'#5d6e8c'},grid:{display:false}},y:{stacked:true,ticks:{color:'#5d6e8c',callback:v=>v+'%'},grid:{color:'rgba(26,40,68,.4)'}}}}});
+  new Chart(document.getElementById('ch-ramp'),{type:'line',data:{labels:['M0','M3','M6','M9','M12','M15','M18','M21','M24'],datasets:[{label:'US',data:[0,32,58,72,80,82,83,84,84],borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.12)',fill:true,tension:.3,borderWidth:2},{label:'EU5',data:[0,8,22,38,52,62,68,72,75],borderColor:'#3b7dff',backgroundColor:'rgba(59,125,255,.1)',fill:true,tension:.3,borderWidth:2},{label:'Japan',data:[0,0,15,32,48,58,65,70,75],borderColor:'#f0b429',backgroundColor:'rgba(240,180,41,.1)',fill:true,tension:.3,borderWidth:2}]},options:opts});
+  new Chart(document.getElementById('ch-cea'),{type:'scatter',data:{datasets:[{label:'Simulations',data:Array.from({length:200},()=>({x:2.5+Math.random()*2.5,y:200000+Math.random()*250000})),backgroundColor:'rgba(0,201,167,.5)',borderColor:'#00c9a7',pointRadius:3},{label:'Base case',data:[{x:3.84,y:323000}],backgroundColor:'#22c55e',borderColor:'#22c55e',pointRadius:8,pointStyle:'rectRot'},{label:'$150K WTP',data:[{x:0,y:0},{x:6,y:900000}],type:'line',borderColor:'#f0b429',borderWidth:2,borderDash:[6,4],pointRadius:0,fill:false}]},options:{...opts,scales:{x:{title:{display:true,text:'Incremental QALYs',color:'#96a4be'},ticks:{color:'#5d6e8c'},grid:{color:'rgba(26,40,68,.4)'}},y:{title:{display:true,text:'Incremental Cost ($)',color:'#96a4be'},ticks:{color:'#5d6e8c',callback:v=>'$'+(v/1000).toFixed(0)+'K'},grid:{color:'rgba(26,40,68,.4)'}}}}});
+  new Chart(document.getElementById('ch-cost'),{type:'doughnut',data:{labels:['Drug acquisition','Administration','Monitoring','AE management','Hospitalization','End-of-life'],datasets:[{data:[245000,28000,18000,22000,8000,2000],backgroundColor:['#22c55e','#00c9a7','#3b7dff','#f0b429','#ff4d6d','#8b5cf6'],borderColor:'#0a0f1c',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#96a4be',font:{size:10}}}}}});
+  new Chart(document.getElementById('ch-tornado'),{type:'bar',data:{labels:['OS HR','Drug price','Discount rate','Utility values','Time horizon','Adverse events'],datasets:[{label:'Low',data:[-18000,-12000,-8000,-6000,-9000,-3000],backgroundColor:'rgba(239,68,68,.6)'},{label:'High',data:[16000,11000,7000,5000,8000,3000],backgroundColor:'rgba(34,197,94,.6)'}]},options:{...opts,indexAxis:'y',scales:{x:{stacked:true,ticks:{color:'#5d6e8c',callback:v=>'$'+v},grid:{color:'rgba(26,40,68,.4)'}},y:{stacked:true,ticks:{color:'#5d6e8c'},grid:{display:false}}}}});
+  new Chart(document.getElementById('ch-hta'),{type:'bar',data:{labels:['NICE','G-BA','HAS','AIFA','DGCYP','CDA-AMC','PBAC'],datasets:[{label:'P(Positive)',data:[52,78,72,62,58,71,64],backgroundColor:['#f0b429','#22c55e','#22c55e','#f0b429','#f0b429','#22c55e','#f0b429'],borderRadius:6}]},options:{...opts,plugins:{legend:{display:false}}}});
+  new Chart(document.getElementById('ch-price'),{type:'line',data:{labels:['US','Germany','France','UK','Italy','Spain','Japan','Canada','Australia'],datasets:[{label:'Net price index',data:[100,82,76,52,72,68,78,68,72],borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.12)',fill:true,tension:.3,borderWidth:2,pointRadius:4}]},options:opts});
+  new Chart(document.getElementById('ch-ira'),{type:'bar',data:{labels:['Base case (no IRA)','Mild (20% MFP)','Base (30% MFP)','Severe (40% MFP)'],datasets:[{label:'5-Yr Revenue ($B)',data:[5.2,4.6,3.9,3.1],backgroundColor:['#22c55e','#00c9a7','#f0b429','#ff4d6d'],borderRadius:6}]},options:{...opts,plugins:{legend:{display:false}}}});
+});
+</script>
+</body>
+</html>

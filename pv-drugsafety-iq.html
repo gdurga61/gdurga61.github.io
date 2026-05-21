@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PV & Drug Safety Strategy IQ — Pharmacovigilance Intelligence Platform</title>
+<meta name="description" content="AI-powered Pharmacovigilance and Drug Safety Strategy platform. Signal detection, ICSR triage, RMP builder, PSUR/PBRER, REMS, and global PV operating model.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#050810;--bg2:#0a0f1c;--bg3:#111828;--bg4:#182038;--bdr:#1a2844;--t1:#eaf0fa;--t2:#96a4be;--t3:#5d6e8c;--blue:#3b7dff;--cyan:#00c9a7;--gold:#f0b429;--rose:#ff4d6d;--violet:#8b5cf6;--green:#22c55e;--orange:#f97316;--red:#ef4444;--f:'Inter',system-ui,sans-serif;--fd:'Fraunces',Georgia,serif;--fm:'JetBrains Mono',monospace}
+html{font-size:15px;scroll-behavior:smooth}body{font-family:var(--f);background:var(--bg);color:var(--t1);overflow-x:hidden;min-height:100vh}
+a{color:var(--cyan);text-decoration:none}button{font-family:var(--f);cursor:pointer;border:none}input,select{font-family:var(--f)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:6px}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.tb-brand{display:flex;align-items:center;gap:12px}.tb-logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--rose),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff}
+.tb-name{font-size:.95rem;font-weight:700;line-height:1.15}.tb-name .sub{display:block;font-size:.62rem;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.8px;margin-top:1px}
+.tb-actions{display:flex;gap:8px;align-items:center}.tb-btn{padding:6px 14px;border-radius:8px;font-size:.72rem;font-weight:600;background:var(--bg3);border:1px solid var(--bdr);color:var(--t2);transition:all .2s}.tb-btn:hover{border-color:var(--cyan);color:var(--cyan)}.tb-btn.primary{background:linear-gradient(135deg,var(--rose),#c91e3a);color:#fff;border-color:transparent}
+.tb-back{font-size:.7rem;color:var(--t2);padding:6px 12px;border-radius:8px;border:1px solid var(--bdr);background:transparent}.tb-back:hover{border-color:var(--cyan);color:var(--cyan)}
+.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{padding:14px 20px;font-size:.75rem;font-weight:600;color:var(--t2);background:transparent;border:none;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:8px}
+.tab:hover{color:var(--t1);background:rgba(255,255,255,.02)}.tab.active{color:var(--rose);border-bottom-color:var(--rose);background:rgba(255,77,109,.05)}
+.tab-icon{font-size:1rem}.tab-num{font-size:.6rem;color:var(--t3);font-family:var(--fm);font-weight:500}.tab.active .tab-num{color:var(--rose)}
+.module{display:none;padding:24px;max-width:1400px;margin:0 auto}.module.active{display:block}
+.mod-header{margin-bottom:24px}.mod-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;background:rgba(255,77,109,.1);color:var(--rose);border:1px solid rgba(255,77,109,.2);margin-bottom:10px}
+.mod-title{font-family:var(--fd);font-size:1.9rem;font-weight:700;letter-spacing:-.6px;margin-bottom:6px}.mod-desc{font-size:.88rem;color:var(--t2);max-width:780px;line-height:1.55}
+.grid-2{display:grid;grid-template-columns:1fr 2fr;gap:18px}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid-eq2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.grid-2,.grid-3,.grid-4,.grid-eq2{grid-template-columns:1fr}}
+.card{background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:18px}.card.compact{padding:14px}
+.card-title{font-size:.82rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}.card-title .lbl{display:flex;align-items:center;gap:8px}.card-title .ic{font-size:1rem}
+.card-sub{font-size:.7rem;color:var(--t2);margin-bottom:14px;line-height:1.5}
+.kpi{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px}
+.kpi-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);font-weight:600;margin-bottom:4px}
+.kpi-val{font-family:var(--fd);font-size:1.7rem;font-weight:700;line-height:1;color:var(--t1)}
+.kpi-val.cyan{color:var(--cyan)}.kpi-val.green{color:var(--green)}.kpi-val.gold{color:var(--gold)}.kpi-val.rose{color:var(--rose)}.kpi-val.violet{color:var(--violet)}
+.kpi-sub{font-size:.65rem;color:var(--t2);margin-top:4px}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;padding:2px 6px;border-radius:6px;font-weight:600;margin-top:4px}
+.kpi-trend.up{background:rgba(34,197,94,.1);color:var(--green)}.kpi-trend.down{background:rgba(239,68,68,.1);color:var(--red)}.kpi-trend.neutral{background:rgba(150,164,190,.1);color:var(--t2)}
+.field{margin-bottom:14px}.field-lbl{font-size:.7rem;font-weight:600;color:var(--t2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.field-input,.field-select{width:100%;padding:9px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);font-size:.82rem}.field-input:focus,.field-select:focus{outline:none;border-color:var(--rose)}
+.field-row{display:flex;gap:10px}.field-row .field{flex:1}
+.slider{width:100%;-webkit-appearance:none;height:4px;border-radius:4px;background:var(--bdr);outline:none}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--rose);cursor:pointer;border:2px solid var(--bg3);box-shadow:0 0 0 2px var(--rose)}
+.slider-val{font-family:var(--fm);font-size:.85rem;font-weight:600;color:var(--rose);margin-left:8px}
+.slider-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}.slider-row .label{font-size:.7rem;color:var(--t2);font-weight:600}
+.btn-run{width:100%;padding:11px;background:linear-gradient(135deg,var(--rose),#c91e3a);color:#fff;border-radius:9px;font-weight:700;font-size:.82rem;margin-top:6px}.btn-run:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(255,77,109,.3)}
+.tbl{width:100%;border-collapse:collapse;font-size:.75rem}
+.tbl th{text-align:left;padding:9px 10px;background:var(--bg2);color:var(--t2);font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bdr)}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(26,40,68,.4);color:var(--t1)}.tbl tr:hover td{background:rgba(255,77,109,.04)}
+.tbl .num{font-family:var(--fm);font-weight:500;text-align:right}
+.tbl .tier{padding:2px 7px;border-radius:5px;font-size:.6rem;font-weight:700;text-transform:uppercase}
+.tier-1{background:rgba(239,68,68,.15);color:var(--red)}.tier-2{background:rgba(240,180,41,.15);color:var(--gold)}.tier-3{background:rgba(0,201,167,.12);color:var(--cyan)}.tier-4{background:rgba(150,164,190,.12);color:var(--t2)}
+.insight{background:linear-gradient(135deg,rgba(255,77,109,.08),rgba(240,180,41,.05));border:1px solid rgba(255,77,109,.2);border-radius:10px;padding:14px 16px;margin-top:14px}
+.insight-hd{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--rose);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.insight-body{font-size:.78rem;color:var(--t1);line-height:1.6}.insight-body strong{color:var(--rose);font-weight:600}.insight-body ul{margin:6px 0 0 18px}.insight-body li{margin-bottom:3px}
+.chart-wrap{position:relative;height:260px;width:100%}.chart-wrap.tall{height:340px}.chart-wrap.short{height:200px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:14px;font-size:.62rem;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--t2)}
+.pill-rose{background:rgba(255,77,109,.1);color:var(--rose);border-color:rgba(255,77,109,.25)}.pill-cyan{background:rgba(0,201,167,.1);color:var(--cyan);border-color:rgba(0,201,167,.25)}.pill-gold{background:rgba(240,180,41,.1);color:var(--gold);border-color:rgba(240,180,41,.25)}
+.signal-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:.65rem;font-weight:700}
+.sig-strong{background:rgba(239,68,68,.15);color:var(--red)}.sig-mod{background:rgba(240,180,41,.15);color:var(--gold)}.sig-weak{background:rgba(150,164,190,.12);color:var(--t2)}
+.checklist{display:flex;flex-direction:column;gap:6px}.check-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;font-size:.76rem}
+.check-box{width:18px;height:18px;border-radius:4px;background:var(--green);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.65rem;flex-shrink:0}.check-box.pending{background:var(--bg4);color:var(--t3);border:1px dashed var(--bdr)}
+.check-box.warn{background:var(--gold)}.check-status{margin-left:auto;font-size:.62rem;font-weight:600;color:var(--t2)}
+.spacer{height:14px}
+.toast{position:fixed;top:80px;right:24px;background:var(--bg3);border:1px solid var(--rose);border-radius:10px;padding:12px 18px;font-size:.78rem;color:var(--t1);box-shadow:0 12px 32px rgba(0,0,0,.4);transform:translateX(120%);transition:transform .3s;z-index:200}.toast.show{transform:translateX(0)}
+@media(min-width:901px){.sticky-side{position:sticky;top:120px;align-self:start}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">PV</div>
+    <div class="tb-name">PV & Drug Safety Strategy IQ<span class="sub">Pharmacovigilance · Risk Management · Benefit-Risk Strategy</span></div>
+  </div>
+  <div class="tb-actions">
+    <a href="index.html" class="tb-back">← Portfolio</a>
+    <button class="tb-btn" onclick="t('Demo data loaded across 5 modules')">📥 Load Demo Data</button>
+    <button class="tb-btn primary" onclick="t('Executive PV strategy report queued')">📤 Export Report</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="signals"><span class="tab-icon">📡</span><span class="tab-num">01</span>Signal Detection AI</button>
+  <button class="tab" data-tab="icsr"><span class="tab-icon">📋</span><span class="tab-num">02</span>ICSR Triage Engine</button>
+  <button class="tab" data-tab="rmp"><span class="tab-icon">⚠️</span><span class="tab-num">03</span>RMP Builder</button>
+  <button class="tab" data-tab="psur"><span class="tab-icon">⚖️</span><span class="tab-num">04</span>PSUR & Benefit-Risk</button>
+  <button class="tab" data-tab="rems"><span class="tab-icon">🏗️</span><span class="tab-num">05</span>REMS & PV Op Model</button>
+</div>
+
+<!-- ===== Module 1: Signal Detection ===== -->
+<section class="module active" id="mod-signals">
+  <div class="mod-header">
+    <div class="mod-tag">📡 Module 01 · Signal Detection</div>
+    <h1 class="mod-title">Signal Detection AI</h1>
+    <p class="mod-desc">Disproportionality analysis on FAERS, VigiBase, EudraVigilance datasets. PRR, ROR, EBGM, BCPNN scoring with signal prioritization matrix and longitudinal signal tracking.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Active Signals</div><div class="kpi-val rose">47</div><div class="kpi-sub">across 8 products</div><span class="kpi-trend up">▲ +5 this quarter</span></div>
+    <div class="kpi"><div class="kpi-lbl">Strong Signals (PRR&gt;2)</div><div class="kpi-val gold">14</div><div class="kpi-sub">requires regulatory action</div><span class="kpi-trend neutral">Standard threshold</span></div>
+    <div class="kpi"><div class="kpi-lbl">Cases This Quarter</div><div class="kpi-val cyan">12,485</div><div class="kpi-sub">FAERS + spontaneous</div><span class="kpi-trend up">▲ +18% YoY</span></div>
+    <div class="kpi"><div class="kpi-lbl">Mean Time to Signal</div><div class="kpi-val green">38</div><div class="kpi-sub">days (industry P50: 62)</div><span class="kpi-trend up">▼ -24 vs P50</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🔍</span> Top Signals by Disproportionality Score</span><span class="pill pill-rose">FAERS · Last Quarter</span></div>
+    <p class="card-sub">PRR (Proportional Reporting Ratio), ROR (Reporting Odds Ratio), EBGM (Empirical Bayes Geometric Mean). PRR &gt; 2 and chi-square &gt; 4 typically warrants signal investigation.</p>
+    <table class="tbl">
+      <thead><tr><th>Product</th><th>Adverse Event (MedDRA PT)</th><th>Cases (N)</th><th>PRR</th><th>ROR</th><th>EBGM</th><th>Chi-Sq</th><th>Signal Strength</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ASC-301</strong></td><td>Pneumonitis (immune-mediated)</td><td class="num">142</td><td class="num">4.82</td><td class="num">5.14</td><td class="num">3.71</td><td class="num">68.4</td><td><span class="signal-badge sig-strong">Strong</span></td><td><span class="pill pill-rose">RMP update</span></td></tr>
+        <tr><td><strong>ASC-301</strong></td><td>Cytokine release syndrome</td><td class="num">89</td><td class="num">3.21</td><td class="num">3.42</td><td class="num">2.84</td><td class="num">42.7</td><td><span class="signal-badge sig-strong">Strong</span></td><td><span class="pill pill-rose">Label review</span></td></tr>
+        <tr><td><strong>IMD-118</strong></td><td>Hepatic enzyme increase</td><td class="num">218</td><td class="num">2.74</td><td class="num">2.91</td><td class="num">2.48</td><td class="num">38.2</td><td><span class="signal-badge sig-strong">Strong</span></td><td><span class="pill pill-rose">DSUR add'l data</span></td></tr>
+        <tr><td><strong>CDM-188</strong></td><td>Acute kidney injury</td><td class="num">94</td><td class="num">2.18</td><td class="num">2.31</td><td class="num">1.94</td><td class="num">22.4</td><td><span class="signal-badge sig-mod">Moderate</span></td><td><span class="pill pill-gold">Watch list</span></td></tr>
+        <tr><td><strong>IMD-256</strong></td><td>Injection site reaction (severe)</td><td class="num">312</td><td class="num">1.92</td><td class="num">2.04</td><td class="num">1.78</td><td class="num">16.8</td><td><span class="signal-badge sig-mod">Moderate</span></td><td><span class="pill pill-gold">Track quarterly</span></td></tr>
+        <tr><td><strong>NEU-378</strong></td><td>Suicidal ideation</td><td class="num">28</td><td class="num">1.48</td><td class="num">1.56</td><td class="num">1.32</td><td class="num">7.2</td><td><span class="signal-badge sig-weak">Weak</span></td><td><span class="pill">Routine PV</span></td></tr>
+        <tr><td><strong>ASC-512</strong></td><td>Peripheral neuropathy</td><td class="num">56</td><td class="num">1.34</td><td class="num">1.42</td><td class="num">1.22</td><td class="num">5.4</td><td><span class="signal-badge sig-weak">Weak</span></td><td><span class="pill">Routine PV</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📊</span> Signal Volume Trend (12 months)</span></div>
+      <div class="chart-wrap"><canvas id="ch-trend"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🎯</span> Signal Prioritization Matrix</span></div>
+      <div class="chart-wrap"><canvas id="ch-matrix"></canvas></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ AI Signal Insight</div>
+    <div class="insight-body">
+      The <strong>ASC-301 pneumonitis signal (PRR 4.82)</strong> crossed the regulatory action threshold this quarter. Disproportionality is consistent with the immune-related adverse event profile expected of this MOA class, but case severity is trending upward (12 fatal cases YTD vs 4 in prior year).
+      <ul>
+        <li><strong>Recommended action:</strong> Initiate ad-hoc PSUR addendum to FDA and EMA within 15 days. Update RMP module SVII to add pneumonitis as an Important Identified Risk.</li>
+        <li><strong>Risk minimization:</strong> Consider DHCP letter (Dear Healthcare Provider) communicating early-detection protocol and corticosteroid management.</li>
+        <li><strong>Cross-product check:</strong> The CDM-188 AKI signal is approaching threshold (PRR 2.18) but not yet actionable; recommend stratified analysis by age and concomitant nephrotoxic medications.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 2: ICSR Triage ===== -->
+<section class="module" id="mod-icsr">
+  <div class="mod-header">
+    <div class="mod-tag">📋 Module 02 · ICSR Operations</div>
+    <h1 class="mod-title">ICSR Triage & Processing Engine</h1>
+    <p class="mod-desc">Individual Case Safety Report intake, classification (seriousness, expectedness, causality), MedDRA coding accuracy, and expedited reporting (E2B R3) workflow management.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">ICSRs This Month</div><div class="kpi-val cyan">4,182</div><div class="kpi-sub">total inbound</div><span class="kpi-trend up">▲ +12% MoM</span></div>
+    <div class="kpi"><div class="kpi-lbl">Expedited Cases</div><div class="kpi-val rose">348</div><div class="kpi-sub">15-day reporting</div><span class="kpi-trend down">▲ +24 YoY</span></div>
+    <div class="kpi"><div class="kpi-lbl">Mean Processing Time</div><div class="kpi-val gold">5.8</div><div class="kpi-sub">days (target: ≤7)</div><span class="kpi-trend up">▲ within SLA</span></div>
+    <div class="kpi"><div class="kpi-lbl">MedDRA Coding Accuracy</div><div class="kpi-val green">96.4%</div><div class="kpi-sub">vs industry 92%</div><span class="kpi-trend up">▲ Best-in-class</span></div>
+  </div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📥</span> Case Intake by Source</span></div>
+      <div class="chart-wrap"><canvas id="ch-intake"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">⏱️</span> Processing Cycle Time</span></div>
+      <div class="chart-wrap"><canvas id="ch-cycle"></canvas></div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🎯</span> Case Classification Distribution</span></div>
+    <table class="tbl">
+      <thead><tr><th>Classification Dimension</th><th>Volume (N)</th><th>% of Total</th><th>Expedited?</th><th>Health Authority Report Required</th><th>SLA Status</th></tr></thead>
+      <tbody>
+        <tr><td>Serious, Unexpected, Related (SUSAR)</td><td class="num">348</td><td class="num">8.3%</td><td><span class="pill pill-rose">15-day</span></td><td>FDA + EMA + PMDA + NMPA</td><td><span class="tier tier-3">On track</span></td></tr>
+        <tr><td>Serious, Expected, Related</td><td class="num">784</td><td class="num">18.7%</td><td><span class="pill pill-gold">Periodic</span></td><td>PSUR cycle</td><td><span class="tier tier-3">On track</span></td></tr>
+        <tr><td>Serious, Unexpected, Not Related</td><td class="num">412</td><td class="num">9.9%</td><td><span class="pill">Quarterly</span></td><td>Annual report</td><td><span class="tier tier-3">On track</span></td></tr>
+        <tr><td>Non-serious, Related</td><td class="num">1,847</td><td class="num">44.2%</td><td><span class="pill">Periodic</span></td><td>PSUR cycle</td><td><span class="tier tier-3">On track</span></td></tr>
+        <tr><td>Non-serious, Not Related</td><td class="num">685</td><td class="num">16.4%</td><td><span class="pill">Routine</span></td><td>Annual report</td><td><span class="tier tier-3">On track</span></td></tr>
+        <tr><td>Pregnancy / Lactation Reports</td><td class="num">68</td><td class="num">1.6%</td><td><span class="pill pill-gold">15-day if serious</span></td><td>Pregnancy registry</td><td><span class="tier tier-2">2 late</span></td></tr>
+        <tr><td>Special Populations (Peds/Elderly)</td><td class="num">38</td><td class="num">0.9%</td><td><span class="pill pill-gold">Case-by-case</span></td><td>Stratified analysis</td><td><span class="tier tier-3">On track</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ ICSR Operations Insight</div>
+    <div class="insight-body">
+      Case volume is up 12% MoM, primarily driven by ASC-301 launch ramp (now 38% of total inbound). Current operating model shows healthy SLA compliance but is approaching capacity at 4,200 cases/month.
+      <ul>
+        <li><strong>Capacity gap projected Q3 2026:</strong> Volume will exceed 5,500 cases/month at current launch trajectory. Recommend onboarding additional 4 FTEs to PV ops or expand FSP partnership with Accenture/Cognizant.</li>
+        <li><strong>Pregnancy registry late cases (2):</strong> Both due to delayed source-document submission from clinical sites. Recommend automated reminder workflow at 5-day mark.</li>
+        <li><strong>Automation opportunity:</strong> 64% of non-serious cases follow predictable MedDRA coding patterns — recommend NLP-based auto-coding with PV reviewer QC, estimated 40% reduction in processing time.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 3: RMP Builder ===== -->
+<section class="module" id="mod-rmp">
+  <div class="mod-header">
+    <div class="mod-tag">⚠️ Module 03 · Risk Management</div>
+    <h1 class="mod-title">Risk Management Plan (RMP) Builder</h1>
+    <p class="mod-desc">EU RMP (template by EMA), US REMS, and ICH E2E equivalent for other regulators. Safety specification, pharmacovigilance plan, and risk minimization measures across the product lifecycle.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card sticky-side">
+      <div class="card-title"><span class="lbl"><span class="ic">🎛️</span> Product Profile</span></div>
+      <div class="field"><label class="field-lbl">Product Selection</label><select class="field-select" id="rmp-prod"><option>ASC-301 (NSCLC, Phase 3)</option><option>IMD-118 (UC, Phase 2)</option><option>IMD-256 (PsA, Phase 3)</option><option>RD-901 (Pompe, Phase 3)</option></select></div>
+      <div class="field"><label class="field-lbl">RMP Version</label><select class="field-select"><option>v2.1 (Current)</option><option>v3.0 (Draft – Launch)</option><option>v4.0 (Post-launch update)</option></select></div>
+      <div class="field"><label class="field-lbl">Regulatory Scope</label><select class="field-select"><option>EU EMA + US FDA + JP PMDA</option><option>EU EMA only</option><option>US FDA only (REMS)</option><option>Global (incl. NMPA)</option></select></div>
+      <div class="field"><label class="field-lbl">Risk Category Filter</label><select class="field-select"><option>All risks</option><option>Important Identified Risks</option><option>Important Potential Risks</option><option>Missing Information</option></select></div>
+      <button class="btn-run">🚀 Generate RMP Draft</button>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title"><span class="lbl"><span class="ic">📋</span> RMP Module Checklist</span><span class="pill pill-rose">EU Format</span></div>
+        <div class="checklist">
+          <div class="check-item"><div class="check-box">✓</div><span><strong>Part I:</strong> Product Overview</span><span class="check-status">Complete</span></div>
+          <div class="check-item"><div class="check-box">✓</div><span><strong>Part II SI:</strong> Epidemiology of indication & target population</span><span class="check-status">Complete</span></div>
+          <div class="check-item"><div class="check-box">✓</div><span><strong>Part II SII:</strong> Non-clinical safety findings</span><span class="check-status">Complete</span></div>
+          <div class="check-item"><div class="check-box">✓</div><span><strong>Part II SIII:</strong> Clinical trial exposure</span><span class="check-status">Complete</span></div>
+          <div class="check-item"><div class="check-box warn">!</div><span><strong>Part II SIV:</strong> Populations not studied in clinical trials</span><span class="check-status" style="color:var(--gold)">Pregnancy data pending</span></div>
+          <div class="check-item"><div class="check-box">✓</div><span><strong>Part II SV:</strong> Post-authorisation experience</span><span class="check-status">Complete</span></div>
+          <div class="check-item"><div class="check-box">✓</div><span><strong>Part II SVI:</strong> Additional EU requirements for safety specification</span><span class="check-status">Complete</span></div>
+          <div class="check-item"><div class="check-box warn">!</div><span><strong>Part II SVII:</strong> Identified & potential risks</span><span class="check-status" style="color:var(--gold)">Updating w/ pneumonitis</span></div>
+          <div class="check-item"><div class="check-box">✓</div><span><strong>Part II SVIII:</strong> Summary of safety concerns</span><span class="check-status">Complete</span></div>
+          <div class="check-item"><div class="check-box">✓</div><span><strong>Part III:</strong> Pharmacovigilance plan</span><span class="check-status">Complete</span></div>
+          <div class="check-item"><div class="check-box pending">○</div><span><strong>Part IV:</strong> Plans for post-authorisation efficacy studies (PAES)</span><span class="check-status">Drafting</span></div>
+          <div class="check-item"><div class="check-box">✓</div><span><strong>Part V:</strong> Risk minimisation measures</span><span class="check-status">Complete</span></div>
+          <div class="check-item"><div class="check-box">✓</div><span><strong>Part VI:</strong> Summary of activities in the RMP by product</span><span class="check-status">Complete</span></div>
+          <div class="check-item"><div class="check-box pending">○</div><span><strong>Part VII:</strong> Annexes (PSP, study protocols)</span><span class="check-status">In review</span></div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="card">
+        <div class="card-title"><span class="lbl"><span class="ic">🚨</span> Safety Specification — Risk Inventory</span></div>
+        <table class="tbl">
+          <thead><tr><th>Risk</th><th>Category</th><th>Severity</th><th>Frequency</th><th>Risk Minimisation Measure</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Immune-mediated pneumonitis</strong></td><td>Important Identified</td><td>Severe</td><td>3-8%</td><td>aRMM: HCP guide + Patient card</td><td><span class="tier tier-1">High priority</span></td></tr>
+            <tr><td><strong>Cytokine release syndrome</strong></td><td>Important Identified</td><td>Severe</td><td>2-5%</td><td>Routine + monitoring algorithm</td><td><span class="tier tier-1">High priority</span></td></tr>
+            <tr><td><strong>Hepatic toxicity</strong></td><td>Important Identified</td><td>Moderate</td><td>5-12%</td><td>Routine + LFT monitoring</td><td><span class="tier tier-2">Watch</span></td></tr>
+            <tr><td><strong>Use in pregnancy</strong></td><td>Missing Information</td><td>Unknown</td><td>N/A</td><td>Pregnancy registry (PASS)</td><td><span class="tier tier-2">Watch</span></td></tr>
+            <tr><td><strong>Long-term safety (&gt;5 yr)</strong></td><td>Missing Information</td><td>Unknown</td><td>N/A</td><td>PASS observational study</td><td><span class="tier tier-2">Watch</span></td></tr>
+            <tr><td><strong>Severe infections</strong></td><td>Important Potential</td><td>Severe</td><td>&lt;2%</td><td>Routine PV + screening</td><td><span class="tier tier-3">Routine</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="insight">
+        <div class="insight-hd">⚡ RMP Strategic Insight</div>
+        <div class="insight-body">
+          The <strong>v3.0 RMP draft</strong> for ASC-301 should be submitted to EMA at least 60 days before MAA filing. Three areas require attention before sign-off:
+          <ul>
+            <li><strong>Pneumonitis additional Risk Minimisation Measures (aRMM):</strong> Finalize HCP educational guide and patient alert card. Submit aRMM materials with the RMP for PRAC review.</li>
+            <li><strong>Pregnancy registry PASS protocol:</strong> Currently in draft. Need PRAC-acceptable design — recommend ENCePP-compliant prospective registry, 5-year follow-up.</li>
+            <li><strong>Part IV PAES:</strong> Confirmatory phase 4 PFS study required as condition of conditional approval. Lock protocol design before MAA submission to avoid post-approval delays.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 4: PSUR / Benefit-Risk ===== -->
+<section class="module" id="mod-psur">
+  <div class="mod-header">
+    <div class="mod-tag">⚖️ Module 04 · Aggregate Reporting</div>
+    <h1 class="mod-title">PSUR/PBRER & Benefit-Risk Assessment</h1>
+    <p class="mod-desc">Periodic Safety Update Reports and Periodic Benefit-Risk Evaluation Reports (ICH E2C R2). Aggregate safety data analysis with structured benefit-risk framework (UMBRA, PrOACT-URL).</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Active PSURs</div><div class="kpi-val violet">8</div><div class="kpi-sub">across portfolio</div></div>
+    <div class="kpi"><div class="kpi-lbl">Next PSUR Due</div><div class="kpi-val rose">42</div><div class="kpi-sub">days (ASC-301)</div><span class="kpi-trend down">▲ Critical</span></div>
+    <div class="kpi"><div class="kpi-lbl">Benefit-Risk Score</div><div class="kpi-val green">+2.4</div><div class="kpi-sub">favorable (ASC-301)</div><span class="kpi-trend up">▲ Stable</span></div>
+    <div class="kpi"><div class="kpi-lbl">DLP Compliance</div><div class="kpi-val cyan">100%</div><div class="kpi-sub">data lock point on-time</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">📅</span> PSUR/PBRER Schedule (12 months)</span></div>
+    <table class="tbl">
+      <thead><tr><th>Product</th><th>PSUR Period</th><th>Data Lock Point</th><th>Submission Due</th><th>Days Remaining</th><th>Status</th><th>Lead Author</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ASC-301</strong></td><td>2026-Q2/Q3</td><td>2026-09-30</td><td>2026-12-29</td><td class="num">42</td><td><span class="tier tier-1">Authoring</span></td><td>PV Lead - Oncology</td></tr>
+        <tr><td><strong>IMD-118</strong></td><td>2026-H2</td><td>2026-12-31</td><td>2027-03-31</td><td class="num">134</td><td><span class="tier tier-2">Planning</span></td><td>PV Lead - Immunology</td></tr>
+        <tr><td><strong>IMD-256</strong></td><td>2026-H2</td><td>2026-12-31</td><td>2027-03-31</td><td class="num">134</td><td><span class="tier tier-2">Planning</span></td><td>PV Lead - Immunology</td></tr>
+        <tr><td><strong>CDM-188</strong></td><td>2026-Q3/Q4</td><td>2026-12-31</td><td>2027-02-14</td><td class="num">89</td><td><span class="tier tier-2">Planning</span></td><td>PV Lead - Cardiomet</td></tr>
+        <tr><td><strong>RD-901</strong></td><td>2026 Annual</td><td>2026-12-31</td><td>2027-03-31</td><td class="num">134</td><td><span class="tier tier-3">Draft outline</span></td><td>PV Lead - Rare</td></tr>
+        <tr><td><strong>NEU-378</strong></td><td>2026 Annual</td><td>2026-12-31</td><td>2027-03-31</td><td class="num">134</td><td><span class="tier tier-3">Draft outline</span></td><td>PV Lead - CNS</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">⚖️</span> Benefit-Risk Profile (ASC-301)</span></div>
+      <p class="card-sub">UMBRA framework: quantified benefit and risk dimensions, weighted composite score.</p>
+      <div class="chart-wrap"><canvas id="ch-br"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📊</span> Safety Profile Evolution</span></div>
+      <p class="card-sub">Cumulative AE incidence rates per 100 patient-years.</p>
+      <div class="chart-wrap"><canvas id="ch-safety"></canvas></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Benefit-Risk Strategic Brief</div>
+    <div class="insight-body">
+      ASC-301 benefit-risk profile remains <strong>favorable (+2.4)</strong> across all subpopulations. The pneumonitis signal is mitigated by early-detection protocol and corticosteroid management — overall mortality benefit (HR 0.68 vs SoC) substantially exceeds risk.
+      <ul>
+        <li><strong>PSUR conclusion language:</strong> Recommend wording: "Benefit-risk profile remains positive in the approved indication. Additional risk minimisation measures introduced for immune-mediated pneumonitis have been effective in case management."</li>
+        <li><strong>Subgroup analysis:</strong> Elderly patients (&gt;75 yrs) show 1.6× pneumonitis risk — recommend dedicated subsection in PSUR and consideration of label update.</li>
+        <li><strong>Strategic positioning:</strong> Benefit-risk strength supports planned expansion into earlier-line setting (Phase 3 ASC-301 1L combination). Use PSUR data as supporting evidence in pre-IND meeting.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 5: REMS & Operating Model ===== -->
+<section class="module" id="mod-rems">
+  <div class="mod-header">
+    <div class="mod-tag">🏗️ Module 05 · PV Operating Model</div>
+    <h1 class="mod-title">REMS Strategy & Global PV Operating Model</h1>
+    <p class="mod-desc">FDA Risk Evaluation and Mitigation Strategies (REMS) design, ETASU components, and global pharmacovigilance operating model diagnostic.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">REMS Programs</div><div class="kpi-val rose">2</div><div class="kpi-sub">active (ASC-301, IMD-118)</div></div>
+    <div class="kpi"><div class="kpi-lbl">PV FTE Count</div><div class="kpi-val cyan">142</div><div class="kpi-sub">global team</div><span class="kpi-trend up">▲ +12 YTD</span></div>
+    <div class="kpi"><div class="kpi-lbl">CRO/FSP Spend</div><div class="kpi-val gold">$18.4M</div><div class="kpi-sub">annual (ICSR processing)</div></div>
+    <div class="kpi"><div class="kpi-lbl">PV Maturity Score</div><div class="kpi-val violet">3.8</div><div class="kpi-sub">/5 (industry P50: 3.6)</div><span class="kpi-trend up">▲ Above peer</span></div>
+  </div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🛡️</span> REMS Component Selector — ASC-301</span></div>
+      <table class="tbl">
+        <thead><tr><th>REMS Element</th><th>Selected</th><th>Rationale</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Medication Guide</strong></td><td><span class="signal-badge sig-strong">Required</span></td><td>Pneumonitis & CRS risk communication</td></tr>
+          <tr><td><strong>Communication Plan (DHCP)</strong></td><td><span class="signal-badge sig-strong">Required</span></td><td>Initial launch + per signal</td></tr>
+          <tr><td><strong>ETASU – Prescriber Certification</strong></td><td><span class="signal-badge sig-mod">Conditional</span></td><td>Specialist oncologists only — under FDA review</td></tr>
+          <tr><td><strong>ETASU – Patient Enrollment</strong></td><td><span class="signal-badge sig-weak">Not required</span></td><td>Risk profile does not warrant patient registry as ETASU</td></tr>
+          <tr><td><strong>ETASU – Lab Monitoring</strong></td><td><span class="signal-badge sig-mod">Conditional</span></td><td>Pulmonary function tests baseline + Q3 months</td></tr>
+          <tr><td><strong>Implementation System</strong></td><td><span class="signal-badge sig-strong">Required</span></td><td>REMS portal + audit trail</td></tr>
+          <tr><td><strong>Timetable for Submission of Assessments</strong></td><td><span class="signal-badge sig-strong">Required</span></td><td>18mo, 3yr, 7yr post-approval</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🌐</span> Global PV Operating Model Maturity</span></div>
+      <div class="chart-wrap"><canvas id="ch-pvmodel"></canvas></div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">📊</span> PV Function Diagnostic</span></div>
+    <table class="tbl">
+      <thead><tr><th>PV Function</th><th>Maturity (1-5)</th><th>FTE Count</th><th>Outsourcing Mix</th><th>Key Gap</th><th>Priority</th></tr></thead>
+      <tbody>
+        <tr><td>Case Intake & Triage</td><td class="num">4.2</td><td class="num">38</td><td class="num">42% FSP</td><td>Volume surge readiness</td><td><span class="tier tier-2">Medium</span></td></tr>
+        <tr><td>ICSR Processing & MedDRA</td><td class="num">3.9</td><td class="num">52</td><td class="num">68% FSP</td><td>NLP auto-coding not yet adopted</td><td><span class="tier tier-1">High</span></td></tr>
+        <tr><td>Signal Detection & Management</td><td class="num">3.6</td><td class="num">14</td><td class="num">10% FSP</td><td>EBGM tool not integrated with Argus</td><td><span class="tier tier-1">High</span></td></tr>
+        <tr><td>Aggregate Reporting (PSUR/PBRER)</td><td class="num">4.0</td><td class="num">12</td><td class="num">25% FSP</td><td>Authoring efficiency</td><td><span class="tier tier-2">Medium</span></td></tr>
+        <tr><td>Risk Management (RMP/REMS)</td><td class="num">3.8</td><td class="num">8</td><td class="num">5% FSP</td><td>aRMM measure tracking</td><td><span class="tier tier-2">Medium</span></td></tr>
+        <tr><td>QPPV & Regulatory PV</td><td class="num">4.4</td><td class="num">10</td><td class="num">0% FSP</td><td>None — strong</td><td><span class="tier tier-3">Maintain</span></td></tr>
+        <tr><td>Medical Safety & Benefit-Risk</td><td class="num">3.5</td><td class="num">8</td><td class="num">0% FSP</td><td>Benefit-risk framework standardization</td><td><span class="tier tier-1">High</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ PV Operating Model Roadmap</div>
+    <div class="insight-body">
+      Composite PV maturity of <strong>3.8/5.0</strong> places organization in industry P60. Three high-leverage transformation initiatives:
+      <ul>
+        <li><strong>Year 1 — NLP-based ICSR auto-coding:</strong> Reduce processing cycle time 40% and FSP spend 18%. Total $4.2M investment, 11-month payback.</li>
+        <li><strong>Year 1 — Integrated signal detection platform:</strong> Replace standalone EBGM tool with Oracle Empirica or Aris Global cloud-native solution integrated with Argus.</li>
+        <li><strong>Year 2 — Benefit-risk methodology standardization:</strong> Adopt UMBRA framework across all PSURs and major safety reviews. Establish Medical Safety Council with quarterly cadence.</li>
+      </ul>
+      <strong>Expected impact:</strong> Maturity 3.8 → 4.3, ICSR cycle time 5.8 → 3.4 days, signal detection time 38 → 22 days, $5.8M annual cost takeout by Year 3.
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast">Updated</div>
+
+<script>
+function t(m){const x=document.getElementById('toast');x.textContent=m;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2400);}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.module').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');document.getElementById('mod-'+b.dataset.tab).classList.add('active');
+  setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),50);
+}));
+
+const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},scales:{x:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}},y:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}}}};
+
+window.addEventListener('load',()=>{
+  new Chart(document.getElementById('ch-trend'),{type:'line',data:{labels:['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun'],datasets:[{label:'Total Signals',data:[28,32,35,38,40,41,42,44,45,46,47,47],borderColor:'#ff4d6d',backgroundColor:'rgba(255,77,109,.15)',fill:true,tension:.3,borderWidth:2},{label:'Strong (PRR>2)',data:[6,7,8,9,10,11,12,12,13,13,14,14],borderColor:'#f0b429',backgroundColor:'rgba(240,180,41,.1)',fill:true,tension:.3,borderWidth:2}]},options:opts});
+  new Chart(document.getElementById('ch-matrix'),{type:'bubble',data:{datasets:[{label:'Signals',data:[{x:4.82,y:142,r:14,l:'Pneumonitis'},{x:3.21,y:89,r:10,l:'CRS'},{x:2.74,y:218,r:18,l:'Hepatic'},{x:2.18,y:94,r:8,l:'AKI'},{x:1.92,y:312,r:20,l:'Inj site'},{x:1.48,y:28,r:5,l:'SI'},{x:1.34,y:56,r:6,l:'PN'}],backgroundColor:'rgba(255,77,109,.5)',borderColor:'#ff4d6d'}]},options:{...opts,scales:{x:{title:{display:true,text:'PRR (Disproportionality)',color:'#96a4be'},ticks:{color:'#5d6e8c'},grid:{color:'rgba(26,40,68,.4)'}},y:{title:{display:true,text:'Cases (N)',color:'#96a4be'},ticks:{color:'#5d6e8c'},grid:{color:'rgba(26,40,68,.4)'}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw.l+': PRR '+c.raw.x+', N='+c.raw.y}}}}});
+  new Chart(document.getElementById('ch-intake'),{type:'doughnut',data:{labels:['Spontaneous (HCP)','Patient/Consumer','Clinical Trial','Literature','Solicited Programs'],datasets:[{data:[2105,892,485,328,372],backgroundColor:['#ff4d6d','#f0b429','#00c9a7','#3b7dff','#8b5cf6'],borderColor:'#0a0f1c',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#96a4be',font:{size:10}}}}}});
+  new Chart(document.getElementById('ch-cycle'),{type:'bar',data:{labels:['Day 0-1','Day 2-3','Day 4-5','Day 6-7','Day 8-10','Day 11+'],datasets:[{label:'Cases',data:[1242,1485,892,348,142,73],backgroundColor:'rgba(0,201,167,.8)',borderRadius:6}]},options:{...opts,plugins:{legend:{display:false}}}});
+  new Chart(document.getElementById('ch-br'),{type:'radar',data:{labels:['Mortality benefit','PFS benefit','QoL improvement','Severe AE rate','Discontinuation rate','Quality of evidence'],datasets:[{label:'ASC-301',data:[88,82,72,62,68,84],backgroundColor:'rgba(0,201,167,.2)',borderColor:'#00c9a7',borderWidth:2},{label:'Standard of Care',data:[62,58,60,75,72,90],backgroundColor:'rgba(255,77,109,.15)',borderColor:'#ff4d6d',borderWidth:2,borderDash:[4,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},scales:{r:{ticks:{display:false},grid:{color:'rgba(26,40,68,.5)'},angleLines:{color:'rgba(26,40,68,.5)'},pointLabels:{color:'#96a4be',font:{size:9}},min:0,max:100}}}});
+  new Chart(document.getElementById('ch-safety'),{type:'line',data:{labels:['M3','M6','M9','M12','M15','M18','M21','M24'],datasets:[{label:'All-grade AEs',data:[42,58,68,74,78,80,82,83],borderColor:'#3b7dff',backgroundColor:'rgba(59,125,255,.1)',fill:true,tension:.3,borderWidth:2},{label:'Grade ≥3 AEs',data:[12,18,22,24,26,27,28,28],borderColor:'#f0b429',backgroundColor:'rgba(240,180,41,.1)',fill:true,tension:.3,borderWidth:2},{label:'Serious AEs',data:[6,9,11,13,14,15,16,16],borderColor:'#ff4d6d',backgroundColor:'rgba(255,77,109,.1)',fill:true,tension:.3,borderWidth:2}]},options:opts});
+  new Chart(document.getElementById('ch-pvmodel'),{type:'radar',data:{labels:['Intake/Triage','ICSR Process','Signal Detection','Aggregate Reports','Risk Mgmt','QPPV/Reg','Medical Safety'],datasets:[{label:'Current',data:[4.2,3.9,3.6,4.0,3.8,4.4,3.5],backgroundColor:'rgba(255,77,109,.15)',borderColor:'#ff4d6d',borderWidth:2},{label:'Target',data:[4.5,4.4,4.4,4.4,4.2,4.6,4.2],backgroundColor:'rgba(0,201,167,.1)',borderColor:'#00c9a7',borderWidth:2,borderDash:[4,4]},{label:'Industry P75',data:[4.2,4.0,4.0,4.1,4.0,4.3,4.0],backgroundColor:'rgba(139,92,246,.08)',borderColor:'#8b5cf6',borderWidth:1.5,borderDash:[2,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},scales:{r:{ticks:{display:false},grid:{color:'rgba(26,40,68,.5)'},angleLines:{color:'rgba(26,40,68,.5)'},pointLabels:{color:'#96a4be',font:{size:9}},min:0,max:5}}}});
+});
+</script>
+</body>
+</html>

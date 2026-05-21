@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BD&L / Asset Valuation IQ — Business Development & Licensing Intelligence Platform</title>
+<meta name="description" content="AI-powered Business Development, Licensing, and Asset Valuation platform. rNPV calculator, comparable deals database, deal structure simulator, in-licensing decision matrix.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#050810;--bg2:#0a0f1c;--bg3:#111828;--bg4:#182038;--bdr:#1a2844;--t1:#eaf0fa;--t2:#96a4be;--t3:#5d6e8c;--blue:#3b7dff;--cyan:#00c9a7;--gold:#f0b429;--rose:#ff4d6d;--violet:#8b5cf6;--green:#22c55e;--orange:#f97316;--red:#ef4444;--f:'Inter',system-ui,sans-serif;--fd:'Fraunces',Georgia,serif;--fm:'JetBrains Mono',monospace}
+html{font-size:15px;scroll-behavior:smooth}body{font-family:var(--f);background:var(--bg);color:var(--t1);overflow-x:hidden;min-height:100vh}
+a{color:var(--cyan);text-decoration:none}button{font-family:var(--f);cursor:pointer;border:none}input,select{font-family:var(--f)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:6px}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.tb-brand{display:flex;align-items:center;gap:12px}.tb-logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--violet),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff}
+.tb-name{font-size:.95rem;font-weight:700;line-height:1.15}.tb-name .sub{display:block;font-size:.62rem;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.8px;margin-top:1px}
+.tb-actions{display:flex;gap:8px;align-items:center}.tb-btn{padding:6px 14px;border-radius:8px;font-size:.72rem;font-weight:600;background:var(--bg3);border:1px solid var(--bdr);color:var(--t2)}.tb-btn:hover{border-color:var(--violet);color:var(--violet)}.tb-btn.primary{background:linear-gradient(135deg,var(--violet),#6d28d9);color:#fff;border-color:transparent}
+.tb-back{font-size:.7rem;color:var(--t2);padding:6px 12px;border-radius:8px;border:1px solid var(--bdr);background:transparent}.tb-back:hover{border-color:var(--violet);color:var(--violet)}
+.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{padding:14px 20px;font-size:.75rem;font-weight:600;color:var(--t2);background:transparent;border:none;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:8px}
+.tab:hover{color:var(--t1);background:rgba(255,255,255,.02)}.tab.active{color:var(--violet);border-bottom-color:var(--violet);background:rgba(139,92,246,.05)}
+.tab-icon{font-size:1rem}.tab-num{font-size:.6rem;color:var(--t3);font-family:var(--fm);font-weight:500}.tab.active .tab-num{color:var(--violet)}
+.module{display:none;padding:24px;max-width:1400px;margin:0 auto}.module.active{display:block}
+.mod-header{margin-bottom:24px}.mod-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;background:rgba(139,92,246,.1);color:var(--violet);border:1px solid rgba(139,92,246,.2);margin-bottom:10px}
+.mod-title{font-family:var(--fd);font-size:1.9rem;font-weight:700;letter-spacing:-.6px;margin-bottom:6px}.mod-desc{font-size:.88rem;color:var(--t2);max-width:780px;line-height:1.55}
+.grid-2{display:grid;grid-template-columns:1fr 2fr;gap:18px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid-eq2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.grid-2,.grid-4,.grid-eq2{grid-template-columns:1fr}}
+.card{background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:18px}
+.card-title{font-size:.82rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}.card-title .lbl{display:flex;align-items:center;gap:8px}.card-title .ic{font-size:1rem}
+.card-sub{font-size:.7rem;color:var(--t2);margin-bottom:14px;line-height:1.5}
+.kpi{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px}
+.kpi-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);font-weight:600;margin-bottom:4px}
+.kpi-val{font-family:var(--fd);font-size:1.7rem;font-weight:700;line-height:1;color:var(--t1)}
+.kpi-val.cyan{color:var(--cyan)}.kpi-val.green{color:var(--green)}.kpi-val.gold{color:var(--gold)}.kpi-val.rose{color:var(--rose)}.kpi-val.violet{color:var(--violet)}.kpi-val.blue{color:var(--blue)}
+.kpi-sub{font-size:.65rem;color:var(--t2);margin-top:4px}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;padding:2px 6px;border-radius:6px;font-weight:600;margin-top:4px}
+.kpi-trend.up{background:rgba(34,197,94,.1);color:var(--green)}.kpi-trend.down{background:rgba(239,68,68,.1);color:var(--red)}.kpi-trend.neutral{background:rgba(150,164,190,.1);color:var(--t2)}
+.field{margin-bottom:14px}.field-lbl{font-size:.7rem;font-weight:600;color:var(--t2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.field-input,.field-select{width:100%;padding:9px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);font-size:.82rem}.field-input:focus,.field-select:focus{outline:none;border-color:var(--violet)}
+.field-row{display:flex;gap:10px}.field-row .field{flex:1}
+.slider{width:100%;-webkit-appearance:none;height:4px;border-radius:4px;background:var(--bdr);outline:none}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--violet);cursor:pointer;border:2px solid var(--bg3)}
+.slider-val{font-family:var(--fm);font-size:.85rem;font-weight:600;color:var(--violet);margin-left:8px}
+.slider-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}.slider-row .label{font-size:.7rem;color:var(--t2);font-weight:600}
+.btn-run{width:100%;padding:11px;background:linear-gradient(135deg,var(--violet),#6d28d9);color:#fff;border-radius:9px;font-weight:700;font-size:.82rem;margin-top:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:.75rem}
+.tbl th{text-align:left;padding:9px 10px;background:var(--bg2);color:var(--t2);font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bdr)}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(26,40,68,.4);color:var(--t1)}.tbl tr:hover td{background:rgba(139,92,246,.04)}
+.tbl .num{font-family:var(--fm);font-weight:500;text-align:right}
+.tbl .tier{padding:2px 7px;border-radius:5px;font-size:.6rem;font-weight:700;text-transform:uppercase}
+.tier-1{background:rgba(34,197,94,.15);color:var(--green)}.tier-2{background:rgba(59,125,255,.12);color:var(--blue)}.tier-3{background:rgba(240,180,41,.12);color:var(--gold)}.tier-4{background:rgba(239,68,68,.12);color:var(--red)}
+.insight{background:linear-gradient(135deg,rgba(139,92,246,.08),rgba(59,125,255,.05));border:1px solid rgba(139,92,246,.2);border-radius:10px;padding:14px 16px;margin-top:14px}
+.insight-hd{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--violet);margin-bottom:6px}
+.insight-body{font-size:.78rem;color:var(--t1);line-height:1.6}.insight-body strong{color:var(--violet);font-weight:600}.insight-body ul{margin:6px 0 0 18px}.insight-body li{margin-bottom:3px}
+.chart-wrap{position:relative;height:260px;width:100%}.chart-wrap.tall{height:340px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:14px;font-size:.62rem;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--t2)}
+.pill-violet{background:rgba(139,92,246,.1);color:var(--violet);border-color:rgba(139,92,246,.25)}.pill-cyan{background:rgba(0,201,167,.1);color:var(--cyan);border-color:rgba(0,201,167,.25)}.pill-gold{background:rgba(240,180,41,.1);color:var(--gold);border-color:rgba(240,180,41,.25)}.pill-green{background:rgba(34,197,94,.1);color:var(--green);border-color:rgba(34,197,94,.25)}
+.spacer{height:14px}
+.toast{position:fixed;top:80px;right:24px;background:var(--bg3);border:1px solid var(--violet);border-radius:10px;padding:12px 18px;font-size:.78rem;color:var(--t1);box-shadow:0 12px 32px rgba(0,0,0,.4);transform:translateX(120%);transition:transform .3s;z-index:200}.toast.show{transform:translateX(0)}
+.score-big{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:14px;font-family:var(--fd);font-size:1.4rem;font-weight:700}
+.sc-hi{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}.sc-mid{background:rgba(240,180,41,.15);color:var(--gold);border:1px solid rgba(240,180,41,.3)}.sc-lo{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+@media(min-width:901px){.sticky-side{position:sticky;top:120px;align-self:start}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">BD</div>
+    <div class="tb-name">BD&L / Asset Valuation IQ<span class="sub">Business Development · Licensing · M&A · Valuation</span></div>
+  </div>
+  <div class="tb-actions">
+    <a href="index.html" class="tb-back">← Portfolio</a>
+    <button class="tb-btn" onclick="t('Demo data loaded')">📥 Load Demo Data</button>
+    <button class="tb-btn primary" onclick="t('Asset valuation report queued')">📤 Export Report</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="rnpv"><span class="tab-icon">💰</span><span class="tab-num">01</span>rNPV Calculator</button>
+  <button class="tab" data-tab="deals"><span class="tab-icon">📚</span><span class="tab-num">02</span>Comparable Deals</button>
+  <button class="tab" data-tab="structure"><span class="tab-icon">🔧</span><span class="tab-num">03</span>Deal Structure</button>
+  <button class="tab" data-tab="decision"><span class="tab-icon">🎯</span><span class="tab-num">04</span>In-Licensing Matrix</button>
+  <button class="tab" data-tab="forecast"><span class="tab-icon">📊</span><span class="tab-num">05</span>Competitive Forecast</button>
+</div>
+
+<!-- ===== Module 1: rNPV Calculator ===== -->
+<section class="module active" id="mod-rnpv">
+  <div class="mod-header">
+    <div class="mod-tag">💰 Module 01 · Risk-Adjusted Valuation</div>
+    <h1 class="mod-title">rNPV Calculator & Scenario Modeling</h1>
+    <p class="mod-desc">Probability-of-success-weighted NPV with adjustable inputs across peak sales, PTRS by phase, discount rate, and time-to-launch. Monte Carlo simulation for value distribution.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card sticky-side">
+      <div class="card-title"><span class="lbl"><span class="ic">🎛️</span> Valuation Inputs</span></div>
+      <div class="field"><label class="field-lbl">Asset</label><select class="field-select"><option>ASC-301 (NSCLC, Phase 3)</option><option>IMD-118 (UC, Phase 2)</option><option>IMD-256 (PsA, Phase 3)</option><option>RD-901 (Pompe, Phase 3)</option></select></div>
+      <div class="field"><div class="slider-row"><span class="label">Peak Annual Sales ($M)</span><span class="slider-val">3,800</span></div><input type="range" min="500" max="10000" step="100" value="3800" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">Years to Peak</span><span class="slider-val">7</span></div><input type="range" min="3" max="15" value="7" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">PTRS to Launch (%)</span><span class="slider-val">62</span></div><input type="range" min="10" max="95" value="62" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">Discount Rate (%)</span><span class="slider-val">10.5</span></div><input type="range" min="6" max="18" step="0.5" value="10.5" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">Patent Life (yr post-launch)</span><span class="slider-val">12</span></div><input type="range" min="5" max="20" value="12" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">COGS (%)</span><span class="slider-val">18</span></div><input type="range" min="10" max="40" value="18" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">Royalty Outflow (%)</span><span class="slider-val">8</span></div><input type="range" min="0" max="25" step="0.5" value="8" class="slider"></div>
+      <button class="btn-run">🚀 Recalculate rNPV</button>
+    </div>
+
+    <div>
+      <div class="grid-4" style="margin-bottom:14px">
+        <div class="kpi"><div class="kpi-lbl">rNPV (Base)</div><div class="kpi-val violet">$2.84B</div><div class="kpi-sub">risk-adjusted</div></div>
+        <div class="kpi"><div class="kpi-lbl">Unadjusted NPV</div><div class="kpi-val cyan">$4.58B</div><div class="kpi-sub">100% PTRS</div></div>
+        <div class="kpi"><div class="kpi-lbl">PoS-Weighted Peak</div><div class="kpi-val gold">$2.36B</div><div class="kpi-sub">62% × $3.8B</div></div>
+        <div class="kpi"><div class="kpi-lbl">Cumulative Cost</div><div class="kpi-val rose">$1.42B</div><div class="kpi-sub">to launch</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="lbl"><span class="ic">📊</span> Cash Flow Profile (Risk-Adjusted)</span></div>
+        <p class="card-sub">Annual probability-adjusted cash flows from current state through patent expiry.</p>
+        <div class="chart-wrap tall"><canvas id="ch-cf"></canvas></div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="grid-eq2">
+        <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🎲</span> Monte Carlo — rNPV Distribution</span></div>
+          <p class="card-sub">10,000 simulations across input uncertainty.</p>
+          <div class="chart-wrap"><canvas id="ch-mc"></canvas></div>
+        </div>
+        <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📉</span> Tornado — rNPV Sensitivity</span></div>
+          <div class="chart-wrap"><canvas id="ch-tornado"></canvas></div>
+        </div>
+      </div>
+
+      <div class="insight">
+        <div class="insight-hd">⚡ Valuation Strategic Brief</div>
+        <div class="insight-body">
+          ASC-301 rNPV of <strong>$2.84B base case</strong> with 80% confidence interval $1.6B - $4.2B. Monte Carlo P10/P50/P90 of $1.4B / $2.84B / $4.3B.
+          <ul>
+            <li><strong>Largest drivers:</strong> Peak sales (±32% of rNPV swing), PTRS (±28%), and IRA price erosion in Year 6+ (±18%). Peak sales assumption is the most negotiable input in deal discussions.</li>
+            <li><strong>Deal floor:</strong> At P25 ($2.1B), supports upfront ≤ $400M + back-end ≤ $1.2B for licensee-side economics. Above $400M upfront, deal becomes value-destructive in conservative scenario.</li>
+            <li><strong>Asymmetry note:</strong> rNPV distribution is right-skewed (mean $2.94B vs median $2.84B). Earn-out structures or contingent value rights (CVR) capture this upside without overpaying upfront.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 2: Comparable Deals ===== -->
+<section class="module" id="mod-deals">
+  <div class="mod-header">
+    <div class="mod-tag">📚 Module 02 · Deal Comparables</div>
+    <h1 class="mod-title">Comparable Deals Database</h1>
+    <p class="mod-desc">Recent biopharma licensing and acquisition deals filtered by therapeutic area, stage, deal type, and structure. Benchmarking for upfront, milestone, and royalty terms.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Comparable Deals</div><div class="kpi-val cyan">42</div><div class="kpi-sub">last 36 months</div></div>
+    <div class="kpi"><div class="kpi-lbl">Median Upfront</div><div class="kpi-val violet">$285M</div><div class="kpi-sub">oncology Phase 3</div></div>
+    <div class="kpi"><div class="kpi-lbl">Median Total BV</div><div class="kpi-val green">$1.84B</div><div class="kpi-sub">upfront + milestones</div></div>
+    <div class="kpi"><div class="kpi-lbl">Median Royalty</div><div class="kpi-val gold">12%</div><div class="kpi-sub">tiered</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">📋</span> Recent Comparable Deals (Oncology · Phase 2-3)</span></div>
+    <table class="tbl">
+      <thead><tr><th>Year</th><th>Licensor → Licensee</th><th>Asset</th><th>Phase</th><th>Indication</th><th>Upfront</th><th>Milestones</th><th>Total BV</th><th>Royalty</th></tr></thead>
+      <tbody>
+        <tr><td>2025</td><td><strong>BeOne Med → Pfizer</strong></td><td>BGB-A1217 (TIGIT)</td><td>Ph2</td><td>NSCLC, GC</td><td class="num">$520M</td><td class="num">$3.2B</td><td class="num">$3.72B</td><td class="num">15-22%</td></tr>
+        <tr><td>2025</td><td><strong>Nuvation → Merck KGaA</strong></td><td>Taletrectinib (ROS1)</td><td>Ph3</td><td>NSCLC</td><td class="num">$680M</td><td class="num">$1.84B</td><td class="num">$2.52B</td><td class="num">12-18%</td></tr>
+        <tr><td>2024</td><td><strong>Arcus → AstraZeneca</strong></td><td>Domvanalimab</td><td>Ph3</td><td>NSCLC, GI</td><td class="num">$420M</td><td class="num">$2.4B</td><td class="num">$2.82B</td><td class="num">15-25%</td></tr>
+        <tr><td>2024</td><td><strong>Daiichi Sankyo / AZ</strong></td><td>Datopotamab DXd</td><td>Ph3</td><td>NSCLC, BC</td><td class="num">$1.0B</td><td class="num">$5.0B</td><td class="num">$6.0B</td><td class="num">50/50 P&L</td></tr>
+        <tr><td>2024</td><td><strong>Roivant → Pfizer</strong></td><td>RVT-3101 (TL1A)</td><td>Ph2</td><td>IBD</td><td class="num">$1.0B</td><td class="num">$1.5B</td><td class="num">$2.5B</td><td class="num">Profit share</td></tr>
+        <tr><td>2024</td><td><strong>Genmab → AbbVie</strong></td><td>Epcoritamab</td><td>Ph3</td><td>DLBCL, FL</td><td class="num">$750M</td><td class="num">$3.15B</td><td class="num">$3.9B</td><td class="num">Profit share</td></tr>
+        <tr><td>2023</td><td><strong>Mirati → BMS</strong></td><td>Adagrasib (KRAS)</td><td>Approved</td><td>NSCLC, CRC</td><td class="num">$4.8B</td><td class="num">N/A (acq)</td><td class="num">$4.8B</td><td class="num">N/A</td></tr>
+        <tr><td>2023</td><td><strong>Seagen → Pfizer</strong></td><td>Whole company</td><td>Multi</td><td>Multi-onc</td><td class="num">$43B</td><td class="num">N/A (acq)</td><td class="num">$43B</td><td class="num">N/A</td></tr>
+        <tr><td>2023</td><td><strong>Prometheus → Merck</strong></td><td>PRA023 (TL1A)</td><td>Ph2</td><td>UC, CD</td><td class="num">$10.8B</td><td class="num">N/A (acq)</td><td class="num">$10.8B</td><td class="num">N/A</td></tr>
+        <tr><td>2023</td><td><strong>ChemoCentryx → Amgen</strong></td><td>Tavneos (ANCA)</td><td>Approved</td><td>Vasculitis</td><td class="num">$3.7B</td><td class="num">N/A (acq)</td><td class="num">$3.7B</td><td class="num">N/A</td></tr>
+        <tr><td>2023</td><td><strong>HUTCHMED → Takeda</strong></td><td>Fruquintinib</td><td>Ph3</td><td>CRC</td><td class="num">$400M</td><td class="num">$730M</td><td class="num">$1.13B</td><td class="num">15-30%</td></tr>
+        <tr><td>2022</td><td><strong>SpringWorks/ Catalent</strong></td><td>Mirdametinib (NF1)</td><td>Ph2</td><td>NF1-PN</td><td class="num">$135M</td><td class="num">$685M</td><td class="num">$820M</td><td class="num">10-15%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📊</span> Deal Value by Phase</span></div>
+      <div class="chart-wrap"><canvas id="ch-phase"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">💸</span> Upfront / Total BV Mix</span></div>
+      <div class="chart-wrap"><canvas id="ch-mix"></canvas></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Comparable Deal Strategic Brief</div>
+    <div class="insight-body">
+      For an ASC-301-equivalent asset (Phase 3 NSCLC, TIGIT-class), the comparable benchmark is BeOne→Pfizer ($520M upfront, $3.72B BV) and Nuvation→Merck KGaA ($680M upfront, $2.52B BV).
+      <ul>
+        <li><strong>Expected range:</strong> Upfront $450-700M, total biobucks $2.5-4B, tiered royalties 15-22%. Anchor at upper end if Phase 3 readout positive.</li>
+        <li><strong>Structure trend:</strong> 4 of 12 recent comparables included profit-share (50/50 or asymmetric) replacing royalty. Profit-share suits high-conviction assets with shared commercial execution; consider for ASC-301 if licensee has competing oncology franchise.</li>
+        <li><strong>Acquisition vs license:</strong> Mirati ($4.8B) and Prometheus ($10.8B) acquisitions demonstrate the premium for whole-company deals — typically 2-3× license total BV when synergies exist.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 3: Deal Structure ===== -->
+<section class="module" id="mod-structure">
+  <div class="mod-header">
+    <div class="mod-tag">🔧 Module 03 · Deal Structuring</div>
+    <h1 class="mod-title">Deal Structure Simulator</h1>
+    <p class="mod-desc">Optimize upfront, milestones, royalty, and equity mix for value-maximizing and risk-balanced deal structures. Tradeoff analysis between cash-out and contingent value.</p>
+  </div>
+
+  <div class="grid-2">
+    <div class="card sticky-side">
+      <div class="card-title"><span class="lbl"><span class="ic">🎛️</span> Structure Inputs</span></div>
+      <div class="field"><label class="field-lbl">Deal Position</label><select class="field-select"><option>Licensee (Acquirer)</option><option>Licensor (Seller)</option></select></div>
+      <div class="field"><div class="slider-row"><span class="label">Upfront ($M)</span><span class="slider-val">550</span></div><input type="range" min="100" max="2000" step="50" value="550" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">Development Milestones ($M)</span><span class="slider-val">800</span></div><input type="range" min="100" max="3000" step="50" value="800" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">Commercial Milestones ($M)</span><span class="slider-val">1200</span></div><input type="range" min="100" max="5000" step="50" value="1200" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">Royalty Tier 1 (%)</span><span class="slider-val">12</span></div><input type="range" min="5" max="25" value="12" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">Royalty Tier 2 (%)</span><span class="slider-val">18</span></div><input type="range" min="5" max="30" value="18" class="slider"></div>
+      <div class="field"><div class="slider-row"><span class="label">Equity Component (%)</span><span class="slider-val">0</span></div><input type="range" min="0" max="20" value="0" class="slider"></div>
+      <button class="btn-run">🚀 Simulate Structure</button>
+    </div>
+
+    <div>
+      <div class="grid-4" style="margin-bottom:14px">
+        <div class="kpi"><div class="kpi-lbl">Total Deal Value</div><div class="kpi-val violet">$2.55B</div><div class="kpi-sub">biobucks</div></div>
+        <div class="kpi"><div class="kpi-lbl">NPV to Licensor</div><div class="kpi-val green">$1.42B</div><div class="kpi-sub">risk-adjusted</div></div>
+        <div class="kpi"><div class="kpi-lbl">NPV to Licensee</div><div class="kpi-val cyan">$1.84B</div><div class="kpi-sub">accretive</div></div>
+        <div class="kpi"><div class="kpi-lbl">Win-Win Zone</div><div class="kpi-val gold">Yes</div><div class="kpi-sub">positive both sides</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="lbl"><span class="ic">📊</span> Deal Cash Flow Distribution</span></div>
+        <div class="chart-wrap tall"><canvas id="ch-deal"></canvas></div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="card">
+        <div class="card-title"><span class="lbl"><span class="ic">🤝</span> Three Structure Scenarios</span></div>
+        <table class="tbl">
+          <thead><tr><th>Scenario</th><th>Upfront</th><th>Dev MS</th><th>Comm MS</th><th>Royalty</th><th>Licensor NPV</th><th>Licensee NPV</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr><td><strong>A: Heavy upfront</strong></td><td class="num">$1,000M</td><td class="num">$500M</td><td class="num">$800M</td><td class="num">8%</td><td class="num">$1.32B</td><td class="num">$1.18B</td><td><span class="tier tier-3">Licensor-favored</span></td></tr>
+            <tr><td><strong>B: Balanced</strong></td><td class="num">$550M</td><td class="num">$800M</td><td class="num">$1,200M</td><td class="num">12/18%</td><td class="num">$1.42B</td><td class="num">$1.84B</td><td><span class="tier tier-1">Win-win</span></td></tr>
+            <tr><td><strong>C: Heavy back-end</strong></td><td class="num">$250M</td><td class="num">$1,000M</td><td class="num">$2,000M</td><td class="num">18/25%</td><td class="num">$1.18B</td><td class="num">$2.24B</td><td><span class="tier tier-3">Licensee-favored</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="insight">
+        <div class="insight-hd">⚡ Deal Structuring Strategic Brief</div>
+        <div class="insight-body">
+          Balanced Scenario B (<strong>$550M upfront / $2B milestones / 12-18% tiered royalty</strong>) creates win-win zone with positive NPV for both parties. Three negotiation levers:
+          <ul>
+            <li><strong>Upfront tradeoff:</strong> Each $100M of upfront cash erodes licensor NPV by ~$60M (cost of cash to licensor &lt; royalty value) but reduces licensor PTRS exposure. Sweet spot is $500-600M upfront for Phase 3 oncology.</li>
+            <li><strong>Royalty stepping:</strong> Tiered royalty (12% under $1B, 18% over $1B, 22% over $3B) creates upside alignment. Licensor captures more value if asset blockbusters.</li>
+            <li><strong>Commercial milestones:</strong> Avoid sales-milestone "cliff" structures where small revenue shortfalls cost large milestones. Use sales-tier ladders ($1B, $2B, $3B) instead of point-in-time targets.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 4: In-Licensing Decision ===== -->
+<section class="module" id="mod-decision">
+  <div class="mod-header">
+    <div class="mod-tag">🎯 Module 04 · Decision Framework</div>
+    <h1 class="mod-title">In-Licensing Decision Matrix</h1>
+    <p class="mod-desc">Multi-criteria decision analysis for in-licensing opportunities. Scoring across strategic fit, scientific merit, commercial potential, and execution feasibility.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Assets Evaluated</div><div class="kpi-val cyan">12</div><div class="kpi-sub">in pipeline review</div></div>
+    <div class="kpi"><div class="kpi-lbl">Recommend Pursue</div><div class="kpi-val green">3</div><div class="kpi-sub">tier 1 priorities</div></div>
+    <div class="kpi"><div class="kpi-lbl">Recommend Pass</div><div class="kpi-val rose">6</div><div class="kpi-sub">low strategic fit</div></div>
+    <div class="kpi"><div class="kpi-lbl">Watch / Monitor</div><div class="kpi-val gold">3</div><div class="kpi-sub">data readout pending</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🏆</span> Asset Scoring Matrix</span></div>
+    <table class="tbl">
+      <thead><tr><th>Asset</th><th>Indication</th><th>Phase</th><th>Strategic Fit</th><th>Science</th><th>Commercial</th><th>Execution</th><th>Composite</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ASC-301</strong></td><td>NSCLC (TIGIT class)</td><td>Ph3</td><td><div class="score-big sc-hi">94</div></td><td><div class="score-big sc-hi">92</div></td><td><div class="score-big sc-hi">90</div></td><td><div class="score-big sc-hi">88</div></td><td><div class="score-big sc-hi">91</div></td><td><span class="tier tier-1">Pursue · Tier 1</span></td></tr>
+        <tr><td><strong>IMD-118</strong></td><td>UC (TL1A class)</td><td>Ph2</td><td><div class="score-big sc-hi">88</div></td><td><div class="score-big sc-hi">85</div></td><td><div class="score-big sc-mid">78</div></td><td><div class="score-big sc-mid">72</div></td><td><div class="score-big sc-hi">81</div></td><td><span class="tier tier-1">Pursue · Tier 1</span></td></tr>
+        <tr><td><strong>RD-901</strong></td><td>Pompe (ERT)</td><td>Ph3</td><td><div class="score-big sc-hi">82</div></td><td><div class="score-big sc-hi">88</div></td><td><div class="score-big sc-mid">68</div></td><td><div class="score-big sc-mid">75</div></td><td><div class="score-big sc-hi">78</div></td><td><span class="tier tier-1">Pursue · Tier 1</span></td></tr>
+        <tr><td><strong>NEU-378</strong></td><td>Major Depression (NMDA)</td><td>Ph2</td><td><div class="score-big sc-mid">68</div></td><td><div class="score-big sc-mid">72</div></td><td><div class="score-big sc-hi">82</div></td><td><div class="score-big sc-mid">68</div></td><td><div class="score-big sc-mid">72</div></td><td><span class="tier tier-3">Watch</span></td></tr>
+        <tr><td><strong>CDM-188</strong></td><td>HFpEF</td><td>Ph2</td><td><div class="score-big sc-lo">58</div></td><td><div class="score-big sc-mid">65</div></td><td><div class="score-big sc-hi">84</div></td><td><div class="score-big sc-mid">62</div></td><td><div class="score-big sc-mid">67</div></td><td><span class="tier tier-3">Watch</span></td></tr>
+        <tr><td><strong>IMD-256</strong></td><td>PsA (IL-23)</td><td>Ph3</td><td><div class="score-big sc-mid">72</div></td><td><div class="score-big sc-mid">75</div></td><td><div class="score-big sc-mid">68</div></td><td><div class="score-big sc-mid">70</div></td><td><div class="score-big sc-mid">71</div></td><td><span class="tier tier-3">Watch · pending data</span></td></tr>
+        <tr><td><strong>RES-422</strong></td><td>IPF (Wnt pathway)</td><td>Ph1b</td><td><div class="score-big sc-lo">42</div></td><td><div class="score-big sc-mid">68</div></td><td><div class="score-big sc-mid">62</div></td><td><div class="score-big sc-lo">48</div></td><td><div class="score-big sc-lo">55</div></td><td><span class="tier tier-4">Pass · early</span></td></tr>
+        <tr><td><strong>VAC-552</strong></td><td>RSV vaccine</td><td>Ph3</td><td><div class="score-big sc-lo">38</div></td><td><div class="score-big sc-mid">62</div></td><td><div class="score-big sc-mid">72</div></td><td><div class="score-big sc-lo">52</div></td><td><div class="score-big sc-lo">56</div></td><td><span class="tier tier-4">Pass · not in TA</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Portfolio Decision Strategic Brief</div>
+    <div class="insight-body">
+      Three Tier-1 priorities (composite ≥ 78) emerge from 12-asset review. Recommended portfolio strategy:
+      <ul>
+        <li><strong>ASC-301 (composite 91):</strong> Pursue aggressively. Strongest strategic fit + Phase 3 + clear path to launch. Submit non-binding offer Q3 2026.</li>
+        <li><strong>IMD-118 (composite 81):</strong> Pursue with option structure. Phase 2 risk warrants $150-250M upfront with $1.2-1.8B milestones tied to Phase 3 success.</li>
+        <li><strong>RD-901 (composite 78):</strong> Rare disease specialty fit. Strategic value beyond NPV — establishes rare disease franchise for tax credits and pricing power.</li>
+        <li><strong>Watch list:</strong> NEU-378 and IMD-256 await Phase 2 / Phase 3 readouts respectively. Decision points Q4 2026 and Q1 2027.</li>
+        <li><strong>Capital allocation:</strong> Pursue all three Tier-1 if cumulative upfront under $1.2B; otherwise prioritize ASC-301 + RD-901 (uncorrelated TAs).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 5: Forecast ===== -->
+<section class="module" id="mod-forecast">
+  <div class="mod-header">
+    <div class="mod-tag">📊 Module 05 · Competitive Forecast</div>
+    <h1 class="mod-title">Asset Valuation & Competitive Forecast</h1>
+    <p class="mod-desc">Peak sales modeling under competitive scenarios, share-of-class projection, and patent-to-LOE revenue trajectory with biosimilar / generic erosion.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Class Peak (2030)</div><div class="kpi-val cyan">$28B</div><div class="kpi-sub">TIGIT class (NSCLC)</div></div>
+    <div class="kpi"><div class="kpi-lbl">Asset Peak Share</div><div class="kpi-val violet">14%</div><div class="kpi-sub">share-of-class</div></div>
+    <div class="kpi"><div class="kpi-lbl">Peak Sales</div><div class="kpi-val green">$3.8B</div><div class="kpi-sub">year 7 global</div></div>
+    <div class="kpi"><div class="kpi-lbl">LOE Erosion (Yr 1)</div><div class="kpi-val rose">-65%</div><div class="kpi-sub">post-patent</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">📈</span> Lifetime Revenue Trajectory (15-year)</span></div>
+    <p class="card-sub">Lifecycle revenue from launch through LOE erosion, with competitive entry impacts.</p>
+    <div class="chart-wrap tall"><canvas id="ch-life"></canvas></div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">⚔️</span> Competitive Landscape — TIGIT Class</span></div>
+      <table class="tbl">
+        <thead><tr><th>Asset</th><th>Sponsor</th><th>Phase</th><th>Status</th><th>Peak Yr Est.</th></tr></thead>
+        <tbody>
+          <tr><td><strong>ASC-301</strong></td><td>Internal</td><td>Ph3</td><td>Pivotal readout 2027</td><td class="num">$3.8B</td></tr>
+          <tr><td>Tiragolumab</td><td>Roche</td><td>Ph3</td><td>Mixed Ph3 outcomes</td><td class="num">$1.2B</td></tr>
+          <tr><td>Vibostolimab</td><td>Merck</td><td>Ph3</td><td>Combo w/ pembro</td><td class="num">$2.4B</td></tr>
+          <tr><td>Domvanalimab</td><td>Arcus/AZ</td><td>Ph3</td><td>Ph3 enrollment</td><td class="num">$3.1B</td></tr>
+          <tr><td>BGB-A1217</td><td>BeOne/Pfizer</td><td>Ph2</td><td>Promising Ph2 data</td><td class="num">$2.0B</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📊</span> Share-of-Class Forecast</span></div>
+      <div class="chart-wrap"><canvas id="ch-soc"></canvas></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Competitive Forecast Strategic Brief</div>
+    <div class="insight-body">
+      TIGIT class is forecasted to reach $28B globally by 2030. ASC-301 captures <strong>14% share ($3.8B peak)</strong> based on best-in-class efficacy in Phase 2 (OS HR 0.68 vs SoC) and projected first/second-to-market position in 1L NSCLC.
+      <ul>
+        <li><strong>Competitive risk:</strong> Domvanalimab (Arcus/AZ) and Vibostolimab (Merck combo) are the two most threatening competitors. If both achieve broader 1L approval, ASC-301 share could compress to 8-10%.</li>
+        <li><strong>Sequencing strategy:</strong> Aggressive 1L combination Phase 3 program is critical — head-to-head positioning vs SoC + checkpoint inhibitor is the highest-NPV indication expansion.</li>
+        <li><strong>LOE planning:</strong> 12-year patent life implies LOE 2039. Begin life-cycle management strategy (2L development, fixed-dose combo, subcutaneous formulation) by Year 4 post-launch.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast">Updated</div>
+
+<script>
+function t(m){const x=document.getElementById('toast');x.textContent=m;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2400);}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.module').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');document.getElementById('mod-'+b.dataset.tab).classList.add('active');
+  setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),50);
+}));
+const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},scales:{x:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}},y:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}}}};
+window.addEventListener('load',()=>{
+  new Chart(document.getElementById('ch-cf'),{type:'bar',data:{labels:['Yr 1','Yr 2','Yr 3','Yr 4','Yr 5','Yr 6','Yr 7','Yr 8','Yr 9','Yr 10','Yr 11','Yr 12'],datasets:[{label:'R&D + Launch costs',data:[-180,-220,-180,-120,-60,-40,-40,-40,-50,-50,-60,-80],backgroundColor:'rgba(239,68,68,.7)'},{label:'Risk-adj revenue',data:[0,0,0,180,580,1240,1840,2360,2820,3120,3380,3580],backgroundColor:'rgba(139,92,246,.7)'}]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,ticks:{...opts.scales.y.ticks,callback:v=>'$'+v+'M'}}}}});
+  new Chart(document.getElementById('ch-mc'),{type:'bar',data:{labels:['<$1B','$1-2B','$2-3B','$3-4B','$4-5B','>$5B'],datasets:[{label:'Simulations',data:[420,1280,3140,2760,1640,760],backgroundColor:'rgba(139,92,246,.7)',borderRadius:5}]},options:{...opts,plugins:{legend:{display:false}}}});
+  new Chart(document.getElementById('ch-tornado'),{type:'bar',data:{labels:['Peak sales','PTRS','IRA price erosion','Discount rate','Time to peak','COGS'],datasets:[{label:'Low',data:[-920,-790,-510,-340,-260,-180],backgroundColor:'rgba(239,68,68,.6)'},{label:'High',data:[860,720,420,310,240,160],backgroundColor:'rgba(34,197,94,.6)'}]},options:{...opts,indexAxis:'y',scales:{x:{stacked:true,ticks:{color:'#5d6e8c',callback:v=>'$'+v+'M'},grid:{color:'rgba(26,40,68,.4)'}},y:{stacked:true,ticks:{color:'#5d6e8c'},grid:{display:false}}}}});
+  new Chart(document.getElementById('ch-phase'),{type:'bar',data:{labels:['Preclinical','Ph1','Ph2','Ph3','Approved (M&A)'],datasets:[{label:'Median Upfront ($M)',data:[28,85,180,520,2400],backgroundColor:'rgba(139,92,246,.7)',borderRadius:5},{label:'Median Total BV ($M)',data:[280,720,1450,2750,4800],backgroundColor:'rgba(0,201,167,.7)',borderRadius:5}]},options:opts});
+  new Chart(document.getElementById('ch-mix'),{type:'doughnut',data:{labels:['Upfront cash','Dev milestones','Comm milestones','Royalties (NPV)','Equity'],datasets:[{data:[550,800,1200,1450,0],backgroundColor:['#8b5cf6','#3b7dff','#00c9a7','#f0b429','#ff4d6d'],borderColor:'#0a0f1c',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#96a4be',font:{size:10}}}}}});
+  new Chart(document.getElementById('ch-deal'),{type:'bar',data:{labels:['Yr 0','Yr 1','Yr 2','Yr 3','Yr 4','Yr 5','Yr 6','Yr 7','Yr 8','Yr 9','Yr 10'],datasets:[{label:'Upfront',data:[550,0,0,0,0,0,0,0,0,0,0],backgroundColor:'#8b5cf6'},{label:'Dev MS',data:[0,0,200,0,300,300,0,0,0,0,0],backgroundColor:'#3b7dff'},{label:'Comm MS',data:[0,0,0,0,0,200,200,300,200,300,0],backgroundColor:'#00c9a7'},{label:'Royalty',data:[0,0,0,0,28,84,168,252,308,348,378],backgroundColor:'#f0b429'}]},options:{...opts,scales:{x:{stacked:true,ticks:{color:'#5d6e8c'},grid:{display:false}},y:{stacked:true,ticks:{color:'#5d6e8c',callback:v=>'$'+v+'M'},grid:{color:'rgba(26,40,68,.4)'}}}}});
+  new Chart(document.getElementById('ch-life'),{type:'line',data:{labels:['L+1','L+2','L+3','L+4','L+5','L+6','L+7','L+8','L+9','L+10','L+11','L+12','LOE+1','LOE+2','LOE+3'],datasets:[{label:'Revenue ($M)',data:[280,680,1240,1840,2380,2820,3580,3680,3540,3320,3080,2780,980,520,310],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.15)',fill:true,tension:.3,borderWidth:2}]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,ticks:{...opts.scales.y.ticks,callback:v=>'$'+v+'M'}}}}});
+  new Chart(document.getElementById('ch-soc'),{type:'doughnut',data:{labels:['ASC-301','Domvanalimab','Vibostolimab','BGB-A1217','Tiragolumab','Other'],datasets:[{data:[14,12,9,7,4,54],backgroundColor:['#8b5cf6','#3b7dff','#00c9a7','#f0b429','#ff4d6d','#5d6e8c'],borderColor:'#0a0f1c',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#96a4be',font:{size:10}}}}}});
+});
+</script>
+</body>
+</html>

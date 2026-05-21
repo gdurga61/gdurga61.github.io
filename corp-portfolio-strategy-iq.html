@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corporate Portfolio Strategy IQ — Pharma Corporate Strategy Platform</title>
+<meta name="description" content="AI-powered Corporate Portfolio Strategy platform. TA strategy matrix, M&A target screener, capital allocation, competitive positioning, and 5-year long-range plan modeling.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#050810;--bg2:#0a0f1c;--bg3:#111828;--bg4:#182038;--bdr:#1a2844;--t1:#eaf0fa;--t2:#96a4be;--t3:#5d6e8c;--blue:#3b7dff;--cyan:#00c9a7;--gold:#f0b429;--rose:#ff4d6d;--violet:#8b5cf6;--green:#22c55e;--orange:#f97316;--red:#ef4444;--f:'Inter',system-ui,sans-serif;--fd:'Fraunces',Georgia,serif;--fm:'JetBrains Mono',monospace}
+html{font-size:15px;scroll-behavior:smooth}body{font-family:var(--f);background:var(--bg);color:var(--t1);overflow-x:hidden;min-height:100vh}
+a{color:var(--cyan);text-decoration:none}button{font-family:var(--f);cursor:pointer;border:none}input,select{font-family:var(--f)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:6px}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.tb-brand{display:flex;align-items:center;gap:12px}.tb-logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff}
+.tb-name{font-size:.95rem;font-weight:700;line-height:1.15}.tb-name .sub{display:block;font-size:.62rem;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.8px;margin-top:1px}
+.tb-actions{display:flex;gap:8px;align-items:center}.tb-btn{padding:6px 14px;border-radius:8px;font-size:.72rem;font-weight:600;background:var(--bg3);border:1px solid var(--bdr);color:var(--t2)}.tb-btn:hover{border-color:var(--blue);color:var(--blue)}.tb-btn.primary{background:linear-gradient(135deg,var(--blue),#1e40af);color:#fff;border-color:transparent}
+.tb-back{font-size:.7rem;color:var(--t2);padding:6px 12px;border-radius:8px;border:1px solid var(--bdr);background:transparent}.tb-back:hover{border-color:var(--blue);color:var(--blue)}
+.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{padding:14px 20px;font-size:.75rem;font-weight:600;color:var(--t2);background:transparent;border:none;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:8px}
+.tab:hover{color:var(--t1);background:rgba(255,255,255,.02)}.tab.active{color:var(--blue);border-bottom-color:var(--blue);background:rgba(59,125,255,.05)}
+.tab-icon{font-size:1rem}.tab-num{font-size:.6rem;color:var(--t3);font-family:var(--fm);font-weight:500}.tab.active .tab-num{color:var(--blue)}
+.module{display:none;padding:24px;max-width:1400px;margin:0 auto}.module.active{display:block}
+.mod-header{margin-bottom:24px}.mod-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;background:rgba(59,125,255,.1);color:var(--blue);border:1px solid rgba(59,125,255,.2);margin-bottom:10px}
+.mod-title{font-family:var(--fd);font-size:1.9rem;font-weight:700;letter-spacing:-.6px;margin-bottom:6px}.mod-desc{font-size:.88rem;color:var(--t2);max-width:780px;line-height:1.55}
+.grid-2{display:grid;grid-template-columns:1fr 2fr;gap:18px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid-eq2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.grid-2,.grid-4,.grid-eq2{grid-template-columns:1fr}}
+.card{background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:18px}
+.card-title{font-size:.82rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}.card-title .lbl{display:flex;align-items:center;gap:8px}.card-title .ic{font-size:1rem}
+.card-sub{font-size:.7rem;color:var(--t2);margin-bottom:14px;line-height:1.5}
+.kpi{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px}
+.kpi-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);font-weight:600;margin-bottom:4px}
+.kpi-val{font-family:var(--fd);font-size:1.7rem;font-weight:700;line-height:1;color:var(--t1)}
+.kpi-val.cyan{color:var(--cyan)}.kpi-val.green{color:var(--green)}.kpi-val.gold{color:var(--gold)}.kpi-val.rose{color:var(--rose)}.kpi-val.violet{color:var(--violet)}.kpi-val.blue{color:var(--blue)}
+.kpi-sub{font-size:.65rem;color:var(--t2);margin-top:4px}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;padding:2px 6px;border-radius:6px;font-weight:600;margin-top:4px}
+.kpi-trend.up{background:rgba(34,197,94,.1);color:var(--green)}.kpi-trend.down{background:rgba(239,68,68,.1);color:var(--red)}.kpi-trend.neutral{background:rgba(150,164,190,.1);color:var(--t2)}
+.field{margin-bottom:14px}.field-lbl{font-size:.7rem;font-weight:600;color:var(--t2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.field-input,.field-select{width:100%;padding:9px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);font-size:.82rem}.field-input:focus,.field-select:focus{outline:none;border-color:var(--blue)}
+.field-row{display:flex;gap:10px}.field-row .field{flex:1}
+.btn-run{width:100%;padding:11px;background:linear-gradient(135deg,var(--blue),#1e40af);color:#fff;border-radius:9px;font-weight:700;font-size:.82rem;margin-top:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:.75rem}
+.tbl th{text-align:left;padding:9px 10px;background:var(--bg2);color:var(--t2);font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bdr)}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(26,40,68,.4);color:var(--t1)}.tbl tr:hover td{background:rgba(59,125,255,.04)}
+.tbl .num{font-family:var(--fm);font-weight:500;text-align:right}
+.tbl .tier{padding:2px 7px;border-radius:5px;font-size:.6rem;font-weight:700;text-transform:uppercase}
+.tier-1{background:rgba(34,197,94,.15);color:var(--green)}.tier-2{background:rgba(0,201,167,.12);color:var(--cyan)}.tier-3{background:rgba(240,180,41,.12);color:var(--gold)}.tier-4{background:rgba(239,68,68,.12);color:var(--red)}.tier-divest{background:rgba(150,164,190,.12);color:var(--t2)}
+.insight{background:linear-gradient(135deg,rgba(59,125,255,.08),rgba(0,201,167,.05));border:1px solid rgba(59,125,255,.2);border-radius:10px;padding:14px 16px;margin-top:14px}
+.insight-hd{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--blue);margin-bottom:6px}
+.insight-body{font-size:.78rem;color:var(--t1);line-height:1.6}.insight-body strong{color:var(--blue);font-weight:600}.insight-body ul{margin:6px 0 0 18px}.insight-body li{margin-bottom:3px}
+.chart-wrap{position:relative;height:260px;width:100%}.chart-wrap.tall{height:380px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:14px;font-size:.62rem;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--t2)}
+.pill-blue{background:rgba(59,125,255,.1);color:var(--blue);border-color:rgba(59,125,255,.25)}.pill-cyan{background:rgba(0,201,167,.1);color:var(--cyan);border-color:rgba(0,201,167,.25)}.pill-gold{background:rgba(240,180,41,.1);color:var(--gold);border-color:rgba(240,180,41,.25)}.pill-green{background:rgba(34,197,94,.1);color:var(--green);border-color:rgba(34,197,94,.25)}
+.spacer{height:14px}
+.toast{position:fixed;top:80px;right:24px;background:var(--bg3);border:1px solid var(--blue);border-radius:10px;padding:12px 18px;font-size:.78rem;color:var(--t1);box-shadow:0 12px 32px rgba(0,0,0,.4);transform:translateX(120%);transition:transform .3s;z-index:200}.toast.show{transform:translateX(0)}
+.gantt{display:flex;flex-direction:column;gap:6px}
+.gantt-row{display:grid;grid-template-columns:200px 1fr;gap:10px;align-items:center;font-size:.72rem}
+.gantt-lbl{color:var(--t2);font-weight:600}
+.gantt-track{height:28px;background:var(--bg2);border-radius:5px;position:relative}
+.gantt-bar{position:absolute;top:0;bottom:0;border-radius:5px;display:flex;align-items:center;padding:0 8px;font-size:.6rem;color:#fff;font-weight:700}
+.score-big{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:14px;font-family:var(--fd);font-size:1.4rem;font-weight:700}
+.sc-hi{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}.sc-mid{background:rgba(240,180,41,.15);color:var(--gold);border:1px solid rgba(240,180,41,.3)}.sc-lo{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">CP</div>
+    <div class="tb-name">Corporate Portfolio Strategy IQ<span class="sub">Therapeutic Area Strategy · M&A · Capital Allocation · LRP</span></div>
+  </div>
+  <div class="tb-actions">
+    <a href="index.html" class="tb-back">← Portfolio</a>
+    <button class="tb-btn" onclick="t('Demo data loaded')">📥 Load Demo Data</button>
+    <button class="tb-btn primary" onclick="t('Corporate strategy report queued')">📤 Export Report</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="ta"><span class="tab-icon">🎯</span><span class="tab-num">01</span>TA Strategy Matrix</button>
+  <button class="tab" data-tab="ma"><span class="tab-icon">🏢</span><span class="tab-num">02</span>M&A Target Screener</button>
+  <button class="tab" data-tab="capital"><span class="tab-icon">💼</span><span class="tab-num">03</span>Capital Allocation</button>
+  <button class="tab" data-tab="position"><span class="tab-icon">🏆</span><span class="tab-num">04</span>Competitive Positioning</button>
+  <button class="tab" data-tab="lrp"><span class="tab-icon">📅</span><span class="tab-num">05</span>5-Year LRP</button>
+</div>
+
+<!-- ===== Module 1: TA Strategy Matrix ===== -->
+<section class="module active" id="mod-ta">
+  <div class="mod-header">
+    <div class="mod-tag">🎯 Module 01 · Therapeutic Area Strategy</div>
+    <h1 class="mod-title">Therapeutic Area Strategy Matrix</h1>
+    <p class="mod-desc">TA-level attractiveness × internal capability matrix. Identify which therapeutic areas to invest in, harvest, divest, or partner across the corporate portfolio.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Active TAs</div><div class="kpi-val blue">6</div><div class="kpi-sub">across portfolio</div></div>
+    <div class="kpi"><div class="kpi-lbl">Invest TAs</div><div class="kpi-val green">2</div><div class="kpi-sub">Oncology · Immunology</div></div>
+    <div class="kpi"><div class="kpi-lbl">Harvest TAs</div><div class="kpi-val gold">2</div><div class="kpi-sub">Cardiometabolic · CNS</div></div>
+    <div class="kpi"><div class="kpi-lbl">Divest TAs</div><div class="kpi-val rose">1</div><div class="kpi-sub">Anti-infectives</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">📊</span> TA Attractiveness × Capability Matrix</span></div>
+    <p class="card-sub">Bubble size = current annual revenue. Quadrant placement drives strategic action.</p>
+    <div class="chart-wrap tall"><canvas id="ch-matrix"></canvas></div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🎯</span> TA Strategic Classification</span></div>
+    <table class="tbl">
+      <thead><tr><th>Therapeutic Area</th><th>Current Revenue</th><th>5-Yr CAGR</th><th>Market Attractiveness</th><th>Internal Capability</th><th>Strategic Action</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Oncology</strong></td><td class="num">$4.8B</td><td class="num">+18%</td><td><div class="score-big sc-hi">92</div></td><td><div class="score-big sc-hi">88</div></td><td><span class="tier tier-1">Invest · Lead</span></td></tr>
+        <tr><td><strong>Immunology / Inflammation</strong></td><td class="num">$2.1B</td><td class="num">+12%</td><td><div class="score-big sc-hi">85</div></td><td><div class="score-big sc-mid">78</div></td><td><span class="tier tier-1">Invest · Build</span></td></tr>
+        <tr><td><strong>Rare Disease</strong></td><td class="num">$840M</td><td class="num">+22%</td><td><div class="score-big sc-hi">82</div></td><td><div class="score-big sc-mid">62</div></td><td><span class="tier tier-2">Partner · BD&L</span></td></tr>
+        <tr><td><strong>Cardiometabolic</strong></td><td class="num">$1.8B</td><td class="num">+4%</td><td><div class="score-big sc-mid">62</div></td><td><div class="score-big sc-hi">85</div></td><td><span class="tier tier-3">Harvest · Selective</span></td></tr>
+        <tr><td><strong>CNS / Neurology</strong></td><td class="num">$680M</td><td class="num">+2%</td><td><div class="score-big sc-mid">58</div></td><td><div class="score-big sc-mid">68</div></td><td><span class="tier tier-3">Harvest · LCM only</span></td></tr>
+        <tr><td><strong>Anti-Infectives</strong></td><td class="num">$320M</td><td class="num">-3%</td><td><div class="score-big sc-lo">38</div></td><td><div class="score-big sc-lo">42</div></td><td><span class="tier tier-divest">Divest · Spin-out</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ TA Strategy Strategic Brief</div>
+    <div class="insight-body">
+      Portfolio mix is over-concentrated in Cardiometabolic and CNS (combined 19% of revenue but only 6% of growth). Recommended portfolio reshaping:
+      <ul>
+        <li><strong>Invest (Oncology, Immunology):</strong> Increase R&D allocation from 58% to 68% by Year 3. Three Phase 2 ICIs and two TIGIT-class assets warrant accelerated investment.</li>
+        <li><strong>Partner (Rare Disease):</strong> High attractiveness, weak capability. Pursue 1-2 in-licensing deals annually to build capability. RD-901 (Pompe) is candidate Tier-1 deal.</li>
+        <li><strong>Harvest (Cardiometabolic, CNS):</strong> Reduce new R&D spend by 60%. Fund only lifecycle management (formulation, fixed-dose combo, pediatric indications). Maintain commercial franchise for cash flow.</li>
+        <li><strong>Divest (Anti-Infectives):</strong> Sub-scale franchise underperforming growth and capability. Spin-out or asset-sale to specialty player (Pfizer, GSK have prior anti-infective M&A interest). Estimated divestiture value $1.2-1.6B.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 2: M&A Target Screener ===== -->
+<section class="module" id="mod-ma">
+  <div class="mod-header">
+    <div class="mod-tag">🏢 Module 02 · M&A Strategy</div>
+    <h1 class="mod-title">M&A Target Screener</h1>
+    <p class="mod-desc">Screen biopharma acquisition targets against strategic fit, asset quality, financial accretion, and execution feasibility. Prioritize 3-5 highest-value targets for active engagement.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Targets Screened</div><div class="kpi-val cyan">42</div><div class="kpi-sub">market cap $500M-$15B</div></div>
+    <div class="kpi"><div class="kpi-lbl">High-Fit Targets</div><div class="kpi-val green">6</div><div class="kpi-sub">composite ≥ 80</div></div>
+    <div class="kpi"><div class="kpi-lbl">Available Capital</div><div class="kpi-val blue">$18B</div><div class="kpi-sub">cash + capacity</div></div>
+    <div class="kpi"><div class="kpi-lbl">Tax-Optimized Headroom</div><div class="kpi-val gold">$24B</div><div class="kpi-sub">w/ debt issuance</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🎯</span> Top 10 M&A Targets</span></div>
+    <table class="tbl">
+      <thead><tr><th>Target</th><th>Ticker</th><th>Market Cap</th><th>Key Asset(s)</th><th>TA Fit</th><th>Strategic Score</th><th>Premium Est.</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Verve Therapeutics</strong></td><td>VERV</td><td class="num">$1.2B</td><td>Gene editing (PCSK9)</td><td>Cardio</td><td><div class="score-big sc-hi">88</div></td><td class="num">40%</td><td><span class="tier tier-1">Pursue · Tier 1</span></td></tr>
+        <tr><td><strong>Crinetics Pharma</strong></td><td>CRNX</td><td class="num">$3.8B</td><td>Paltusotine (acromegaly)</td><td>Rare</td><td><div class="score-big sc-hi">86</div></td><td class="num">35%</td><td><span class="tier tier-1">Pursue · Tier 1</span></td></tr>
+        <tr><td><strong>Cytokinetics</strong></td><td>CYTK</td><td class="num">$5.2B</td><td>Aficamten (HCM)</td><td>Cardio</td><td><div class="score-big sc-hi">82</div></td><td class="num">40%</td><td><span class="tier tier-1">Pursue · Tier 1</span></td></tr>
+        <tr><td><strong>Revolution Medicines</strong></td><td>RVMD</td><td class="num">$8.2B</td><td>RMC-6236 (RAS multi)</td><td>Oncology</td><td><div class="score-big sc-hi">85</div></td><td class="num">45%</td><td><span class="tier tier-1">Pursue · Tier 1</span></td></tr>
+        <tr><td><strong>Nuvation Bio</strong></td><td>NUVB</td><td class="num">$680M</td><td>Taletrectinib (ROS1)</td><td>Oncology</td><td><div class="score-big sc-mid">76</div></td><td class="num">50%</td><td><span class="tier tier-2">Watch</span></td></tr>
+        <tr><td><strong>Praxis Precision</strong></td><td>PRAX</td><td class="num">$1.4B</td><td>Ulixacaltamide (tremor)</td><td>CNS</td><td><div class="score-big sc-mid">72</div></td><td class="num">35%</td><td><span class="tier tier-2">Watch</span></td></tr>
+        <tr><td><strong>Iovance Biotherapeutics</strong></td><td>IOVA</td><td class="num">$1.8B</td><td>Lifileucel (TIL therapy)</td><td>Oncology</td><td><div class="score-big sc-mid">68</div></td><td class="num">30%</td><td><span class="tier tier-2">Watch</span></td></tr>
+        <tr><td><strong>Arcus Biosciences</strong></td><td>RCUS</td><td class="num">$1.6B</td><td>Domvanalimab (TIGIT)</td><td>Oncology</td><td><div class="score-big sc-mid">62</div></td><td class="num">25%</td><td><span class="tier tier-3">Pass · partnered</span></td></tr>
+        <tr><td><strong>Vir Biotechnology</strong></td><td>VIR</td><td class="num">$1.1B</td><td>HBV/HDV portfolio</td><td>Infectious</td><td><div class="score-big sc-lo">52</div></td><td class="num">N/A</td><td><span class="tier tier-divest">Pass · off-strategy</span></td></tr>
+        <tr><td><strong>Mersana Therapeutics</strong></td><td>MRSN</td><td class="num">$220M</td><td>UpRi (HER2-low ADC)</td><td>Oncology</td><td><div class="score-big sc-lo">48</div></td><td class="num">N/A</td><td><span class="tier tier-divest">Pass · low quality</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ M&A Strategic Brief</div>
+    <div class="insight-body">
+      Four Tier-1 targets identified with composite scores ≥ 82. Sequencing recommendation:
+      <ul>
+        <li><strong>Crinetics Pharma (acromegaly):</strong> Builds rare disease franchise quickly. Paltusotine is first-in-class oral acromegaly. $3.8B market cap + 35% premium = ~$5.1B transaction. Highest-confidence Tier 1.</li>
+        <li><strong>Verve Therapeutics (gene editing):</strong> Platform play — gene editing capabilities transfer across cardio, rare. $1.2B + 40% = ~$1.7B small bolt-on with significant strategic optionality.</li>
+        <li><strong>Cytokinetics (HCM):</strong> Aficamten is best-in-class HCM therapy. Adds new cardio franchise growth driver. $5.2B + 40% = ~$7.3B transaction.</li>
+        <li><strong>Revolution Medicines (RAS-multi):</strong> Highest scientific quality target. RMC-6236 is breakthrough RAS asset with multi-billion peak potential. $8.2B + 45% = ~$11.9B — most expensive but highest upside.</li>
+      </ul>
+      <strong>Capital constraint:</strong> Total Tier-1 transaction cost ~$26B exceeds $24B headroom. Recommend Crinetics + Verve + Cytokinetics first ($14.1B); revisit Revolution Medicines after cardio franchise integration.
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 3: Capital Allocation ===== -->
+<section class="module" id="mod-capital">
+  <div class="mod-header">
+    <div class="mod-tag">💼 Module 03 · Capital Allocation</div>
+    <h1 class="mod-title">Capital Allocation Optimizer</h1>
+    <p class="mod-desc">Optimal capital deployment across R&D, BD&L, M&A, share buybacks, and dividends. Maximize 5-year EPS growth and ROIC while maintaining strategic optionality.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Annual FCF</div><div class="kpi-val green">$8.4B</div><div class="kpi-sub">free cash flow</div></div>
+    <div class="kpi"><div class="kpi-lbl">R&D Investment</div><div class="kpi-val blue">$5.2B</div><div class="kpi-sub">22% of revenue</div></div>
+    <div class="kpi"><div class="kpi-lbl">BD&L Budget</div><div class="kpi-val violet">$3.2B</div><div class="kpi-sub">annual capacity</div></div>
+    <div class="kpi"><div class="kpi-lbl">Return to Shareholders</div><div class="kpi-val gold">$4.8B</div><div class="kpi-sub">dividends + buybacks</div></div>
+  </div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🥧</span> Current Capital Allocation</span></div>
+      <div class="chart-wrap"><canvas id="ch-current"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🎯</span> Recommended Allocation</span></div>
+      <div class="chart-wrap"><canvas id="ch-target"></canvas></div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">📊</span> Capital Allocation Detail by Use</span></div>
+    <table class="tbl">
+      <thead><tr><th>Use of Capital</th><th>Current ($B)</th><th>Recommended ($B)</th><th>Δ</th><th>Expected ROIC</th><th>Strategic Priority</th></tr></thead>
+      <tbody>
+        <tr><td><strong>R&D — Discovery & Preclinical</strong></td><td class="num">$1.4</td><td class="num">$1.2</td><td class="num" style="color:var(--rose)">-$0.2</td><td class="num">8-12%</td><td><span class="pill pill-gold">Selective</span></td></tr>
+        <tr><td><strong>R&D — Clinical Development</strong></td><td class="num">$3.8</td><td class="num">$4.4</td><td class="num" style="color:var(--green)">+$0.6</td><td class="num">14-22%</td><td><span class="pill pill-green">Increase</span></td></tr>
+        <tr><td><strong>BD&L (Licenses + Partnerships)</strong></td><td class="num">$1.2</td><td class="num">$1.8</td><td class="num" style="color:var(--green)">+$0.6</td><td class="num">16-25%</td><td><span class="pill pill-blue">Increase</span></td></tr>
+        <tr><td><strong>M&A (Targeted Acquisitions)</strong></td><td class="num">$2.0</td><td class="num">$3.6</td><td class="num" style="color:var(--green)">+$1.6</td><td class="num">12-18%</td><td><span class="pill pill-blue">Increase</span></td></tr>
+        <tr><td><strong>Capex (Manufacturing + Digital)</strong></td><td class="num">$1.6</td><td class="num">$1.8</td><td class="num" style="color:var(--green)">+$0.2</td><td class="num">10-14%</td><td><span class="pill">Stable</span></td></tr>
+        <tr><td><strong>Dividends</strong></td><td class="num">$2.4</td><td class="num">$2.4</td><td class="num">$0.0</td><td class="num">N/A</td><td><span class="pill">Stable</span></td></tr>
+        <tr><td><strong>Share Buybacks</strong></td><td class="num">$2.4</td><td class="num">$1.6</td><td class="num" style="color:var(--rose)">-$0.8</td><td class="num">N/A</td><td><span class="pill pill-gold">Reduce</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Capital Allocation Strategic Brief</div>
+    <div class="insight-box-body">
+    <div class="insight-body">
+      Recommended reallocation shifts <strong>$1.6B from buybacks + discovery R&D into M&A + late-stage development + BD&L</strong>, raising portfolio ROIC from 14% to 17% over 5 years.
+      <ul>
+        <li><strong>Reduce share buybacks ($-0.8B):</strong> Current trading at ~16× forward earnings is fair value, not undervalued. Better return on capital available in M&A and clinical development.</li>
+        <li><strong>Reduce discovery R&D ($-0.2B):</strong> Internal discovery has 5% PTRS to launch vs. 35% PTRS for Ph2 in-licensed assets. Shift internal discovery to platform technologies (gene editing, ADC).</li>
+        <li><strong>Increase late-stage clinical ($+0.6B):</strong> Three Phase 3 readiness gates need additional investment to maintain timelines.</li>
+        <li><strong>Increase M&A ($+1.6B):</strong> Capacity for 1-2 Tier-1 acquisitions per year. Crinetics + Verve combination is feasible within this envelope.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 4: Competitive Positioning ===== -->
+<section class="module" id="mod-position">
+  <div class="mod-header">
+    <div class="mod-tag">🏆 Module 04 · Competitive Positioning</div>
+    <h1 class="mod-title">Competitive Positioning Analysis</h1>
+    <p class="mod-desc">Multi-dimensional company-level competitive analysis against top biopharma peers. Identify positioning gaps, white-space opportunities, and defensive vulnerabilities.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Peer Set Size</div><div class="kpi-val blue">12</div><div class="kpi-sub">global biopharma</div></div>
+    <div class="kpi"><div class="kpi-lbl">Rev Rank</div><div class="kpi-val cyan">#9</div><div class="kpi-sub">of 12 peers</div></div>
+    <div class="kpi"><div class="kpi-lbl">Pipeline Rank</div><div class="kpi-val green">#6</div><div class="kpi-sub">composite NPV</div><span class="kpi-trend up">▲ +2 vs LY</span></div>
+    <div class="kpi"><div class="kpi-lbl">R&D Productivity</div><div class="kpi-val gold">#4</div><div class="kpi-sub">PTRS-weighted</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🕸️</span> Competitive Positioning Radar</span></div>
+    <div class="chart-wrap tall"><canvas id="ch-radar"></canvas></div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">📊</span> Peer Comparison — Top Metrics</span></div>
+    <table class="tbl">
+      <thead><tr><th>Company</th><th>Revenue</th><th>R&D %</th><th>Pipeline NPV</th><th>Onc</th><th>Imm</th><th>Cardio</th><th>Rare</th><th>5-Yr CAGR</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Pfizer</strong></td><td class="num">$59B</td><td class="num">18%</td><td class="num">$28B</td><td>✓✓✓</td><td>✓✓</td><td>✓✓</td><td>✓</td><td class="num">+4%</td></tr>
+        <tr><td><strong>Merck</strong></td><td class="num">$60B</td><td class="num">25%</td><td class="num">$32B</td><td>✓✓✓</td><td>✓</td><td>✓✓</td><td></td><td class="num">+8%</td></tr>
+        <tr><td><strong>AbbVie</strong></td><td class="num">$54B</td><td class="num">14%</td><td class="num">$24B</td><td>✓✓</td><td>✓✓✓</td><td></td><td>✓</td><td class="num">+5%</td></tr>
+        <tr><td><strong>Bristol Myers Squibb</strong></td><td class="num">$45B</td><td class="num">22%</td><td class="num">$22B</td><td>✓✓✓</td><td>✓✓</td><td>✓</td><td>✓</td><td class="num">+3%</td></tr>
+        <tr><td><strong>AstraZeneca</strong></td><td class="num">$45B</td><td class="num">22%</td><td class="num">$28B</td><td>✓✓✓</td><td>✓</td><td>✓✓</td><td>✓✓</td><td class="num">+12%</td></tr>
+        <tr><td><strong>Roche</strong></td><td class="num">$67B</td><td class="num">20%</td><td class="num">$30B</td><td>✓✓✓</td><td>✓</td><td>✓</td><td>✓</td><td class="num">+5%</td></tr>
+        <tr><td><strong>Novartis</strong></td><td class="num">$48B</td><td class="num">21%</td><td class="num">$22B</td><td>✓✓</td><td>✓✓</td><td>✓✓</td><td>✓✓✓</td><td class="num">+6%</td></tr>
+        <tr><td style="background:rgba(59,125,255,.08)"><strong>This Company</strong></td><td class="num">$22B</td><td class="num">22%</td><td class="num">$14B</td><td>✓✓✓</td><td>✓✓</td><td>✓</td><td>✓</td><td class="num">+9%</td></tr>
+        <tr><td><strong>GSK</strong></td><td class="num">$38B</td><td class="num">15%</td><td class="num">$16B</td><td>✓✓</td><td>✓</td><td></td><td>✓</td><td class="num">+5%</td></tr>
+        <tr><td><strong>Eli Lilly</strong></td><td class="num">$36B</td><td class="num">26%</td><td class="num">$32B</td><td>✓✓</td><td>✓✓</td><td>✓✓✓</td><td>✓</td><td class="num">+22%</td></tr>
+        <tr><td><strong>Sanofi</strong></td><td class="num">$45B</td><td class="num">15%</td><td class="num">$18B</td><td>✓</td><td>✓✓✓</td><td>✓</td><td>✓✓</td><td class="num">+4%</td></tr>
+        <tr><td><strong>Takeda</strong></td><td class="num">$31B</td><td class="num">14%</td><td class="num">$14B</td><td>✓✓</td><td>✓✓</td><td></td><td>✓✓✓</td><td class="num">+2%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Competitive Positioning Brief</div>
+    <div class="insight-body">
+      Company ranks #9 in revenue but #6 in pipeline NPV — pipeline is over-indexed vs. current revenue, signaling positive forward growth trajectory. Three competitive priorities:
+      <ul>
+        <li><strong>Defend Oncology leadership:</strong> Tied with Pfizer / Merck / BMS / AZ / Roche at "✓✓✓" oncology — must invest aggressively to maintain top-tier positioning. ASC-301 launch is critical.</li>
+        <li><strong>Close Immunology gap:</strong> AbbVie (✓✓✓) and Sanofi (✓✓✓) lead. Recommend either organic build via IMD-118 + IMD-256 OR M&A of mid-cap immunology player.</li>
+        <li><strong>Rare disease whitespace:</strong> Significant peer gap — Novartis, AZ, Takeda lead. Crinetics M&A would move Rare from ✓ to ✓✓, narrowing peer gap meaningfully.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 5: 5-Year LRP ===== -->
+<section class="module" id="mod-lrp">
+  <div class="mod-header">
+    <div class="mod-tag">📅 Module 05 · Long-Range Plan</div>
+    <h1 class="mod-title">5-Year Strategic Roadmap (LRP)</h1>
+    <p class="mod-desc">Integrated 5-year long-range plan covering revenue trajectory, pipeline transitions, M&A milestones, and strategic positioning evolution.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">2026 Revenue</div><div class="kpi-val cyan">$22B</div><div class="kpi-sub">current</div></div>
+    <div class="kpi"><div class="kpi-lbl">2031 Revenue Target</div><div class="kpi-val green">$38B</div><div class="kpi-sub">+11.5% CAGR</div></div>
+    <div class="kpi"><div class="kpi-lbl">2031 EPS</div><div class="kpi-val blue">$18.40</div><div class="kpi-sub">+13% CAGR</div></div>
+    <div class="kpi"><div class="kpi-lbl">Cumulative Inv</div><div class="kpi-val gold">$42B</div><div class="kpi-sub">R&D + M&A + BD&L</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">📈</span> 5-Year Revenue Bridge</span></div>
+    <div class="chart-wrap tall"><canvas id="ch-bridge"></canvas></div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🗺️</span> Strategic Milestone Roadmap</span></div>
+    <div class="gantt">
+      <div class="gantt-row"><div class="gantt-lbl">ASC-301 NSCLC launch</div><div class="gantt-track"><div class="gantt-bar" style="left:8%;width:8%;background:#3b7dff">2027</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">IMD-118 UC Phase 3 readout</div><div class="gantt-track"><div class="gantt-bar" style="left:24%;width:6%;background:#00c9a7">Q2 2028</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">Crinetics acquisition close</div><div class="gantt-track"><div class="gantt-bar" style="left:14%;width:6%;background:#8b5cf6">Q3 2027</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">Verve gene editing close</div><div class="gantt-track"><div class="gantt-bar" style="left:18%;width:6%;background:#8b5cf6">Q4 2027</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">Anti-infectives divestiture</div><div class="gantt-track"><div class="gantt-bar" style="left:22%;width:6%;background:#5d6e8c">Q1 2028</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">IMD-118 UC launch</div><div class="gantt-track"><div class="gantt-bar" style="left:50%;width:8%;background:#3b7dff">2029</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">IRA Medicare price impact (Cohort 1)</div><div class="gantt-track"><div class="gantt-bar" style="left:42%;width:6%;background:#ef4444">Q1 2028</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">Cytokinetics acquisition (optional)</div><div class="gantt-track"><div class="gantt-bar" style="left:62%;width:6%;background:#8b5cf6">2030</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">RD-901 Pompe ERT launch</div><div class="gantt-track"><div class="gantt-bar" style="left:74%;width:8%;background:#3b7dff">2030</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">Revolution Med acquisition (revisit)</div><div class="gantt-track"><div class="gantt-bar" style="left:86%;width:6%;background:#8b5cf6">2031</div></div></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ LRP Strategic Brief</div>
+    <div class="insight-body">
+      Base-case LRP delivers <strong>$38B revenue by 2031 (+11.5% CAGR) and EPS $18.40 (+13% CAGR)</strong>, top-quartile growth among large-cap biopharma peers. Critical execution dependencies:
+      <ul>
+        <li><strong>2027 — Launch year:</strong> ASC-301 NSCLC + Crinetics close = $1.8B incremental revenue contribution in Year 1. Most consequential year.</li>
+        <li><strong>2028 — Pivotal year:</strong> IMD-118 Phase 3 readout determines immunology trajectory; IRA negotiation begins. Worst-case scenario: IMD-118 fails + 40% IRA cut = $4.2B revenue gap vs plan.</li>
+        <li><strong>2029-2030 — Build year:</strong> IMD-118 launch + RD-901 + Cytokinetics integration. Diversifies portfolio beyond Onc + immunology dependence.</li>
+        <li><strong>2031 — Optimization year:</strong> Revolution Medicines acquisition decision based on RAS-multi data and cardio synergies post-Cytokinetics.</li>
+      </ul>
+      Risk-adjusted LRP achieves $34B revenue by 2031 (+9% CAGR). Stretch case with all M&A executed and zero Phase 3 failures: $42B (+14% CAGR).
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast">Updated</div>
+
+<script>
+function t(m){const x=document.getElementById('toast');x.textContent=m;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2400);}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.module').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');document.getElementById('mod-'+b.dataset.tab).classList.add('active');
+  setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),50);
+}));
+const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},scales:{x:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}},y:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}}}};
+window.addEventListener('load',()=>{
+  new Chart(document.getElementById('ch-matrix'),{type:'bubble',data:{datasets:[{label:'TAs',data:[{x:92,y:88,r:28,l:'Onc',color:'#22c55e'},{x:85,y:78,r:18,l:'Imm',color:'#22c55e'},{x:82,y:62,r:12,l:'Rare',color:'#00c9a7'},{x:62,y:85,r:16,l:'Cardio',color:'#f0b429'},{x:58,y:68,r:10,l:'CNS',color:'#f0b429'},{x:38,y:42,r:7,l:'Anti-Inf',color:'#ef4444'}],backgroundColor:(c)=>c.raw?c.raw.color+'80':'#3b7dff',borderColor:(c)=>c.raw?c.raw.color:'#3b7dff'}]},options:{...opts,scales:{x:{title:{display:true,text:'Market Attractiveness →',color:'#96a4be'},ticks:{color:'#5d6e8c'},grid:{color:'rgba(26,40,68,.4)'},min:0,max:100},y:{title:{display:true,text:'Internal Capability →',color:'#96a4be'},ticks:{color:'#5d6e8c'},grid:{color:'rgba(26,40,68,.4)'},min:0,max:100}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw.l}}}}});
+  new Chart(document.getElementById('ch-current'),{type:'doughnut',data:{labels:['R&D — Discovery','R&D — Clinical','BD&L','M&A','Capex','Dividends','Buybacks'],datasets:[{data:[1.4,3.8,1.2,2.0,1.6,2.4,2.4],backgroundColor:['#5d6e8c','#3b7dff','#8b5cf6','#00c9a7','#f0b429','#22c55e','#ff4d6d'],borderColor:'#0a0f1c',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#96a4be',font:{size:9}}}}}});
+  new Chart(document.getElementById('ch-target'),{type:'doughnut',data:{labels:['R&D — Discovery','R&D — Clinical','BD&L','M&A','Capex','Dividends','Buybacks'],datasets:[{data:[1.2,4.4,1.8,3.6,1.8,2.4,1.6],backgroundColor:['#5d6e8c','#3b7dff','#8b5cf6','#00c9a7','#f0b429','#22c55e','#ff4d6d'],borderColor:'#0a0f1c',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{color:'#96a4be',font:{size:9}}}}}});
+  new Chart(document.getElementById('ch-radar'),{type:'radar',data:{labels:['Revenue','Pipeline NPV','R&D Productivity','Oncology','Immunology','Rare Disease','Geographic mix','Profitability'],datasets:[{label:'This Company',data:[55,68,82,88,78,55,72,80],backgroundColor:'rgba(59,125,255,.15)',borderColor:'#3b7dff',borderWidth:2},{label:'Big-Pharma Median',data:[72,76,72,75,72,68,80,78],backgroundColor:'rgba(150,164,190,.08)',borderColor:'#96a4be',borderWidth:1.5,borderDash:[4,4]},{label:'Best-in-class peer',data:[95,92,88,95,92,88,90,92],backgroundColor:'rgba(34,197,94,.08)',borderColor:'#22c55e',borderWidth:1.5,borderDash:[2,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},scales:{r:{ticks:{display:false},grid:{color:'rgba(26,40,68,.5)'},angleLines:{color:'rgba(26,40,68,.5)'},pointLabels:{color:'#96a4be',font:{size:9}},min:0,max:100}}}});
+  new Chart(document.getElementById('ch-bridge'),{type:'bar',data:{labels:['2026 Base','LOE erosion','IRA impact','Onc growth','Imm growth','M&A contrib','New launches','2031 Target'],datasets:[{label:'Revenue ($B)',data:[22,-3.8,-2.4,4.6,2.8,5.4,9.4,38],backgroundColor:['#3b7dff','#ef4444','#ef4444','#22c55e','#22c55e','#8b5cf6','#00c9a7','#3b7dff'],borderRadius:5}]},options:{...opts,plugins:{legend:{display:false}},scales:{...opts.scales,y:{...opts.scales.y,ticks:{...opts.scales.y.ticks,callback:v=>'$'+v+'B'}}}}});
+});
+</script>
+</body>
+</html>

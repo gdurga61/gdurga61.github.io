@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Launch Excellence IQ — Pharma Launch Strategy Platform</title>
+<meta name="description" content="AI-powered Pharma Launch Excellence platform. 8-dimension launch readiness scorecard, country sequencing, KOL strategy, OBR builder, and year 1-3 forecast modeling.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#050810;--bg2:#0a0f1c;--bg3:#111828;--bg4:#182038;--bdr:#1a2844;--t1:#eaf0fa;--t2:#96a4be;--t3:#5d6e8c;--blue:#3b7dff;--cyan:#00c9a7;--gold:#f0b429;--rose:#ff4d6d;--violet:#8b5cf6;--green:#22c55e;--orange:#f97316;--red:#ef4444;--f:'Inter',system-ui,sans-serif;--fd:'Fraunces',Georgia,serif;--fm:'JetBrains Mono',monospace}
+html{font-size:15px;scroll-behavior:smooth}body{font-family:var(--f);background:var(--bg);color:var(--t1);overflow-x:hidden;min-height:100vh}
+a{color:var(--cyan);text-decoration:none}button{font-family:var(--f);cursor:pointer;border:none}input,select{font-family:var(--f)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:6px}
+.topbar{position:sticky;top:0;z-index:50;background:rgba(5,8,16,.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.tb-brand{display:flex;align-items:center;gap:12px}.tb-logo{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,var(--orange),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:#fff}
+.tb-name{font-size:.95rem;font-weight:700;line-height:1.15}.tb-name .sub{display:block;font-size:.62rem;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:.8px;margin-top:1px}
+.tb-actions{display:flex;gap:8px;align-items:center}.tb-btn{padding:6px 14px;border-radius:8px;font-size:.72rem;font-weight:600;background:var(--bg3);border:1px solid var(--bdr);color:var(--t2)}.tb-btn:hover{border-color:var(--orange);color:var(--orange)}.tb-btn.primary{background:linear-gradient(135deg,var(--orange),#ea580c);color:#fff;border-color:transparent}
+.tb-back{font-size:.7rem;color:var(--t2);padding:6px 12px;border-radius:8px;border:1px solid var(--bdr);background:transparent}.tb-back:hover{border-color:var(--orange);color:var(--orange)}
+.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{padding:14px 20px;font-size:.75rem;font-weight:600;color:var(--t2);background:transparent;border:none;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:8px}
+.tab:hover{color:var(--t1);background:rgba(255,255,255,.02)}.tab.active{color:var(--orange);border-bottom-color:var(--orange);background:rgba(249,115,22,.05)}
+.tab-icon{font-size:1rem}.tab-num{font-size:.6rem;color:var(--t3);font-family:var(--fm);font-weight:500}.tab.active .tab-num{color:var(--orange)}
+.module{display:none;padding:24px;max-width:1400px;margin:0 auto}.module.active{display:block}
+.mod-header{margin-bottom:24px}.mod-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;background:rgba(249,115,22,.1);color:var(--orange);border:1px solid rgba(249,115,22,.2);margin-bottom:10px}
+.mod-title{font-family:var(--fd);font-size:1.9rem;font-weight:700;letter-spacing:-.6px;margin-bottom:6px}.mod-desc{font-size:.88rem;color:var(--t2);max-width:780px;line-height:1.55}
+.grid-2{display:grid;grid-template-columns:1fr 2fr;gap:18px}.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid-eq2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:900px){.grid-2,.grid-4,.grid-eq2{grid-template-columns:1fr}}
+.card{background:var(--bg3);border:1px solid var(--bdr);border-radius:12px;padding:18px}
+.card-title{font-size:.82rem;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:8px}.card-title .lbl{display:flex;align-items:center;gap:8px}.card-title .ic{font-size:1rem}
+.card-sub{font-size:.7rem;color:var(--t2);margin-bottom:14px;line-height:1.5}
+.kpi{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px}
+.kpi-lbl{font-size:.6rem;text-transform:uppercase;letter-spacing:.8px;color:var(--t3);font-weight:600;margin-bottom:4px}
+.kpi-val{font-family:var(--fd);font-size:1.7rem;font-weight:700;line-height:1;color:var(--t1)}
+.kpi-val.cyan{color:var(--cyan)}.kpi-val.green{color:var(--green)}.kpi-val.gold{color:var(--gold)}.kpi-val.rose{color:var(--rose)}.kpi-val.violet{color:var(--violet)}.kpi-val.orange{color:var(--orange)}
+.kpi-sub{font-size:.65rem;color:var(--t2);margin-top:4px}
+.kpi-trend{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;padding:2px 6px;border-radius:6px;font-weight:600;margin-top:4px}
+.kpi-trend.up{background:rgba(34,197,94,.1);color:var(--green)}.kpi-trend.down{background:rgba(239,68,68,.1);color:var(--red)}.kpi-trend.neutral{background:rgba(150,164,190,.1);color:var(--t2)}
+.field{margin-bottom:14px}.field-lbl{font-size:.7rem;font-weight:600;color:var(--t2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.field-input,.field-select{width:100%;padding:9px 12px;border-radius:8px;background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);font-size:.82rem}.field-input:focus,.field-select:focus{outline:none;border-color:var(--orange)}
+.field-row{display:flex;gap:10px}.field-row .field{flex:1}
+.btn-run{width:100%;padding:11px;background:linear-gradient(135deg,var(--orange),#ea580c);color:#fff;border-radius:9px;font-weight:700;font-size:.82rem;margin-top:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:.75rem}
+.tbl th{text-align:left;padding:9px 10px;background:var(--bg2);color:var(--t2);font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bdr)}
+.tbl td{padding:9px 10px;border-bottom:1px solid rgba(26,40,68,.4);color:var(--t1)}.tbl tr:hover td{background:rgba(249,115,22,.04)}
+.tbl .num{font-family:var(--fm);font-weight:500;text-align:right}
+.tbl .tier{padding:2px 7px;border-radius:5px;font-size:.6rem;font-weight:700;text-transform:uppercase}
+.tier-1{background:rgba(34,197,94,.15);color:var(--green)}.tier-2{background:rgba(0,201,167,.12);color:var(--cyan)}.tier-3{background:rgba(240,180,41,.12);color:var(--gold)}.tier-4{background:rgba(239,68,68,.12);color:var(--red)}
+.insight{background:linear-gradient(135deg,rgba(249,115,22,.08),rgba(240,180,41,.05));border:1px solid rgba(249,115,22,.2);border-radius:10px;padding:14px 16px;margin-top:14px}
+.insight-hd{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--orange);margin-bottom:6px}
+.insight-body{font-size:.78rem;color:var(--t1);line-height:1.6}.insight-body strong{color:var(--orange);font-weight:600}.insight-body ul{margin:6px 0 0 18px}.insight-body li{margin-bottom:3px}
+.chart-wrap{position:relative;height:260px;width:100%}.chart-wrap.tall{height:340px}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:14px;font-size:.62rem;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--t2)}
+.pill-orange{background:rgba(249,115,22,.1);color:var(--orange);border-color:rgba(249,115,22,.25)}.pill-cyan{background:rgba(0,201,167,.1);color:var(--cyan);border-color:rgba(0,201,167,.25)}.pill-gold{background:rgba(240,180,41,.1);color:var(--gold);border-color:rgba(240,180,41,.25)}.pill-green{background:rgba(34,197,94,.1);color:var(--green);border-color:rgba(34,197,94,.25)}
+.spacer{height:14px}
+.toast{position:fixed;top:80px;right:24px;background:var(--bg3);border:1px solid var(--orange);border-radius:10px;padding:12px 18px;font-size:.78rem;color:var(--t1);box-shadow:0 12px 32px rgba(0,0,0,.4);transform:translateX(120%);transition:transform .3s;z-index:200}.toast.show{transform:translateX(0)}
+.score-big{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:14px;font-family:var(--fd);font-size:1.4rem;font-weight:700}
+.sc-hi{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}.sc-mid{background:rgba(240,180,41,.15);color:var(--gold);border:1px solid rgba(240,180,41,.3)}.sc-lo{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.gantt{display:flex;flex-direction:column;gap:6px}
+.gantt-row{display:grid;grid-template-columns:160px 1fr;gap:10px;align-items:center;font-size:.72rem}
+.gantt-lbl{color:var(--t2);font-weight:600}
+.gantt-track{height:24px;background:var(--bg2);border-radius:5px;position:relative}
+.gantt-bar{position:absolute;top:0;bottom:0;border-radius:5px;display:flex;align-items:center;padding:0 8px;font-size:.6rem;color:#fff;font-weight:700}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">LX</div>
+    <div class="tb-name">Launch Excellence IQ<span class="sub">Pharma Launch Strategy · Readiness · Sequencing · Trajectory</span></div>
+  </div>
+  <div class="tb-actions">
+    <a href="index.html" class="tb-back">← Portfolio</a>
+    <button class="tb-btn" onclick="t('Demo data loaded')">📥 Load Demo Data</button>
+    <button class="tb-btn primary" onclick="t('Launch readiness report queued')">📤 Export Report</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="readiness"><span class="tab-icon">📊</span><span class="tab-num">01</span>Readiness Scorecard</button>
+  <button class="tab" data-tab="sequencing"><span class="tab-icon">🌍</span><span class="tab-num">02</span>Country Sequencing</button>
+  <button class="tab" data-tab="kol"><span class="tab-icon">👥</span><span class="tab-num">03</span>KOL & Advocacy</button>
+  <button class="tab" data-tab="obr"><span class="tab-icon">🗺️</span><span class="tab-num">04</span>Optimized Brand Roadmap</button>
+  <button class="tab" data-tab="trajectory"><span class="tab-icon">📈</span><span class="tab-num">05</span>Year 1-3 Trajectory</button>
+</div>
+
+<!-- ===== Module 1: Readiness Scorecard ===== -->
+<section class="module active" id="mod-readiness">
+  <div class="mod-header">
+    <div class="mod-tag">📊 Module 01 · Launch Readiness</div>
+    <h1 class="mod-title">8-Dimension Launch Readiness Scorecard</h1>
+    <p class="mod-desc">Comprehensive launch readiness assessment across Brand Strategy, Medical Affairs, Market Access, Commercial, Operations, Communications & Digital, KOL Engagement, and Regulatory readiness.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Composite Readiness</div><div class="kpi-val orange">72%</div><div class="kpi-sub">target ≥ 85% at L-90</div><span class="kpi-trend down">▲ Below target</span></div>
+    <div class="kpi"><div class="kpi-lbl">Days to Launch</div><div class="kpi-val cyan">187</div><div class="kpi-sub">L-187</div></div>
+    <div class="kpi"><div class="kpi-lbl">Critical Risks</div><div class="kpi-val rose">3</div><div class="kpi-sub">red status</div><span class="kpi-trend down">▲ Escalate</span></div>
+    <div class="kpi"><div class="kpi-lbl">Launch Confidence</div><div class="kpi-val gold">Yellow</div><div class="kpi-sub">go/no-go @ L-90</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🎯</span> 8-Dimension Readiness Detail</span><span class="pill pill-orange">L-187 status</span></div>
+    <table class="tbl">
+      <thead><tr><th>Dimension</th><th>Score</th><th>Lead Owner</th><th>Status</th><th>Key Gaps / Actions</th><th>Risk</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Brand Strategy & Positioning</strong></td><td><div class="score-big sc-hi">88</div></td><td>VP Marketing</td><td><span class="tier tier-1">Green</span></td><td>Positioning locked, brand book v2 in distribution</td><td>Low</td></tr>
+        <tr><td><strong>Medical Affairs Readiness</strong></td><td><div class="score-big sc-hi">82</div></td><td>VP Medical Affairs</td><td><span class="tier tier-1">Green</span></td><td>MSL deployment 90%, scientific platform locked</td><td>Low</td></tr>
+        <tr><td><strong>Market Access & Reimbursement</strong></td><td><div class="score-big sc-mid">68</div></td><td>VP Market Access</td><td><span class="tier tier-3">Yellow</span></td><td>Medicaid PA strategy pending in 12 states</td><td>Medium</td></tr>
+        <tr><td><strong>Commercial Operations</strong></td><td><div class="score-big sc-hi">78</div></td><td>VP Commercial</td><td><span class="tier tier-1">Green</span></td><td>SFE deployment 85%, IC plan finalized</td><td>Low</td></tr>
+        <tr><td><strong>Supply Chain & Operations</strong></td><td><div class="score-big sc-lo">54</div></td><td>VP Operations</td><td><span class="tier tier-4">Red</span></td><td>CMC bottleneck — second site validation behind schedule</td><td>High</td></tr>
+        <tr><td><strong>Communications & Digital</strong></td><td><div class="score-big sc-mid">72</div></td><td>VP Communications</td><td><span class="tier tier-3">Yellow</span></td><td>HCP digital campaign in development; DTC creative pending MLR</td><td>Medium</td></tr>
+        <tr><td><strong>KOL Engagement</strong></td><td><div class="score-big sc-hi">85</div></td><td>VP Medical Affairs</td><td><span class="tier tier-1">Green</span></td><td>Tier 1 KOLs 95% engaged, Tier 2 advisory board planned</td><td>Low</td></tr>
+        <tr><td><strong>Regulatory & Compliance</strong></td><td><div class="score-big sc-lo">58</div></td><td>VP Regulatory</td><td><span class="tier tier-4">Red</span></td><td>FDA labeling negotiation ongoing; promotional materials on hold</td><td>High</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🕸️</span> Readiness Radar</span></div>
+      <div class="chart-wrap tall"><canvas id="ch-radar"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📈</span> Readiness Trajectory (vs Plan)</span></div>
+      <div class="chart-wrap tall"><canvas id="ch-trajectory"></canvas></div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Launch Readiness Strategic Brief</div>
+    <div class="insight-body">
+      Composite readiness at <strong>72% versus 85% target at L-90</strong> places launch at YELLOW with two RED dimensions requiring immediate escalation:
+      <ul>
+        <li><strong>Supply Chain RED (54%):</strong> Second manufacturing site validation 8 weeks behind schedule. Recommend interim single-site supply strategy with phased market expansion; engage CMO partner as Phase 1 backup. Escalate to CEO.</li>
+        <li><strong>Regulatory RED (58%):</strong> FDA labeling negotiation centers on pneumonitis warning language. Recommend in-person meeting with reviewer Q4 2026; prepare promotional materials in 2 versions (current + likely-final labels) to avoid post-approval delay.</li>
+        <li><strong>Medicaid PA strategy:</strong> 12 states behind on PA criteria definition. Recommend NCQA-aligned PA template + state-by-state rollout vs. state-by-state custom development.</li>
+      </ul>
+      Critical path to GREEN: resolve supply by L-150, regulatory by L-120. Failure to address either pushes launch by an estimated 3-6 months ($380-540M revenue impact).
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 2: Country Sequencing ===== -->
+<section class="module" id="mod-sequencing">
+  <div class="mod-header">
+    <div class="mod-tag">🌍 Module 02 · Country Sequencing</div>
+    <h1 class="mod-title">Global Country Launch Sequencing</h1>
+    <p class="mod-desc">Wave-based launch sequencing optimizing for regulatory approval timing, payer access, competitive landscape, and international reference pricing implications.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Launch Markets</div><div class="kpi-val cyan">28</div><div class="kpi-sub">across 3 waves</div></div>
+    <div class="kpi"><div class="kpi-lbl">Wave 1 Markets</div><div class="kpi-val green">5</div><div class="kpi-sub">months 0-6 post-approval</div></div>
+    <div class="kpi"><div class="kpi-lbl">Time to 90% Coverage</div><div class="kpi-val gold">18</div><div class="kpi-sub">months</div></div>
+    <div class="kpi"><div class="kpi-lbl">Peak Yr 5 Revenue</div><div class="kpi-val violet">$3.8B</div><div class="kpi-sub">global</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">📅</span> Country Launch Sequence</span></div>
+    <div class="gantt">
+      <div class="gantt-row"><div class="gantt-lbl">🇺🇸 United States</div><div class="gantt-track"><div class="gantt-bar" style="left:0%;width:5%;background:#22c55e">M0</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇩🇪 Germany</div><div class="gantt-track"><div class="gantt-bar" style="left:5%;width:5%;background:#22c55e">M1</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇬🇧 United Kingdom</div><div class="gantt-track"><div class="gantt-bar" style="left:10%;width:5%;background:#22c55e">M2</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇯🇵 Japan</div><div class="gantt-track"><div class="gantt-bar" style="left:15%;width:5%;background:#22c55e">M3</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇨🇦 Canada</div><div class="gantt-track"><div class="gantt-bar" style="left:25%;width:5%;background:#22c55e">M5</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇫🇷 France</div><div class="gantt-track"><div class="gantt-bar" style="left:30%;width:5%;background:#00c9a7">M6</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇮🇹 Italy</div><div class="gantt-track"><div class="gantt-bar" style="left:40%;width:5%;background:#00c9a7">M8</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇪🇸 Spain</div><div class="gantt-track"><div class="gantt-bar" style="left:45%;width:5%;background:#00c9a7">M9</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇦🇺 Australia</div><div class="gantt-track"><div class="gantt-bar" style="left:50%;width:5%;background:#00c9a7">M10</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇰🇷 South Korea</div><div class="gantt-track"><div class="gantt-bar" style="left:55%;width:5%;background:#f0b429">M11</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇧🇷 Brazil</div><div class="gantt-track"><div class="gantt-bar" style="left:65%;width:5%;background:#f0b429">M13</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇨🇳 China (NMPA)</div><div class="gantt-track"><div class="gantt-bar" style="left:75%;width:5%;background:#f0b429">M15</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇲🇽 Mexico</div><div class="gantt-track"><div class="gantt-bar" style="left:80%;width:5%;background:#f0b429">M16</div></div></div>
+      <div class="gantt-row"><div class="gantt-lbl">🇮🇳 India</div><div class="gantt-track"><div class="gantt-bar" style="left:90%;width:5%;background:#f97316">M18</div></div></div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🗺️</span> Wave Strategy & Rationale</span></div>
+    <table class="tbl">
+      <thead><tr><th>Wave</th><th>Markets</th><th>Timing</th><th>Yr-5 Peak Sales</th><th>Strategic Rationale</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Wave 1</strong></td><td>US, Germany, UK, Japan, Canada</td><td>M0-M5</td><td class="num">$2.4B (63%)</td><td>Highest revenue + reference price anchors; US drives ROI</td></tr>
+        <tr><td><strong>Wave 2</strong></td><td>France, Italy, Spain, Australia, S. Korea</td><td>M6-M11</td><td class="num">$890M (23%)</td><td>EU5 completion; price-friendly HTAs first</td></tr>
+        <tr><td><strong>Wave 3</strong></td><td>Brazil, China, Mexico, India + 14 more</td><td>M12-M24</td><td class="num">$510M (14%)</td><td>Emerging markets; partner with local affiliates / distributors</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Sequencing Strategic Brief</div>
+    <div class="insight-body">
+      <strong>Anchor sequence (US → Germany → UK → Japan)</strong> protects international reference pricing while capturing 63% of peak sales in Wave 1. Three sequencing risks:
+      <ul>
+        <li><strong>UK price erosion:</strong> Launching UK before Germany would anchor international reference at NICE-discounted price. Confirmed Germany-first sequencing protects ~$340M cumulative revenue.</li>
+        <li><strong>Japan timing:</strong> PMDA approval expected M3, but reimbursement (Chuikyo) decision lags 60-90 days. Plan promotional launch at NHI listing, not approval.</li>
+        <li><strong>China (NMPA) Wave 3:</strong> Significant ($120M Yr-3) but requires local Phase 3 bridging trial in 30% of cases. If bridging required, delays to M18+.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 3: KOL ===== -->
+<section class="module" id="mod-kol">
+  <div class="mod-header">
+    <div class="mod-tag">👥 Module 03 · KOL & Advocacy</div>
+    <h1 class="mod-title">Pre-Launch KOL Engagement & Advocacy Strategy</h1>
+    <p class="mod-desc">KOL identification, tiering, engagement plan, and patient advocacy organization mapping for pre-launch and launch readiness.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Tier 1 KOLs</div><div class="kpi-val orange">24</div><div class="kpi-sub">global influencers</div></div>
+    <div class="kpi"><div class="kpi-lbl">KOL Engagement Rate</div><div class="kpi-val green">87%</div><div class="kpi-sub">advisory board attendance</div></div>
+    <div class="kpi"><div class="kpi-lbl">Advocacy Orgs</div><div class="kpi-val cyan">12</div><div class="kpi-sub">partnerships</div></div>
+    <div class="kpi"><div class="kpi-lbl">Speaker Bureau</div><div class="kpi-val violet">68</div><div class="kpi-sub">certified speakers</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">⭐</span> Top KOLs by Therapeutic Area — NSCLC</span></div>
+    <table class="tbl">
+      <thead><tr><th>KOL</th><th>Institution</th><th>Country</th><th>Influence Score</th><th>Engagement Status</th><th>Activities (12 mo)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dr. R. Herbst</strong></td><td>Yale Cancer Center</td><td>🇺🇸 US</td><td><div class="score-big sc-hi">96</div></td><td><span class="tier tier-1">Tier 1 · Engaged</span></td><td>Advisory + speaker + congress</td></tr>
+        <tr><td><strong>Dr. S. Peters</strong></td><td>CHUV Lausanne</td><td>🇨🇭 Switzerland</td><td><div class="score-big sc-hi">94</div></td><td><span class="tier tier-1">Tier 1 · Engaged</span></td><td>Steering committee chair</td></tr>
+        <tr><td><strong>Dr. A. Drilon</strong></td><td>MSK Cancer Center</td><td>🇺🇸 US</td><td><div class="score-big sc-hi">92</div></td><td><span class="tier tier-1">Tier 1 · Engaged</span></td><td>Advisory + publication</td></tr>
+        <tr><td><strong>Dr. F. Cappuzzo</strong></td><td>National Cancer Institute Roma</td><td>🇮🇹 Italy</td><td><div class="score-big sc-hi">88</div></td><td><span class="tier tier-1">Tier 1 · Engaged</span></td><td>Advisory + speaker</td></tr>
+        <tr><td><strong>Dr. T. Mok</strong></td><td>Chinese University of Hong Kong</td><td>🇭🇰 HK</td><td><div class="score-big sc-hi">95</div></td><td><span class="tier tier-1">Tier 1 · Engaged</span></td><td>APAC steering</td></tr>
+        <tr><td><strong>Dr. M. Reck</strong></td><td>LungenClinic Grosshansdorf</td><td>🇩🇪 Germany</td><td><div class="score-big sc-mid">82</div></td><td><span class="tier tier-2">Tier 2 · Pending</span></td><td>Advisory board invitation</td></tr>
+        <tr><td><strong>Dr. R. Soo</strong></td><td>National University Hospital Singapore</td><td>🇸🇬 SG</td><td><div class="score-big sc-mid">78</div></td><td><span class="tier tier-2">Tier 2 · Engaged</span></td><td>Speaker training Q3</td></tr>
+        <tr><td><strong>Dr. J. Garon</strong></td><td>UCLA Jonsson Cancer Center</td><td>🇺🇸 US</td><td><div class="score-big sc-mid">80</div></td><td><span class="tier tier-2">Tier 2 · Engaged</span></td><td>Speaker + publication</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ KOL Engagement Strategic Brief</div>
+    <div class="insight-body">
+      Tier 1 engagement is strong at 87%. Three priority gaps:
+      <ul>
+        <li><strong>Dr. Reck (Tier 2 · pending):</strong> Highest-profile German thoracic oncologist not yet on advisory board. Recommend personalized outreach by Chief Medical Officer at WCLC 2026.</li>
+        <li><strong>Tier 3 / community oncologist gap:</strong> Speaker bureau over-indexed on academic centers (64% academic, 36% community). Recommend community oncologist recruitment for post-launch peer-to-peer programs.</li>
+        <li><strong>Advocacy partnership opportunity:</strong> LUNGevity, Free to Breathe, and IASLC Foundation have not yet committed to launch awareness campaigns. Recommend grant + co-development of patient-facing educational materials.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Module 4: OBR ===== -->
+<section class="module" id="mod-obr">
+  <div class="mod-header">
+    <div class="mod-tag">🗺️ Module 04 · Optimized Brand Roadmap</div>
+    <h1 class="mod-title">Optimized Brand Roadmap (OBR)</h1>
+    <p class="mod-desc">Integrated launch and post-launch milestone roadmap covering pre-launch (L-12 to L-0), launch (L-0 to L+90), and growth phases (L+90 to L+360).</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">⏱️</span> Pre-Launch Milestones (L-12 to L-0)</span></div>
+    <table class="tbl">
+      <thead><tr><th>Milestone</th><th>Timing</th><th>Owner</th><th>Dependency</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>FDA approval (PDUFA)</td><td>L-0</td><td>Regulatory</td><td>Label finalization</td><td><span class="tier tier-2">In progress</span></td></tr>
+        <tr><td>Brand strategy lockdown</td><td>L-9</td><td>Marketing</td><td>Market research complete</td><td><span class="tier tier-1">Complete</span></td></tr>
+        <tr><td>MLR approval of launch materials</td><td>L-3</td><td>MLR Committee</td><td>Label content</td><td><span class="tier tier-2">In review</span></td></tr>
+        <tr><td>Field force hire & train</td><td>L-6 to L-1</td><td>Sales Ops</td><td>FF deployment plan</td><td><span class="tier tier-2">In progress</span></td></tr>
+        <tr><td>Manufacturing scale-up validation</td><td>L-9</td><td>CMC</td><td>Site 2 PAI</td><td><span class="tier tier-4">Delayed</span></td></tr>
+        <tr><td>Payer dossier delivery (AMCP)</td><td>L-6</td><td>Market Access</td><td>HEOR completion</td><td><span class="tier tier-1">Complete</span></td></tr>
+        <tr><td>KOL advisory board (final)</td><td>L-4</td><td>Medical Affairs</td><td>Final clinical data</td><td><span class="tier tier-1">Complete</span></td></tr>
+        <tr><td>HCP digital campaign go-live</td><td>L-2</td><td>Digital</td><td>MLR approval</td><td><span class="tier tier-2">In progress</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="card">
+    <div class="card-title"><span class="lbl"><span class="ic">🚀</span> Launch & Post-Launch (L-0 to L+360)</span></div>
+    <table class="tbl">
+      <thead><tr><th>Phase</th><th>Milestone</th><th>Target Metric</th><th>Year 1 Goal</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Launch Day (L+0)</strong></td><td>FF detail launch + advocacy event</td><td>HCP awareness</td><td>40% target HCP awareness</td></tr>
+        <tr><td><strong>L+30 days</strong></td><td>First prescription</td><td>Initial Rx volume</td><td>500 Rx</td></tr>
+        <tr><td><strong>L+90 days</strong></td><td>Q1 launch review</td><td>Trial vs forecast</td><td>±15% of forecast</td></tr>
+        <tr><td><strong>L+180 days</strong></td><td>Half-year review + adjustments</td><td>Market share</td><td>8% NRx share</td></tr>
+        <tr><td><strong>L+270 days</strong></td><td>Real-world data emergence</td><td>RWE publications</td><td>2+ abstracts</td></tr>
+        <tr><td><strong>L+360 days</strong></td><td>Year-1 launch debrief</td><td>Yr-1 revenue</td><td>$280M</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== Module 5: Trajectory ===== -->
+<section class="module" id="mod-trajectory">
+  <div class="mod-header">
+    <div class="mod-tag">📈 Module 05 · Trajectory Modeling</div>
+    <h1 class="mod-title">Year 1-3 Launch Trajectory Forecast</h1>
+    <p class="mod-desc">Risk-adjusted revenue trajectory across base, optimistic, and conservative scenarios. Peer benchmarking against analogous launches.</p>
+  </div>
+
+  <div class="grid-4" style="margin-bottom:14px">
+    <div class="kpi"><div class="kpi-lbl">Year 1 Forecast</div><div class="kpi-val orange">$280M</div><div class="kpi-sub">base case</div></div>
+    <div class="kpi"><div class="kpi-lbl">Year 3 Forecast</div><div class="kpi-val green">$1.6B</div><div class="kpi-sub">base case</div></div>
+    <div class="kpi"><div class="kpi-lbl">Peak Year (Yr 7)</div><div class="kpi-val cyan">$3.8B</div><div class="kpi-sub">global net</div></div>
+    <div class="kpi"><div class="kpi-lbl">Peer Bench (Yr 1)</div><div class="kpi-val violet">$245M</div><div class="kpi-sub">median analogue</div></div>
+  </div>
+
+  <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📊</span> 3-Year Revenue Trajectory (Scenarios)</span></div>
+    <div class="chart-wrap tall"><canvas id="ch-traj"></canvas></div>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="grid-eq2">
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">📊</span> Peer Launch Comparison</span></div>
+      <div class="chart-wrap"><canvas id="ch-peer"></canvas></div>
+    </div>
+    <div class="card"><div class="card-title"><span class="lbl"><span class="ic">🔍</span> Launch Trajectory Drivers</span></div>
+      <table class="tbl">
+        <thead><tr><th>Driver</th><th>Yr-1 Impact</th><th>Confidence</th></tr></thead>
+        <tbody>
+          <tr><td>Payer access ramp</td><td class="num">+18%</td><td><span class="pill pill-green">High</span></td></tr>
+          <tr><td>HCP awareness/adoption</td><td class="num">+14%</td><td><span class="pill pill-green">High</span></td></tr>
+          <tr><td>Sales force productivity</td><td class="num">+12%</td><td><span class="pill pill-gold">Med</span></td></tr>
+          <tr><td>Competitive response</td><td class="num">-8%</td><td><span class="pill pill-gold">Med</span></td></tr>
+          <tr><td>Supply / inventory</td><td class="num">-4%</td><td><span class="pill pill-cyan">High</span></td></tr>
+          <tr><td>Real-world effectiveness signals</td><td class="num">+6%</td><td><span class="pill pill-gold">Med</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="insight-hd">⚡ Trajectory Strategic Brief</div>
+    <div class="insight-body">
+      Base-case Year 1 of <strong>$280M tracks 14% above peer median ($245M)</strong> reflecting strong clinical differentiation and payer access. Three trajectory levers:
+      <ul>
+        <li><strong>Aggressive scenario ($340M Yr 1):</strong> Requires accelerated Medicaid PA resolution + Tier-3 formulary positioning at top 5 PBMs by L+60.</li>
+        <li><strong>Conservative scenario ($210M Yr 1):</strong> Triggered by supply constraint or labeling delay. Prepare investor narrative + revised guidance protocols in advance.</li>
+        <li><strong>Competitive risk:</strong> Two competitive late-stage Phase 3 assets read out in Year 2. Forecast assumes -8% impact; could swing to -15% if both data are positive. Refresh forecast quarterly.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast">Updated</div>
+
+<script>
+function t(m){const x=document.getElementById('toast');x.textContent=m;x.classList.add('show');setTimeout(()=>x.classList.remove('show'),2400);}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.module').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');document.getElementById('mod-'+b.dataset.tab).classList.add('active');
+  setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),50);
+}));
+const opts={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},scales:{x:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}},y:{ticks:{color:'#5d6e8c',font:{size:10}},grid:{color:'rgba(26,40,68,.4)'}}}};
+window.addEventListener('load',()=>{
+  new Chart(document.getElementById('ch-radar'),{type:'radar',data:{labels:['Brand','Medical','Access','Commercial','Ops/Supply','Comms/Digital','KOL','Regulatory'],datasets:[{label:'Current',data:[88,82,68,78,54,72,85,58],backgroundColor:'rgba(249,115,22,.15)',borderColor:'#f97316',borderWidth:2},{label:'Target (L-90)',data:[90,88,85,85,85,85,90,85],backgroundColor:'rgba(34,197,94,.08)',borderColor:'#22c55e',borderWidth:1.5,borderDash:[4,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#96a4be',font:{size:10}}}},scales:{r:{ticks:{display:false},grid:{color:'rgba(26,40,68,.5)'},angleLines:{color:'rgba(26,40,68,.5)'},pointLabels:{color:'#96a4be',font:{size:9}},min:0,max:100}}}});
+  new Chart(document.getElementById('ch-trajectory'),{type:'line',data:{labels:['L-360','L-270','L-180','L-90','L-0'],datasets:[{label:'Actual',data:[42,52,62,72,null],borderColor:'#f97316',backgroundColor:'rgba(249,115,22,.1)',fill:true,tension:.3,borderWidth:3},{label:'Plan',data:[50,65,78,85,90],borderColor:'#22c55e',borderDash:[6,4],borderWidth:2,fill:false,tension:.3}]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,min:0,max:100,ticks:{...opts.scales.y.ticks,callback:v=>v+'%'}}}}});
+  new Chart(document.getElementById('ch-traj'),{type:'line',data:{labels:['Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8','Q9','Q10','Q11','Q12'],datasets:[{label:'Optimistic',data:[58,82,98,102,142,178,210,232,280,320,355,385],borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,.08)',fill:'+1',tension:.3,borderWidth:2,pointRadius:0},{label:'Base case',data:[42,68,82,88,118,148,178,196,235,275,305,335],borderColor:'#f97316',backgroundColor:'rgba(249,115,22,.12)',fill:'+1',tension:.3,borderWidth:3,pointRadius:0},{label:'Conservative',data:[28,52,68,72,98,122,145,162,195,225,250,275],borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.06)',fill:false,tension:.3,borderWidth:2,pointRadius:0}]},options:{...opts,scales:{...opts.scales,y:{...opts.scales.y,ticks:{...opts.scales.y.ticks,callback:v=>'$'+v+'M'}}}}});
+  new Chart(document.getElementById('ch-peer'),{type:'bar',data:{labels:['Keytruda Yr1','Opdivo Yr1','Tagrisso Yr1','Tecentriq Yr1','Median','ASC-301 base','ASC-301 optim'],datasets:[{label:'Year-1 Revenue ($M)',data:[55,128,265,180,180,280,340],backgroundColor:['#3b7dff','#8b5cf6','#22c55e','#00c9a7','#96a4be','#f97316','#22c55e'],borderRadius:6}]},options:{...opts,plugins:{legend:{display:false}}}});
+});
+</script>
+</body>
+</html>
