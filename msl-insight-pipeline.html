@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSL Insight Pipeline — Field Intelligence Platform</title>
+<meta name="description" content="AI-powered MSL field insights platform. Converts unstructured KOL interaction notes into structured intelligence across scientific themes, competitive signals, advocacy gaps, and emerging unmet needs.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0e1a;--bg2:#10162a;--bg3:#161e36;--bg4:#1f2945;
+  --bdr:#243054;--bdr2:#2e3d6c;
+  --t1:#f0f4ff;--t2:#9ba9c8;--t3:#5d6b8e;
+  --blue:#4f8eff;--cyan:#00d4b4;--gold:#f5b840;--rose:#ff5577;--violet:#9b6dff;
+  --green:#34d670;--orange:#ff9550;--red:#ff4d5c;
+  --acc:#00d4b4;--acc2:#4f8eff;
+  --f:'Inter',system-ui,sans-serif;--fd:'Fraunces',Georgia,serif;--fm:'JetBrains Mono',monospace;
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--bg);color:var(--t1);overflow-x:hidden;min-height:100vh;background-image:radial-gradient(circle at 15% 10%,rgba(79,142,255,.08),transparent 35%),radial-gradient(circle at 85% 90%,rgba(0,212,180,.06),transparent 40%)}
+a{color:var(--cyan);text-decoration:none}
+button{font-family:var(--f);cursor:pointer;border:none}
+input,select,textarea{font-family:var(--f)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:6px}::-webkit-scrollbar-thumb:hover{background:var(--bdr2)}
+
+.topbar{position:sticky;top:0;z-index:50;background:rgba(10,14,26,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--bdr);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.tb-brand{display:flex;align-items:center;gap:12px}
+.tb-logo{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--cyan),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#0a0e1a;box-shadow:0 8px 24px rgba(0,212,180,.25)}
+.tb-name{font-size:1rem;font-weight:700;line-height:1.15;letter-spacing:-.2px}
+.tb-name .sub{display:block;font-size:.65rem;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.tb-actions{display:flex;gap:10px;align-items:center}
+.tb-btn{padding:8px 16px;border-radius:9px;font-size:.74rem;font-weight:600;background:var(--bg3);border:1px solid var(--bdr);color:var(--t2);transition:all .2s;display:inline-flex;align-items:center;gap:5px}
+.tb-btn:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-1px)}
+.tb-btn.primary{background:linear-gradient(135deg,var(--cyan),#00a890);color:#0a0e1a;border-color:transparent;font-weight:700}
+.tb-back{font-size:.72rem;color:var(--t2);padding:8px 14px;border-radius:9px;border:1px solid var(--bdr);background:transparent}
+.tb-back:hover{border-color:var(--cyan);color:var(--cyan)}
+
+.hero{padding:38px 28px 22px;max-width:1400px;margin:0 auto}
+.hero-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 13px;border-radius:20px;background:rgba(0,212,180,.1);border:1px solid rgba(0,212,180,.3);font-size:.66rem;font-weight:600;color:var(--cyan);margin-bottom:14px;text-transform:uppercase;letter-spacing:.8px}
+.hero-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.hero h1{font-family:var(--fd);font-size:2.4rem;font-weight:800;letter-spacing:-1px;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,var(--t1) 0%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:.92rem;color:var(--t2);max-width:760px;line-height:1.6}
+.hero .hl{color:var(--cyan);font-weight:600}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:6px 28px 22px;max-width:1400px;margin:0 auto}
+@media(max-width:900px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.metric{background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--bdr);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden}
+.metric::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),transparent)}
+.metric-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--t3);font-weight:600;margin-bottom:6px}
+.metric-val{font-family:var(--fd);font-size:1.85rem;font-weight:700;line-height:1;color:var(--t1)}
+.metric-val.cyan{color:var(--cyan)}.metric-val.gold{color:var(--gold)}.metric-val.green{color:var(--green)}.metric-val.rose{color:var(--rose)}
+.metric-sub{font-size:.68rem;color:var(--t2);margin-top:6px}
+.metric-trend{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;padding:3px 7px;border-radius:6px;font-weight:600;margin-top:6px}
+.metric-trend.up{background:rgba(52,214,112,.12);color:var(--green)}
+.metric-trend.down{background:rgba(255,77,92,.12);color:var(--red)}
+
+.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--bdr);padding:0 24px;max-width:1400px;margin:8px auto 0;border-radius:14px 14px 0 0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:15px 22px;font-size:.78rem;font-weight:600;color:var(--t2);background:transparent;border:none;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:8px;position:relative}
+.tab:hover{color:var(--t1);background:rgba(255,255,255,.02)}
+.tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tab.active::before{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:var(--cyan)}
+.tab-icon{font-size:1rem}
+.tab-num{font-size:.62rem;color:var(--t3);font-family:var(--fm);font-weight:500;background:var(--bg);padding:2px 6px;border-radius:5px}
+.tab.active .tab-num{color:var(--cyan);background:rgba(0,212,180,.1)}
+
+.module{display:none;padding:24px 28px 60px;max-width:1400px;margin:0 auto}
+.module.active{display:block;animation:fadeIn .25s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.section-hd{margin-bottom:18px}
+.section-hd h2{font-family:var(--fd);font-size:1.45rem;font-weight:700;letter-spacing:-.4px;margin-bottom:4px}
+.section-hd p{font-size:.82rem;color:var(--t2);line-height:1.55}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-12{display:grid;grid-template-columns:1fr 2fr;gap:18px}
+.grid-21{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+@media(max-width:900px){.grid-2,.grid-3,.grid-12,.grid-21{grid-template-columns:1fr}}
+
+.card{background:linear-gradient(135deg,var(--bg3) 0%,var(--bg2) 100%);border:1px solid var(--bdr);border-radius:14px;padding:18px;transition:border-color .2s}
+.card:hover{border-color:var(--bdr2)}
+.card.glass{background:rgba(22,30,54,.6);backdrop-filter:blur(12px)}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
+.card-hd h3{font-size:.88rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.card-hd .ic{font-size:1.05rem}
+.card-sub{font-size:.72rem;color:var(--t2);line-height:1.5;margin-bottom:14px}
+
+.field{margin-bottom:14px}
+.field-lbl{font-size:.7rem;font-weight:600;color:var(--t2);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.field-input,.field-select,.field-area{width:100%;padding:10px 13px;border-radius:9px;background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);font-size:.85rem;transition:border-color .2s}
+.field-area{min-height:140px;font-family:var(--f);line-height:1.55;resize:vertical}
+.field-input:focus,.field-select:focus,.field-area:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,180,.1)}
+.field-row{display:flex;gap:10px}.field-row .field{flex:1}
+
+.btn{padding:11px 18px;border-radius:9px;font-weight:700;font-size:.82rem;transition:all .2s;display:inline-flex;align-items:center;gap:7px;justify-content:center}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--cyan),#00a890);color:#0a0e1a}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,212,180,.3)}
+.btn-secondary{background:var(--bg3);color:var(--t1);border:1px solid var(--bdr)}
+.btn-secondary:hover{border-color:var(--cyan);color:var(--cyan)}
+
+.insight-card{background:linear-gradient(135deg,rgba(0,212,180,.06),rgba(79,142,255,.04));border:1px solid rgba(0,212,180,.2);border-radius:12px;padding:14px 16px;margin-top:14px}
+.insight-hd{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--cyan);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.insight-body{font-size:.8rem;color:var(--t1);line-height:1.65}
+.insight-body strong{color:var(--cyan);font-weight:600}
+.insight-body ul{margin:6px 0 0 18px}
+.insight-body li{margin-bottom:4px}
+
+.tbl{width:100%;border-collapse:collapse;font-size:.76rem}
+.tbl th{text-align:left;padding:10px 11px;background:var(--bg2);color:var(--t2);font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bdr)}
+.tbl td{padding:10px 11px;border-bottom:1px solid rgba(36,48,84,.4);color:var(--t1);vertical-align:top}
+.tbl tr:hover td{background:rgba(0,212,180,.04)}
+.tbl .num{font-family:var(--fm);font-weight:500;text-align:right}
+
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:14px;font-size:.62rem;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--t2)}
+.tag-cyan{background:rgba(0,212,180,.1);color:var(--cyan);border-color:rgba(0,212,180,.3)}
+.tag-blue{background:rgba(79,142,255,.1);color:var(--blue);border-color:rgba(79,142,255,.3)}
+.tag-gold{background:rgba(245,184,64,.1);color:var(--gold);border-color:rgba(245,184,64,.3)}
+.tag-rose{background:rgba(255,85,119,.1);color:var(--rose);border-color:rgba(255,85,119,.3)}
+.tag-violet{background:rgba(155,109,255,.1);color:var(--violet);border-color:rgba(155,109,255,.3)}
+.tag-green{background:rgba(52,214,112,.1);color:var(--green);border-color:rgba(52,214,112,.3)}
+.tag-orange{background:rgba(255,149,80,.1);color:var(--orange);border-color:rgba(255,149,80,.3)}
+
+.chart-wrap{position:relative;height:280px;width:100%}
+.chart-wrap.tall{height:340px}
+.chart-wrap.short{height:220px}
+
+.note-pill{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:6px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.sev-high{background:rgba(255,77,92,.15);color:var(--red)}
+.sev-med{background:rgba(245,184,64,.15);color:var(--gold)}
+.sev-low{background:rgba(155,165,200,.12);color:var(--t2)}
+
+.before-after{display:grid;grid-template-columns:1fr 1fr;gap:0;border-radius:12px;overflow:hidden;border:1px solid var(--bdr)}
+@media(max-width:900px){.before-after{grid-template-columns:1fr}}
+.ba-panel{padding:18px}
+.ba-panel.before{background:var(--bg2);border-right:1px solid var(--bdr)}
+.ba-panel.after{background:linear-gradient(135deg,rgba(0,212,180,.05),rgba(79,142,255,.03))}
+.ba-label{display:inline-flex;align-items:center;gap:5px;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:3px 9px;border-radius:6px;margin-bottom:10px}
+.ba-label.before{background:rgba(155,165,200,.15);color:var(--t2)}
+.ba-label.after{background:rgba(0,212,180,.15);color:var(--cyan)}
+.ba-body{font-size:.78rem;line-height:1.6;color:var(--t1)}
+.ba-body.raw{font-family:var(--fm);font-size:.72rem;color:var(--t2);white-space:pre-wrap}
+
+.toast{position:fixed;top:90px;right:28px;background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--cyan);border-radius:11px;padding:13px 20px;font-size:.8rem;color:var(--t1);box-shadow:0 16px 40px rgba(0,0,0,.5);transform:translateX(120%);transition:transform .3s;z-index:200;display:flex;align-items:center;gap:9px}
+.toast.show{transform:translateX(0)}
+.toast .ic{font-size:1.1rem;color:var(--cyan)}
+
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,212,180,.3);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.process-flow{display:flex;align-items:center;gap:0;margin:18px 0 8px;padding:14px;background:rgba(22,30,54,.5);border-radius:12px;border:1px solid var(--bdr);overflow-x:auto;scrollbar-width:none}
+.process-flow::-webkit-scrollbar{display:none}
+.flow-step{display:flex;align-items:center;gap:8px;padding:7px 13px;background:var(--bg3);border:1px solid var(--bdr);border-radius:9px;font-size:.74rem;font-weight:600;color:var(--t2);white-space:nowrap;flex-shrink:0}
+.flow-step.active{background:rgba(0,212,180,.1);border-color:var(--cyan);color:var(--cyan)}
+.flow-arrow{color:var(--t3);margin:0 4px;flex-shrink:0}
+
+.demo-note{background:rgba(245,184,64,.08);border:1px solid rgba(245,184,64,.3);border-radius:9px;padding:10px 14px;font-size:.72rem;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:9px}
+.demo-note .ic{font-size:.95rem}
+
+.kol-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px;transition:all .2s}
+.kol-card:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.kol-name{font-weight:700;font-size:.86rem;margin-bottom:3px}
+.kol-inst{font-size:.7rem;color:var(--t2);margin-bottom:8px}
+.kol-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.kol-stat{font-size:.62rem;padding:2px 7px;background:var(--bg3);border-radius:5px;color:var(--t2);font-weight:600}
+
+.signal-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 12px;background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;margin-bottom:7px}
+.signal-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.signal-icon.theme{background:rgba(79,142,255,.15);color:var(--blue)}
+.signal-icon.compete{background:rgba(255,85,119,.15);color:var(--rose)}
+.signal-icon.advocacy{background:rgba(155,109,255,.15);color:var(--violet)}
+.signal-icon.unmet{background:rgba(245,184,64,.15);color:var(--gold)}
+.signal-body{font-size:.78rem;line-height:1.5}
+.signal-body strong{color:var(--cyan)}
+.signal-body .meta{font-size:.65rem;color:var(--t3);margin-top:3px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">MSL</div>
+    <div class="tb-name">MSL Insight Pipeline<span class="sub">Field Intelligence · Auto-Tag · Synthesize · Decide</span></div>
+  </div>
+  <div class="tb-actions">
+    <a href="index.html" class="tb-back">← Portfolio</a>
+    <button class="tb-btn" onclick="loadDemoNote()">📥 Load Sample Note</button>
+    <button class="tb-btn primary" onclick="toast('Insights briefing exported to PowerPoint')">📤 Export Brief</button>
+  </div>
+</div>
+
+<div class="hero">
+  <span class="hero-pill"><span class="dot"></span>SaaS Platform · AI-Native · Veeva CRM Compatible</span>
+  <h1>Turn 200 MSL Notes Into Strategic Intelligence</h1>
+  <p>Convert unstructured KOL interaction notes into <span class="hl">structured intelligence</span> across scientific themes, competitive signals, advocacy gaps, and emerging unmet needs. Aggregate field signal across 50+ MSLs. Surface decision-ready insights for Medical Affairs Leadership.</p>
+</div>
+
+<div class="metrics">
+  <div class="metric"><div class="metric-lbl">Notes Processed (Q3)</div><div class="metric-val cyan">2,847</div><div class="metric-sub">across 42 MSLs · 8 indications</div><span class="metric-trend up">▲ +18% QoQ</span></div>
+  <div class="metric"><div class="metric-lbl">Mean Time to Insight</div><div class="metric-val green">3.2 min</div><div class="metric-sub">vs 47 min manual coding</div><span class="metric-trend up">▼ 93% faster</span></div>
+  <div class="metric"><div class="metric-lbl">Strategic Signals Surfaced</div><div class="metric-val gold">184</div><div class="metric-sub">classification accuracy 94%</div><span class="metric-trend up">▲ Best-in-class</span></div>
+  <div class="metric"><div class="metric-lbl">FTE Hours Recovered</div><div class="metric-val rose">312</div><div class="metric-sub">monthly across team</div><span class="metric-trend up">▲ $48K/mo value</span></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="capture"><span class="tab-icon">✍️</span><span class="tab-num">01</span>Note Capture & AI Tagging</button>
+  <button class="tab" data-tab="signals"><span class="tab-icon">📡</span><span class="tab-num">02</span>Signal Aggregation</button>
+  <button class="tab" data-tab="kol"><span class="tab-icon">👥</span><span class="tab-num">03</span>KOL Intelligence View</button>
+  <button class="tab" data-tab="trends"><span class="tab-icon">📈</span><span class="tab-num">04</span>Theme & Competitive Trends</button>
+  <button class="tab" data-tab="briefing"><span class="tab-icon">📋</span><span class="tab-num">05</span>Leadership Briefing</button>
+</div>
+
+<!-- ==================== MODULE 1: NOTE CAPTURE & AI TAGGING ==================== -->
+<section class="module active" id="mod-capture">
+  <div class="section-hd">
+    <h2>Note Capture & AI Tagging</h2>
+    <p>Paste an MSL field note or use sample data. AI extracts scientific themes, competitive signals, advocacy gaps, unmet needs, and KOL sentiment — in seconds.</p>
+  </div>
+
+  <div class="process-flow">
+    <div class="flow-step active">📝 Raw Note</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step active">🤖 NLP Parse</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step active">🏷️ Multi-Tag</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step active">📊 Score Strategic Relevance</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step active">✅ Validate</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step active">🎯 Route to Intelligence Hub</div>
+  </div>
+
+  <div class="grid-12">
+    <div class="card">
+      <div class="card-hd"><h3><span class="ic">📝</span> MSL Note Input</h3></div>
+      <p class="card-sub">Paste a free-text field note from your last KOL interaction, or click "Load Sample" above to populate with a realistic NSCLC engagement example.</p>
+
+      <div class="field">
+        <label class="field-lbl">MSL Name</label>
+        <select class="field-select" id="msl-name">
+          <option>Sarah Chen, PharmD</option>
+          <option>James Rodriguez, MD</option>
+          <option>Priya Sharma, PhD</option>
+          <option>Marcus Webb, PharmD</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-lbl">KOL Name</label>
+          <select class="field-select" id="kol-name">
+            <option>Dr. Roy Herbst (Yale)</option>
+            <option>Dr. Solange Peters (CHUV)</option>
+            <option>Dr. Tony Mok (CUHK)</option>
+            <option>Dr. Martin Reck (Grosshansdorf)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-lbl">Interaction Type</label>
+          <select class="field-select">
+            <option>1:1 Office Visit</option>
+            <option>Advisory Board</option>
+            <option>Congress Booth</option>
+            <option>Virtual Briefing</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="field-lbl">Field Note (Free Text)</label>
+        <textarea class="field-area" id="note-input" placeholder="Type or paste MSL field note here...&#10;&#10;Example: Met with Dr. Smith at his clinic. He's seeing strong response in EGFR+ patients but worried about pneumonitis cases..."></textarea>
+      </div>
+
+      <button class="btn btn-primary" onclick="processNote()">⚡ Process with AI</button>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-hd">
+          <h3><span class="ic">🎯</span> AI-Extracted Intelligence</h3>
+          <span class="tag tag-cyan" id="proc-status">Awaiting input</span>
+        </div>
+        <div id="extracted-view">
+          <p class="card-sub">Click "Load Sample Note" above or process your own note to see structured AI extraction across 5 intelligence dimensions.</p>
+
+          <div class="before-after">
+            <div class="ba-panel before">
+              <span class="ba-label before">📝 Before · Raw Note</span>
+              <div class="ba-body raw">Met w/ Dr. H at ASCO booth. Excited about ASC-301 OS data in 2L NSCLC — said HR 0.68 is "best in class" for TIGIT-class. Asked about combo data w/ pembro — wants Ph3 in 1L. Mentioned 3 patients on competitor's TIGIT had pneumonitis G3+, concerned about class effect. Asked if we'd publish biomarker analysis. He'd join advisory board. Bringing to next Yale GI tumor board.</div>
+            </div>
+            <div class="ba-panel after">
+              <span class="ba-label after">✨ After · Structured Intelligence</span>
+              <div class="ba-body">
+                <strong style="color:var(--blue)">🔬 Scientific Themes:</strong><br>
+                • OS efficacy in 2L NSCLC (HR 0.68)<br>
+                • TIGIT-class positioning<br>
+                • Combo strategy w/ pembrolizumab<br>
+                • Biomarker analysis demand<br><br>
+                <strong style="color:var(--rose)">⚔️ Competitive Signal:</strong><br>
+                • Competitor TIGIT pneumonitis cases (G3+ in 3 patients) — potential class-effect concern<br><br>
+                <strong style="color:var(--violet)">🤝 Advocacy Gap:</strong><br>
+                • Willing to join advisory board (HIGH priority engagement)<br>
+                • Bringing data to Yale GI tumor board<br><br>
+                <strong style="color:var(--gold)">💡 Unmet Need:</strong><br>
+                • Phase 3 1L NSCLC combination program<br><br>
+                <strong style="color:var(--green)">😊 KOL Sentiment:</strong><br>
+                • Positive 0.78 · Confidence HIGH
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-hd">⚡ AI Pipeline Output</div>
+    <div class="insight-body">
+      Each note is processed against the <strong>5-dimension extraction schema</strong>: (1) Scientific Themes — efficacy, safety, MOA, biomarker; (2) Competitive Intelligence — competitor product mentions, market events, sentiment vs your asset; (3) Advocacy Engagement — willingness to advise, speak, publish, refer patients; (4) Unmet Medical Needs — gaps, requests for new indications, off-label questions; (5) KOL Sentiment — confidence-scored disposition toward your asset.
+      <ul>
+        <li><strong>Real-time NLP:</strong> NER + clinical entity recognition + custom oncology ontology (MedDRA + NCIt + custom KOL graph).</li>
+        <li><strong>Confidence scoring:</strong> Each tag receives a 0-1 confidence score. Sub-threshold tags route to MSL review queue for human-in-the-loop validation.</li>
+        <li><strong>Audit trail:</strong> Original note + AI tags + human edits stored with timestamps for regulatory compliance (Medical Affairs documentation standards).</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MODULE 2: SIGNAL AGGREGATION ==================== -->
+<section class="module" id="mod-signals">
+  <div class="section-hd">
+    <h2>Cross-Team Signal Aggregation</h2>
+    <p>Roll up tagged notes across the MSL team. Identify recurring themes, escalating signals, and emerging patterns invisible at the individual-note level.</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:18px">
+    <div class="card">
+      <div class="card-hd"><h3><span class="ic">📡</span> Top Signals This Quarter (Q3)</h3><span class="tag tag-cyan">Auto-Surfaced</span></div>
+      <div class="signal-row">
+        <div class="signal-icon compete">⚔️</div>
+        <div class="signal-body"><strong>Competitor TIGIT pneumonitis class effect</strong> mentioned in 18 separate MSL interactions across 12 KOLs. Pattern strengthening.<div class="meta">First detected: Aug 14 · Confidence: HIGH</div></div>
+        <span class="note-pill sev-high">High</span>
+      </div>
+      <div class="signal-row">
+        <div class="signal-icon unmet">💡</div>
+        <div class="signal-body"><strong>Demand for 1L NSCLC combination data</strong> requested by 24 KOLs. Strategic gap in current evidence package.<div class="meta">First detected: Jul 02 · Confidence: HIGH</div></div>
+        <span class="note-pill sev-high">High</span>
+      </div>
+      <div class="signal-row">
+        <div class="signal-icon theme">🔬</div>
+        <div class="signal-body"><strong>Biomarker analysis demand</strong> emerging across 14 interactions. PD-L1 + TIGIT expression correlation requested.<div class="meta">First detected: Aug 28 · Confidence: MED</div></div>
+        <span class="note-pill sev-med">Med</span>
+      </div>
+      <div class="signal-row">
+        <div class="signal-icon advocacy">🤝</div>
+        <div class="signal-body"><strong>Advisory board interest surge</strong> — 8 Tier-1 KOLs offered to join post-ASCO data presentation.<div class="meta">First detected: Aug 22 · Confidence: HIGH</div></div>
+        <span class="note-pill sev-high">High</span>
+      </div>
+      <div class="signal-row">
+        <div class="signal-icon theme">🔬</div>
+        <div class="signal-body"><strong>Elderly subgroup safety questions</strong> raised in 11 interactions. Pneumonitis rate 1.6× in &gt;75y subgroup.<div class="meta">First detected: Sep 05 · Confidence: MED</div></div>
+        <span class="note-pill sev-med">Med</span>
+      </div>
+      <div class="signal-row">
+        <div class="signal-icon compete">⚔️</div>
+        <div class="signal-body"><strong>Domvanalimab Phase 3 enrollment delay</strong> mentioned by 5 KOLs. Window of opportunity in 2L positioning.<div class="meta">First detected: Sep 10 · Confidence: MED</div></div>
+        <span class="note-pill sev-med">Med</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><h3><span class="ic">📊</span> Signal Volume by Dimension</h3></div>
+      <div class="chart-wrap"><canvas id="ch-dim"></canvas></div>
+      <div class="insight-card" style="margin-top:14px">
+        <div class="insight-hd">📍 Trend Detection</div>
+        <div class="insight-body" style="font-size:.76rem">
+          <strong>Scientific themes</strong> dominate volume (42% of all signals), but <strong>competitive intelligence</strong> shows fastest growth (+62% QoQ) — driven by post-ASCO competitor data releases requiring rapid field intelligence response.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><h3><span class="ic">🌡️</span> Signal Heatmap by KOL Segment × Theme</h3><span class="tag tag-cyan">Last 90 days</span></div>
+    <p class="card-sub">Darker cells = higher mention frequency. Identifies where strategic themes are gaining traction (or being ignored).</p>
+    <div style="overflow-x:auto">
+    <table class="tbl">
+      <thead><tr><th>KOL Segment</th><th>Efficacy</th><th>Safety/AE</th><th>Combo Strategy</th><th>Biomarker</th><th>Competitor</th><th>Advocacy</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Tier 1 Academic (n=18)</strong></td>
+          <td style="background:rgba(0,212,180,.45);text-align:center;font-weight:700">82</td>
+          <td style="background:rgba(0,212,180,.32);text-align:center;font-weight:700">64</td>
+          <td style="background:rgba(0,212,180,.55);text-align:center;font-weight:700">94</td>
+          <td style="background:rgba(0,212,180,.42);text-align:center;font-weight:700">71</td>
+          <td style="background:rgba(0,212,180,.48);text-align:center;font-weight:700">88</td>
+          <td style="background:rgba(0,212,180,.58);text-align:center;font-weight:700">102</td>
+        </tr>
+        <tr><td><strong>Tier 2 Academic (n=32)</strong></td>
+          <td style="background:rgba(0,212,180,.35);text-align:center;font-weight:700">68</td>
+          <td style="background:rgba(0,212,180,.28);text-align:center;font-weight:700">52</td>
+          <td style="background:rgba(0,212,180,.38);text-align:center;font-weight:700">72</td>
+          <td style="background:rgba(0,212,180,.22);text-align:center;font-weight:700">42</td>
+          <td style="background:rgba(0,212,180,.35);text-align:center;font-weight:700">68</td>
+          <td style="background:rgba(0,212,180,.32);text-align:center;font-weight:700">61</td>
+        </tr>
+        <tr><td><strong>Community Oncology (n=64)</strong></td>
+          <td style="background:rgba(0,212,180,.42);text-align:center;font-weight:700">82</td>
+          <td style="background:rgba(0,212,180,.45);text-align:center;font-weight:700">88</td>
+          <td style="background:rgba(0,212,180,.18);text-align:center;font-weight:700">35</td>
+          <td style="background:rgba(0,212,180,.12);text-align:center;font-weight:700">22</td>
+          <td style="background:rgba(0,212,180,.25);text-align:center;font-weight:700">48</td>
+          <td style="background:rgba(0,212,180,.15);text-align:center;font-weight:700">28</td>
+        </tr>
+        <tr><td><strong>Pathway Influencers (n=12)</strong></td>
+          <td style="background:rgba(0,212,180,.48);text-align:center;font-weight:700">88</td>
+          <td style="background:rgba(0,212,180,.35);text-align:center;font-weight:700">68</td>
+          <td style="background:rgba(0,212,180,.32);text-align:center;font-weight:700">60</td>
+          <td style="background:rgba(0,212,180,.38);text-align:center;font-weight:700">70</td>
+          <td style="background:rgba(0,212,180,.42);text-align:center;font-weight:700">80</td>
+          <td style="background:rgba(0,212,180,.48);text-align:center;font-weight:700">90</td>
+        </tr>
+        <tr><td><strong>Emerging KOLs (n=22)</strong></td>
+          <td style="background:rgba(0,212,180,.22);text-align:center;font-weight:700">42</td>
+          <td style="background:rgba(0,212,180,.18);text-align:center;font-weight:700">35</td>
+          <td style="background:rgba(0,212,180,.28);text-align:center;font-weight:700">55</td>
+          <td style="background:rgba(0,212,180,.32);text-align:center;font-weight:700">60</td>
+          <td style="background:rgba(0,212,180,.22);text-align:center;font-weight:700">42</td>
+          <td style="background:rgba(0,212,180,.18);text-align:center;font-weight:700">34</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-hd">⚡ Aggregation Insight</div>
+    <div class="insight-body">
+      <strong>Combo strategy</strong> dominates Tier 1 academic conversations (94 mentions) but is nearly invisible to community oncology (35 mentions). This is a <strong>messaging gap</strong> — your evidence story is resonating with thought leaders but not yet penetrating to community where prescribing actually happens.
+      <ul>
+        <li><strong>Action 1:</strong> Develop community-oncologist-targeted educational materials on combination data — Tier 2 conferences and regional symposia.</li>
+        <li><strong>Action 2:</strong> Activate Tier 1 KOLs as community oncology speakers (peer-to-peer credibility transfer).</li>
+        <li><strong>Action 3:</strong> Track field signal monthly to measure community penetration of combo messaging.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MODULE 3: KOL INTELLIGENCE VIEW ==================== -->
+<section class="module" id="mod-kol">
+  <div class="section-hd">
+    <h2>KOL Intelligence View</h2>
+    <p>Per-KOL profile aggregating all MSL interactions: scientific interests, advocacy disposition, competitive concerns, recommended next actions.</p>
+  </div>
+
+  <div class="grid-3" style="margin-bottom:18px">
+    <div class="kol-card" onclick="toast('Drill-down opened for Dr. Herbst')" style="cursor:pointer">
+      <div class="kol-name">Dr. Roy Herbst</div>
+      <div class="kol-inst">Yale Cancer Center · Tier 1 Academic</div>
+      <div style="font-size:.76rem;color:var(--t2);line-height:1.5">
+        <strong style="color:var(--cyan)">12 interactions</strong> over 90 days. Focus: combo strategy + biomarker. Sentiment +0.82. <strong style="color:var(--green)">Advisory board confirmed</strong>.
+      </div>
+      <div class="kol-stats">
+        <span class="kol-stat" style="color:var(--green)">😊 +0.82</span>
+        <span class="kol-stat">12 notes</span>
+        <span class="kol-stat" style="color:var(--violet)">Tier 1</span>
+      </div>
+    </div>
+    <div class="kol-card" onclick="toast('Drill-down opened for Dr. Peters')" style="cursor:pointer">
+      <div class="kol-name">Dr. Solange Peters</div>
+      <div class="kol-inst">CHUV Lausanne · Tier 1 Academic</div>
+      <div style="font-size:.76rem;color:var(--t2);line-height:1.5">
+        <strong style="color:var(--cyan)">9 interactions</strong> over 90 days. Focus: safety profile in elderly. Sentiment +0.71. <strong style="color:var(--gold)">Steering committee chair</strong>.
+      </div>
+      <div class="kol-stats">
+        <span class="kol-stat" style="color:var(--green)">😊 +0.71</span>
+        <span class="kol-stat">9 notes</span>
+        <span class="kol-stat" style="color:var(--violet)">Tier 1</span>
+      </div>
+    </div>
+    <div class="kol-card" onclick="toast('Drill-down opened for Dr. Mok')" style="cursor:pointer">
+      <div class="kol-name">Dr. Tony Mok</div>
+      <div class="kol-inst">CUHK · Tier 1 Academic · APAC</div>
+      <div style="font-size:.76rem;color:var(--t2);line-height:1.5">
+        <strong style="color:var(--cyan)">8 interactions</strong> over 90 days. Focus: APAC trial expansion. Sentiment +0.78. <strong style="color:var(--green)">Co-PI interest</strong>.
+      </div>
+      <div class="kol-stats">
+        <span class="kol-stat" style="color:var(--green)">😊 +0.78</span>
+        <span class="kol-stat">8 notes</span>
+        <span class="kol-stat" style="color:var(--violet)">Tier 1</span>
+      </div>
+    </div>
+    <div class="kol-card" onclick="toast('Drill-down opened for Dr. Reck')" style="cursor:pointer">
+      <div class="kol-name">Dr. Martin Reck</div>
+      <div class="kol-inst">Grosshansdorf · Tier 1 EU</div>
+      <div style="font-size:.76rem;color:var(--t2);line-height:1.5">
+        <strong style="color:var(--cyan)">5 interactions</strong> over 90 days. Focus: skeptical of OS extrapolation. Sentiment +0.42. <strong style="color:var(--gold)">Engagement gap</strong>.
+      </div>
+      <div class="kol-stats">
+        <span class="kol-stat" style="color:var(--gold)">😐 +0.42</span>
+        <span class="kol-stat">5 notes</span>
+        <span class="kol-stat" style="color:var(--rose)">At risk</span>
+      </div>
+    </div>
+    <div class="kol-card" onclick="toast('Drill-down opened for Dr. Cappuzzo')" style="cursor:pointer">
+      <div class="kol-name">Dr. Federico Cappuzzo</div>
+      <div class="kol-inst">National Cancer Inst · Italy</div>
+      <div style="font-size:.76rem;color:var(--t2);line-height:1.5">
+        <strong style="color:var(--cyan)">7 interactions</strong> over 90 days. Focus: Italian payer landscape. Sentiment +0.68. <strong style="color:var(--cyan)">Speaker confirmed</strong>.
+      </div>
+      <div class="kol-stats">
+        <span class="kol-stat" style="color:var(--green)">😊 +0.68</span>
+        <span class="kol-stat">7 notes</span>
+        <span class="kol-stat" style="color:var(--violet)">Tier 1</span>
+      </div>
+    </div>
+    <div class="kol-card" onclick="toast('Drill-down opened for Dr. Drilon')" style="cursor:pointer">
+      <div class="kol-name">Dr. Alexander Drilon</div>
+      <div class="kol-inst">MSK Cancer Center · Tier 1</div>
+      <div style="font-size:.76rem;color:var(--t2);line-height:1.5">
+        <strong style="color:var(--cyan)">10 interactions</strong> over 90 days. Focus: biomarker stratification. Sentiment +0.79. <strong style="color:var(--green)">Publication co-author</strong>.
+      </div>
+      <div class="kol-stats">
+        <span class="kol-stat" style="color:var(--green)">😊 +0.79</span>
+        <span class="kol-stat">10 notes</span>
+        <span class="kol-stat" style="color:var(--violet)">Tier 1</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><h3><span class="ic">🎯</span> KOL Action Recommendations (AI-Generated)</h3><span class="tag tag-cyan">Next 30 days</span></div>
+    <table class="tbl">
+      <thead><tr><th>KOL</th><th>Status</th><th>Recommended Action</th><th>Priority</th><th>Owner</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dr. Reck</strong></td><td><span class="tag tag-rose">Sentiment decline</span></td><td>Schedule 1:1 with Chief Medical Officer to address OS extrapolation skepticism with new RWE data</td><td><span class="note-pill sev-high">High</span></td><td>Sarah Chen (MSL Lead EU)</td></tr>
+        <tr><td><strong>Dr. Herbst</strong></td><td><span class="tag tag-green">Advisory ready</span></td><td>Send advisory board invitation + biomarker preliminary data for Q4 meeting</td><td><span class="note-pill sev-high">High</span></td><td>James Rodriguez</td></tr>
+        <tr><td><strong>Dr. Mok</strong></td><td><span class="tag tag-cyan">APAC opportunity</span></td><td>Connect with APAC commercial lead — Co-PI interest signals expansion potential</td><td><span class="note-pill sev-high">High</span></td><td>Priya Sharma</td></tr>
+        <tr><td><strong>Dr. Peters</strong></td><td><span class="tag tag-gold">Engagement+</span></td><td>Provide elderly subgroup safety pooled analysis. Steering committee Q1 update</td><td><span class="note-pill sev-med">Med</span></td><td>Sarah Chen</td></tr>
+        <tr><td><strong>Dr. Drilon</strong></td><td><span class="tag tag-violet">Publication track</span></td><td>Manuscript co-authorship invitation for biomarker analysis (JCO target)</td><td><span class="note-pill sev-med">Med</span></td><td>Marcus Webb</td></tr>
+        <tr><td><strong>Dr. Cappuzzo</strong></td><td><span class="tag tag-cyan">Speaker active</span></td><td>Confirm Italian regional speaker tour Q1 — 6 cities, payer-focused content</td><td><span class="note-pill sev-low">Standard</span></td><td>James Rodriguez</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================== MODULE 4: THEME & COMPETITIVE TRENDS ==================== -->
+<section class="module" id="mod-trends">
+  <div class="section-hd">
+    <h2>Theme & Competitive Trends Over Time</h2>
+    <p>Track how scientific themes and competitive signals evolve quarter-over-quarter. Detect emerging concerns before they become major issues.</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:18px">
+    <div class="card"><div class="card-hd"><h3><span class="ic">📈</span> Scientific Theme Trajectory</h3></div>
+      <div class="chart-wrap tall"><canvas id="ch-themes"></canvas></div>
+    </div>
+    <div class="card"><div class="card-hd"><h3><span class="ic">⚔️</span> Competitive Mention Volume</h3></div>
+      <div class="chart-wrap tall"><canvas id="ch-compete"></canvas></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card"><div class="card-hd"><h3><span class="ic">😊</span> KOL Sentiment Over Time</h3></div>
+      <div class="chart-wrap"><canvas id="ch-sentiment"></canvas></div>
+    </div>
+    <div class="card"><div class="card-hd"><h3><span class="ic">🚨</span> Early Warning Signals</h3></div>
+      <table class="tbl">
+        <thead><tr><th>Emerging Signal</th><th>First Detected</th><th>Volume</th><th>Trend</th></tr></thead>
+        <tbody>
+          <tr><td>Elderly pneumonitis rate concern</td><td>Sep 05</td><td>11</td><td><span class="tag tag-rose">▲ Rising</span></td></tr>
+          <tr><td>Biomarker PD-L1 + TIGIT correlation</td><td>Aug 28</td><td>14</td><td><span class="tag tag-cyan">▲ Rising</span></td></tr>
+          <tr><td>1L combination expansion demand</td><td>Jul 02</td><td>24</td><td><span class="tag tag-gold">▲ Strong</span></td></tr>
+          <tr><td>Competitor TIGIT pneumonitis</td><td>Aug 14</td><td>18</td><td><span class="tag tag-rose">▲ Rising</span></td></tr>
+          <tr><td>Domvanalimab enrollment delay</td><td>Sep 10</td><td>5</td><td><span class="tag tag-violet">→ Stable</span></td></tr>
+          <tr><td>Subcutaneous formulation interest</td><td>Sep 22</td><td>4</td><td><span class="tag tag-cyan">▲ New</span></td></tr>
+          <tr><td>Patient adherence improvement</td><td>Aug 18</td><td>7</td><td><span class="tag tag-cyan">→ Stable</span></td></tr>
+          <tr><td>Healthcare resource utilization</td><td>Sep 15</td><td>3</td><td><span class="tag tag-cyan">▲ New</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-hd">⚡ Trend Pattern Analysis</div>
+    <div class="insight-body">
+      <strong>Three trends require urgent strategic response:</strong>
+      <ul>
+        <li><strong>Elderly pneumonitis (rising):</strong> 11 mentions in 30 days, up from 2 in prior quarter. Pre-emptive Dear Healthcare Provider letter recommended. Update prescribing materials with elderly-specific dosing/monitoring guidance.</li>
+        <li><strong>1L combination demand (sustained high):</strong> 24 mentions sustained over 60 days from Tier 1 KOLs. Strategic priority — accelerate Phase 3 1L combination protocol development. Submit to FDA pre-IND meeting.</li>
+        <li><strong>Competitor TIGIT class effect:</strong> 18 mentions of competitor pneumonitis cases provides defensive narrative opportunity. Update KOL talking points with comparative safety analysis.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MODULE 5: LEADERSHIP BRIEFING ==================== -->
+<section class="module" id="mod-briefing">
+  <div class="section-hd">
+    <h2>Auto-Generated Leadership Briefing</h2>
+    <p>One-click executive briefing synthesizing all field intelligence into a board-ready report. Replaces weekly manual synthesis (avg 6 hours / week).</p>
+  </div>
+
+  <div class="demo-note"><span class="ic">⚡</span> AI Generated · September 2026 Q3 Briefing · 2,847 notes synthesized · 184 strategic signals · Click sections to expand</div>
+
+  <div class="card">
+    <div class="card-hd">
+      <h3><span class="ic">📋</span> Q3 2026 Medical Affairs Field Intelligence Briefing</h3>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" style="padding:7px 12px;font-size:.72rem" onclick="toast('Briefing exported to PowerPoint')">📊 PPT</button>
+        <button class="btn btn-secondary" style="padding:7px 12px;font-size:.72rem" onclick="toast('Briefing exported to PDF')">📄 PDF</button>
+        <button class="btn btn-secondary" style="padding:7px 12px;font-size:.72rem" onclick="toast('Briefing emailed to leadership')">📧 Email</button>
+      </div>
+    </div>
+
+    <div style="background:var(--bg2);padding:18px;border-radius:11px;font-size:.84rem;line-height:1.7">
+
+      <h4 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:8px;color:var(--cyan)">Executive Summary</h4>
+      <p style="margin-bottom:14px">
+        Q3 2026 field intelligence from 2,847 MSL interactions across 42 MSLs reveals four strategic priorities for leadership attention: (1) <strong>1L combination demand</strong> sustained at high level among Tier 1 KOLs — strategic acceleration warranted; (2) <strong>Competitor TIGIT class-effect pneumonitis</strong> emerging as defensive opportunity; (3) <strong>Elderly safety subgroup concerns</strong> require pre-emptive communication; (4) <strong>Advisory board interest surge</strong> presents engagement capacity opportunity post-ASCO data.
+      </p>
+
+      <h4 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:8px;color:var(--cyan)">Strategic Priority 1: Accelerate 1L Combination Program</h4>
+      <p style="margin-bottom:6px"><strong style="color:var(--gold)">Signal:</strong> 24 Tier 1 KOLs requested 1L combination data over the past 90 days — sustained across all geographies (US, EU, APAC).</p>
+      <p style="margin-bottom:6px"><strong style="color:var(--gold)">Implication:</strong> Current 2L positioning leaves significant whitespace and competitive risk if Domvanalimab or Vibostolimab achieves 1L approval first.</p>
+      <p style="margin-bottom:14px"><strong style="color:var(--gold)">Recommendation:</strong> Submit pre-IND meeting request to FDA for Phase 3 1L combination (ASC-301 + pembrolizumab vs SoC). Allocate 12 additional clinical sites Q1 2027. Estimated incremental NPV: $1.4-2.1B.</p>
+
+      <h4 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:8px;color:var(--cyan)">Strategic Priority 2: Competitive Pneumonitis Defensive Narrative</h4>
+      <p style="margin-bottom:6px"><strong style="color:var(--gold)">Signal:</strong> 18 MSL interactions cited competitor TIGIT Grade 3+ pneumonitis cases (Roche tiragolumab, Merck vibostolimab) — KOLs proactively raising class-effect concern.</p>
+      <p style="margin-bottom:6px"><strong style="color:var(--gold)">Implication:</strong> Competitive vulnerability creates positioning opportunity if our safety profile holds favorably (ASC-301 G3+ pneumonitis 3% vs competitor 7-9%).</p>
+      <p style="margin-bottom:14px"><strong style="color:var(--gold)">Recommendation:</strong> Develop comparative safety analysis (pooled trial data + RWE confirmation). Brief Tier 1 KOLs at upcoming WCLC. Update MSL talking points with comparative AE profile.</p>
+
+      <h4 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:8px;color:var(--cyan)">Strategic Priority 3: Pre-emptive Elderly Safety Communication</h4>
+      <p style="margin-bottom:6px"><strong style="color:var(--gold)">Signal:</strong> 11 MSL interactions raised concerns about elderly (&gt;75y) pneumonitis rates after ASCO presentation of subgroup data showing 1.6× rate.</p>
+      <p style="margin-bottom:6px"><strong style="color:var(--gold)">Implication:</strong> Without proactive communication, this could become a label restriction risk during FDA review.</p>
+      <p style="margin-bottom:14px"><strong style="color:var(--gold)">Recommendation:</strong> Issue Dear Healthcare Provider letter with elderly-specific monitoring protocol. Update Medical Information response letters. Plan elderly subgroup symposium at ESMO 2027.</p>
+
+      <h4 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:8px;color:var(--cyan)">Strategic Priority 4: Advisory Board Capacity Expansion</h4>
+      <p style="margin-bottom:6px"><strong style="color:var(--gold)">Signal:</strong> 8 Tier 1 KOLs offered to join advisory board post-ASCO. Current capacity 12 seats; current roster 11 — capacity gap.</p>
+      <p style="margin-bottom:6px"><strong style="color:var(--gold)">Implication:</strong> Decline-by-default would damage relationships with high-value KOLs at peak engagement moment.</p>
+      <p style="margin-bottom:0"><strong style="color:var(--gold)">Recommendation:</strong> Expand advisory board to 16 seats. Create regional sub-boards (US, EU, APAC) for tier 1 KOL roles. Activate 3 candidates immediately, 2 in Q1 2027, 3 in Q2 2027.</p>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-hd">⚡ Workflow Impact</div>
+      <div class="insight-body">
+        This briefing was generated automatically from 2,847 underlying MSL notes. Manual synthesis of equivalent intelligence requires:
+        <ul>
+          <li><strong>Before MSL Insight Pipeline:</strong> 2 Medical Affairs analysts × 40 hours = 80 hours per quarter × $85/hr = $6,800 per briefing</li>
+          <li><strong>With MSL Insight Pipeline:</strong> 1 Medical Affairs lead × 2 hours review = 2 hours per quarter × $120/hr = $240 per briefing</li>
+          <li><strong>ROI:</strong> 96% time reduction · $6,560 cost savings per briefing · 26 hours of high-value analyst time redirected to strategic projects</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast"><span class="ic">✓</span><span id="toast-msg">Action completed</span></div>
+
+<script>
+// Tab switching
+document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('mod-' + btn.dataset.tab).classList.add('active');
+  setTimeout(() => window.scrollTo({top: 200, behavior: 'smooth'}), 50);
+}));
+
+// Toast
+function toast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// Sample notes
+const samples = [
+`Met with Dr. Herbst at ASCO booth following his oral presentation. He was very enthusiastic about ASC-301 OS data in 2L NSCLC — specifically called HR 0.68 "best in class" for the TIGIT category. Spent 25 minutes discussing the biomarker subgroup analysis we presented. He asked specifically about combination data with pembrolizumab — strongly suggested we accelerate a Phase 3 in 1L NSCLC where the opportunity is largest. Mentioned he's seen 3 patients on competitor tiragolumab develop Grade 3+ pneumonitis at Yale — concerned this is a class effect rather than product-specific. He'd be interested in joining our advisory board and offered to bring our data to next Yale GI tumor board. Wants us to share the elderly subgroup safety analysis when available. Overall very positive on the asset. Confirmed willingness to participate as steering committee member for the planned 1L study.`,
+`Quick coffee with Dr. Reck at WCLC. He remains skeptical about the OS extrapolation in our long-term Kaplan-Meier curves — feels the model assumes too much hazard rate stability beyond 36 months. Wants to see real-world evidence cohort data to confirm the modeled tail. Less excited about our combination strategy because Roche has already announced 1L combination data showing modest PFS benefit. Asked tough questions about elderly subgroup pneumonitis rate (1.6× hazard ratio in >75y). He's not pulling back from the program but engagement clearly lower than at last interaction. Suggested we organize an EU-specific scientific exchange focused on real-world evidence and elderly safety. Did agree to review draft of comparative safety manuscript when ready. No advisory board commitment yet. Need to address his concerns more proactively.`,
+`Engaging discussion with Dr. Mok during virtual briefing — focused entirely on APAC opportunity. He's interested in being co-PI for an Asian Pacific regional Phase 3 study. Pointed out that Japan PMDA and China NMPA have different bridging requirements for our class. Highlighted strong unmet need in Asian EGFR+ NSCLC subgroups where existing TKIs aren't enough. Asked about Korea inclusion — said he could connect us with Seoul National University Hospital team. Sentiment very positive on the asset, especially with our biomarker stratification approach. He suggested KRAS G12C cross-readthrough study as additional indication expansion. Asked if we'd share the PD-L1 + TIGIT correlation analysis in the next 30 days. Wants to author the APAC regulatory strategy whitepaper.`
+];
+
+let curSample = 0;
+function loadDemoNote() {
+  document.getElementById('note-input').value = samples[curSample];
+  curSample = (curSample + 1) % samples.length;
+  toast('Sample MSL note loaded — click Process with AI');
+}
+
+function processNote() {
+  const note = document.getElementById('note-input').value.trim();
+  if (!note) { toast('Please load a sample or enter a note first'); return; }
+  const status = document.getElementById('proc-status');
+  status.innerHTML = '<span class="spinner"></span>&nbsp; Processing with AI...';
+  status.className = 'tag tag-cyan';
+  setTimeout(() => {
+    status.innerHTML = '✓ Extracted in 2.4s';
+    status.className = 'tag tag-green';
+    toast('Note processed · 5 dimensions extracted · 12 tags applied · Confidence 0.94');
+  }, 1600);
+}
+
+// Charts
+const chartOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#9ba9c8', font: { size: 10 } } } },
+  scales: {
+    x: { ticks: { color: '#5d6b8e', font: { size: 10 } }, grid: { color: 'rgba(36,48,84,.4)' } },
+    y: { ticks: { color: '#5d6b8e', font: { size: 10 } }, grid: { color: 'rgba(36,48,84,.4)' } }
+  }
+};
+
+window.addEventListener('load', () => {
+  // Signal dimensions bar
+  new Chart(document.getElementById('ch-dim'), {
+    type: 'bar',
+    data: {
+      labels: ['Scientific\nThemes', 'Competitive\nIntel', 'Advocacy\nGaps', 'Unmet\nNeeds', 'KOL\nSentiment'],
+      datasets: [{
+        label: 'Signal Volume',
+        data: [1198, 624, 412, 386, 227],
+        backgroundColor: ['rgba(79,142,255,.8)','rgba(255,85,119,.8)','rgba(155,109,255,.8)','rgba(245,184,64,.8)','rgba(52,214,112,.8)'],
+        borderRadius: 8
+      }]
+    },
+    options: { ...chartOpts, plugins: { legend: { display: false } } }
+  });
+
+  // Themes over time
+  new Chart(document.getElementById('ch-themes'), {
+    type: 'line',
+    data: {
+      labels: ['Apr','May','Jun','Jul','Aug','Sep'],
+      datasets: [
+        { label: 'Efficacy', data: [148,162,178,192,212,234], borderColor: '#4f8eff', backgroundColor: 'rgba(79,142,255,.12)', fill: true, tension: .3, borderWidth: 2 },
+        { label: 'Combo Strategy', data: [42,68,98,134,168,196], borderColor: '#00d4b4', backgroundColor: 'rgba(0,212,180,.1)', fill: true, tension: .3, borderWidth: 2 },
+        { label: 'Biomarker', data: [28,32,44,68,98,128], borderColor: '#9b6dff', backgroundColor: 'rgba(155,109,255,.08)', fill: true, tension: .3, borderWidth: 2 },
+        { label: 'Safety/AE', data: [62,68,72,78,92,118], borderColor: '#f5b840', backgroundColor: 'rgba(245,184,64,.08)', fill: true, tension: .3, borderWidth: 2 }
+      ]
+    },
+    options: chartOpts
+  });
+
+  // Competitive mentions
+  new Chart(document.getElementById('ch-compete'), {
+    type: 'bar',
+    data: {
+      labels: ['Apr','May','Jun','Jul','Aug','Sep'],
+      datasets: [
+        { label: 'Tiragolumab', data: [12,18,24,32,42,48], backgroundColor: 'rgba(255,85,119,.8)', borderRadius: 5 },
+        { label: 'Vibostolimab', data: [8,14,18,24,32,38], backgroundColor: 'rgba(245,184,64,.8)', borderRadius: 5 },
+        { label: 'Domvanalimab', data: [4,8,14,18,22,26], backgroundColor: 'rgba(155,109,255,.8)', borderRadius: 5 },
+        { label: 'BGB-A1217', data: [2,4,8,12,18,22], backgroundColor: 'rgba(79,142,255,.8)', borderRadius: 5 }
+      ]
+    },
+    options: { ...chartOpts, scales: { x: { ...chartOpts.scales.x, stacked: true }, y: { ...chartOpts.scales.y, stacked: true } } }
+  });
+
+  // Sentiment
+  new Chart(document.getElementById('ch-sentiment'), {
+    type: 'line',
+    data: {
+      labels: ['Apr','May','Jun','Jul','Aug','Sep'],
+      datasets: [
+        { label: 'Tier 1 Academic', data: [0.62,0.68,0.72,0.76,0.78,0.82], borderColor: '#00d4b4', backgroundColor: 'rgba(0,212,180,.12)', fill: true, tension: .3, borderWidth: 2 },
+        { label: 'Community Onc', data: [0.48,0.52,0.54,0.58,0.62,0.64], borderColor: '#4f8eff', backgroundColor: 'rgba(79,142,255,.08)', fill: true, tension: .3, borderWidth: 2 },
+        { label: 'Pathway Influencers', data: [0.58,0.62,0.64,0.66,0.68,0.72], borderColor: '#f5b840', backgroundColor: 'rgba(245,184,64,.08)', fill: true, tension: .3, borderWidth: 2 }
+      ]
+    },
+    options: { ...chartOpts, scales: { ...chartOpts.scales, y: { ...chartOpts.scales.y, min: 0, max: 1, ticks: { ...chartOpts.scales.y.ticks, callback: v => v.toFixed(1) } } } }
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claims Intelligence IQ — Real-World Data to Strategic Insights</title>
+<meta name="description" content="AI-powered claims data intelligence platform. Komodo, Optum, IQVIA, Flatiron claims to structured commercial and medical intelligence in minutes.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a1020;--bg2:#101830;--bg3:#16203a;--bg4:#1d2a4a;
+  --bdr:#243456;--bdr2:#2e4170;
+  --t1:#eef3ff;--t2:#9aacd0;--t3:#5d6f95;
+  --blue:#4296ff;--cyan:#00ccc4;--gold:#ffb828;--rose:#ff5577;--violet:#9b6dff;
+  --green:#34d670;--orange:#ff9550;--red:#ff4d5c;--magenta:#e94db6;
+  --acc:#4296ff;--acc2:#00ccc4;
+  --f:'Inter',system-ui,sans-serif;--fd:'Fraunces',Georgia,serif;--fm:'JetBrains Mono',monospace;
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--bg);color:var(--t1);overflow-x:hidden;min-height:100vh;background-image:radial-gradient(circle at 10% 5%,rgba(66,150,255,.08),transparent 35%),radial-gradient(circle at 90% 95%,rgba(0,204,196,.06),transparent 40%)}
+a{color:var(--cyan);text-decoration:none}
+button{font-family:var(--f);cursor:pointer;border:none}
+input,select,textarea{font-family:var(--f)}
+::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:6px}::-webkit-scrollbar-thumb:hover{background:var(--bdr2)}
+
+.topbar{position:sticky;top:0;z-index:50;background:rgba(10,16,32,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--bdr);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.tb-brand{display:flex;align-items:center;gap:12px}
+.tb-logo{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#0a1020;box-shadow:0 8px 24px rgba(66,150,255,.25)}
+.tb-name{font-size:1rem;font-weight:700;line-height:1.15;letter-spacing:-.2px}
+.tb-name .sub{display:block;font-size:.65rem;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.tb-actions{display:flex;gap:10px;align-items:center}
+.tb-btn{padding:8px 16px;border-radius:9px;font-size:.74rem;font-weight:600;background:var(--bg3);border:1px solid var(--bdr);color:var(--t2);transition:all .2s;display:inline-flex;align-items:center;gap:5px}
+.tb-btn:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-1px)}
+.tb-btn.primary{background:linear-gradient(135deg,var(--blue),#1a5dc4);color:#fff;border-color:transparent;font-weight:700}
+.tb-back{font-size:.72rem;color:var(--t2);padding:8px 14px;border-radius:9px;border:1px solid var(--bdr);background:transparent}
+.tb-back:hover{border-color:var(--blue);color:var(--blue)}
+
+.hero{padding:38px 28px 22px;max-width:1400px;margin:0 auto}
+.hero-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 13px;border-radius:20px;background:rgba(66,150,255,.1);border:1px solid rgba(66,150,255,.3);font-size:.66rem;font-weight:600;color:var(--blue);margin-bottom:14px;text-transform:uppercase;letter-spacing:.8px}
+.hero-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--blue);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.hero h1{font-family:var(--fd);font-size:2.4rem;font-weight:800;letter-spacing:-1px;line-height:1.1;margin-bottom:10px;background:linear-gradient(135deg,var(--t1) 0%,var(--blue) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:.92rem;color:var(--t2);max-width:780px;line-height:1.6}
+.hero .hl{color:var(--cyan);font-weight:600}
+
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:6px 28px 22px;max-width:1400px;margin:0 auto}
+@media(max-width:900px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.metric{background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--bdr);border-radius:14px;padding:16px 18px;position:relative;overflow:hidden}
+.metric::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),transparent)}
+.metric-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:1px;color:var(--t3);font-weight:600;margin-bottom:6px}
+.metric-val{font-family:var(--fd);font-size:1.85rem;font-weight:700;line-height:1;color:var(--t1)}
+.metric-val.cyan{color:var(--cyan)}.metric-val.gold{color:var(--gold)}.metric-val.green{color:var(--green)}.metric-val.rose{color:var(--rose)}.metric-val.blue{color:var(--blue)}
+.metric-sub{font-size:.68rem;color:var(--t2);margin-top:6px}
+.metric-trend{display:inline-flex;align-items:center;gap:3px;font-size:.62rem;padding:3px 7px;border-radius:6px;font-weight:600;margin-top:6px}
+.metric-trend.up{background:rgba(52,214,112,.12);color:var(--green)}
+.metric-trend.down{background:rgba(255,77,92,.12);color:var(--red)}
+
+.tabs{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--bdr);padding:0 24px;max-width:1400px;margin:8px auto 0;border-radius:14px 14px 0 0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:15px 22px;font-size:.78rem;font-weight:600;color:var(--t2);background:transparent;border:none;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;display:flex;align-items:center;gap:8px;position:relative}
+.tab:hover{color:var(--t1);background:rgba(255,255,255,.02)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-icon{font-size:1rem}
+.tab-num{font-size:.62rem;color:var(--t3);font-family:var(--fm);font-weight:500;background:var(--bg);padding:2px 6px;border-radius:5px}
+.tab.active .tab-num{color:var(--blue);background:rgba(66,150,255,.1)}
+
+.module{display:none;padding:24px 28px 60px;max-width:1400px;margin:0 auto}
+.module.active{display:block;animation:fadeIn .25s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.section-hd{margin-bottom:18px}
+.section-hd h2{font-family:var(--fd);font-size:1.45rem;font-weight:700;letter-spacing:-.4px;margin-bottom:4px}
+.section-hd p{font-size:.82rem;color:var(--t2);line-height:1.55}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.grid-12{display:grid;grid-template-columns:1fr 2fr;gap:18px}
+.grid-21{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+@media(max-width:900px){.grid-2,.grid-3,.grid-4,.grid-12,.grid-21{grid-template-columns:1fr}}
+
+.card{background:linear-gradient(135deg,var(--bg3) 0%,var(--bg2) 100%);border:1px solid var(--bdr);border-radius:14px;padding:18px;transition:border-color .2s}
+.card:hover{border-color:var(--bdr2)}
+.card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
+.card-hd h3{font-size:.88rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.card-hd .ic{font-size:1.05rem}
+.card-sub{font-size:.72rem;color:var(--t2);line-height:1.5;margin-bottom:14px}
+
+.field{margin-bottom:14px}
+.field-lbl{font-size:.7rem;font-weight:600;color:var(--t2);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.field-input,.field-select,.field-area{width:100%;padding:10px 13px;border-radius:9px;background:var(--bg2);border:1px solid var(--bdr);color:var(--t1);font-size:.85rem;transition:border-color .2s}
+.field-input:focus,.field-select:focus,.field-area:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(66,150,255,.1)}
+.field-row{display:flex;gap:10px}.field-row .field{flex:1}
+
+.btn{padding:11px 18px;border-radius:9px;font-weight:700;font-size:.82rem;transition:all .2s;display:inline-flex;align-items:center;gap:7px;justify-content:center}
+.btn-primary{width:100%;background:linear-gradient(135deg,var(--blue),#1a5dc4);color:#fff}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(66,150,255,.3)}
+.btn-secondary{background:var(--bg3);color:var(--t1);border:1px solid var(--bdr)}
+.btn-secondary:hover{border-color:var(--blue);color:var(--blue)}
+
+.insight-card{background:linear-gradient(135deg,rgba(66,150,255,.06),rgba(0,204,196,.04));border:1px solid rgba(66,150,255,.2);border-radius:12px;padding:14px 16px;margin-top:14px}
+.insight-hd{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--blue);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.insight-body{font-size:.8rem;color:var(--t1);line-height:1.65}
+.insight-body strong{color:var(--blue);font-weight:600}
+.insight-body ul{margin:6px 0 0 18px}
+.insight-body li{margin-bottom:4px}
+
+.tbl{width:100%;border-collapse:collapse;font-size:.76rem}
+.tbl th{text-align:left;padding:10px 11px;background:var(--bg2);color:var(--t2);font-weight:600;font-size:.65rem;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bdr)}
+.tbl td{padding:10px 11px;border-bottom:1px solid rgba(36,52,86,.4);color:var(--t1);vertical-align:top}
+.tbl tr:hover td{background:rgba(66,150,255,.04)}
+.tbl .num{font-family:var(--fm);font-weight:500;text-align:right}
+
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:14px;font-size:.62rem;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--t2)}
+.tag-cyan{background:rgba(0,204,196,.1);color:var(--cyan);border-color:rgba(0,204,196,.3)}
+.tag-blue{background:rgba(66,150,255,.1);color:var(--blue);border-color:rgba(66,150,255,.3)}
+.tag-gold{background:rgba(255,184,40,.1);color:var(--gold);border-color:rgba(255,184,40,.3)}
+.tag-rose{background:rgba(255,85,119,.1);color:var(--rose);border-color:rgba(255,85,119,.3)}
+.tag-violet{background:rgba(155,109,255,.1);color:var(--violet);border-color:rgba(155,109,255,.3)}
+.tag-green{background:rgba(52,214,112,.1);color:var(--green);border-color:rgba(52,214,112,.3)}
+.tag-magenta{background:rgba(233,77,182,.1);color:var(--magenta);border-color:rgba(233,77,182,.3)}
+
+.chart-wrap{position:relative;height:280px;width:100%}
+.chart-wrap.tall{height:340px}
+.chart-wrap.xl{height:400px}
+
+.toast{position:fixed;top:90px;right:28px;background:linear-gradient(135deg,var(--bg3),var(--bg2));border:1px solid var(--blue);border-radius:11px;padding:13px 20px;font-size:.8rem;color:var(--t1);box-shadow:0 16px 40px rgba(0,0,0,.5);transform:translateX(120%);transition:transform .3s;z-index:200;display:flex;align-items:center;gap:9px}
+.toast.show{transform:translateX(0)}
+.toast .ic{font-size:1.1rem;color:var(--blue)}
+
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(66,150,255,.3);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.data-source-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:18px}
+.ds-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:13px;transition:all .2s;cursor:pointer}
+.ds-card:hover{border-color:var(--blue);transform:translateY(-2px)}
+.ds-card.selected{border-color:var(--cyan);background:rgba(0,204,196,.06)}
+.ds-name{font-weight:700;font-size:.82rem;margin-bottom:3px;display:flex;align-items:center;justify-content:space-between}
+.ds-size{font-size:.66rem;color:var(--t2);margin-bottom:6px}
+.ds-status{display:inline-flex;align-items:center;gap:4px;font-size:.6rem;padding:2px 7px;border-radius:5px;background:rgba(52,214,112,.12);color:var(--green);font-weight:600}
+.ds-status.pending{background:rgba(245,184,64,.12);color:var(--gold)}
+
+.flow-pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:14px 0 18px}
+@media(max-width:900px){.flow-pipeline{grid-template-columns:1fr 1fr}}
+.flow-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px;text-align:center;position:relative}
+.flow-card.active{border-color:var(--blue);background:rgba(66,150,255,.05)}
+.flow-card .num{font-family:var(--fd);font-size:.95rem;font-weight:700;color:var(--blue);display:block;margin-bottom:3px}
+.flow-card .lbl{font-size:.7rem;font-weight:600;color:var(--t1);margin-bottom:3px}
+.flow-card .desc{font-size:.62rem;color:var(--t2);line-height:1.4}
+
+.progress-bar{height:6px;background:var(--bg);border-radius:4px;overflow:hidden;margin:6px 0}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width .4s}
+
+.demo-note{background:rgba(255,184,40,.08);border:1px solid rgba(255,184,40,.3);border-radius:9px;padding:10px 14px;font-size:.72rem;color:var(--gold);margin-bottom:14px;display:flex;align-items:center;gap:9px}
+.demo-note .ic{font-size:.95rem}
+
+.cohort-row{display:grid;grid-template-columns:auto 1fr auto auto;gap:14px;align-items:center;padding:11px 13px;background:var(--bg2);border:1px solid var(--bdr);border-radius:9px;margin-bottom:7px}
+.cohort-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--blue);background:rgba(66,150,255,.15)}
+.cohort-name{font-weight:700;font-size:.82rem;margin-bottom:2px}
+.cohort-detail{font-size:.66rem;color:var(--t2)}
+.cohort-count{font-family:var(--fd);font-size:1.05rem;font-weight:700;color:var(--cyan)}
+.cohort-pct{font-size:.65rem;color:var(--t3);text-align:right}
+
+.heatmap-cell{padding:6px;text-align:center;font-weight:700;font-size:.7rem;color:#fff}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tb-brand">
+    <div class="tb-logo">CIQ</div>
+    <div class="tb-name">Claims Intelligence IQ<span class="sub">Komodo · Optum · IQVIA · Flatiron · Truveta to Insights</span></div>
+  </div>
+  <div class="tb-actions">
+    <a href="index.html" class="tb-back">← Portfolio</a>
+    <button class="tb-btn" onclick="runAnalysis()">⚡ Run Analysis</button>
+    <button class="tb-btn primary" onclick="toast('Strategic insights brief exported')">📤 Export Brief</button>
+  </div>
+</div>
+
+<div class="hero">
+  <span class="hero-pill"><span class="dot"></span>Real-World Data Intelligence · Multi-Source · HIPAA Safe</span>
+  <h1>From Raw Claims to Strategic Decisions</h1>
+  <p>Connect Komodo, Optum, IQVIA, Flatiron, Truveta, and TriNetX. AI extracts <span class="hl">patient journeys, prescribing patterns, payer dynamics, line-of-therapy progression, and switching behavior</span> — synthesized into commercial and medical insights ready for executive decisions.</p>
+</div>
+
+<div class="metrics">
+  <div class="metric"><div class="metric-lbl">Lives Analyzed</div><div class="metric-val cyan">320M</div><div class="metric-sub">across 6 data sources</div><span class="metric-trend up">▲ Multi-source linked</span></div>
+  <div class="metric"><div class="metric-lbl">Patient Cohort</div><div class="metric-val blue">487K</div><div class="metric-sub">NSCLC · 2L+ treated</div><span class="metric-trend up">▲ Refreshed daily</span></div>
+  <div class="metric"><div class="metric-lbl">Mean Time to Insight</div><div class="metric-val green">4.2 min</div><div class="metric-sub">vs 6-8 wk analyst pull</div><span class="metric-trend up">▼ 99.7% faster</span></div>
+  <div class="metric"><div class="metric-lbl">Insight Confidence</div><div class="metric-val gold">96%</div><div class="metric-sub">statistical validation</div><span class="metric-trend up">▲ Audit-ready</span></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" data-tab="source"><span class="tab-icon">🗄️</span><span class="tab-num">01</span>Data Source Selector</button>
+  <button class="tab" data-tab="cohort"><span class="tab-icon">🎯</span><span class="tab-num">02</span>Cohort Builder</button>
+  <button class="tab" data-tab="journey"><span class="tab-icon">🛤️</span><span class="tab-num">03</span>Patient Journey & LoT</button>
+  <button class="tab" data-tab="prescribe"><span class="tab-icon">💊</span><span class="tab-num">04</span>Prescribing & Switching</button>
+  <button class="tab" data-tab="payer"><span class="tab-icon">💰</span><span class="tab-num">05</span>Payer & Cost Analytics</button>
+  <button class="tab" data-tab="insights"><span class="tab-icon">🎯</span><span class="tab-num">06</span>Strategic Insights Brief</button>
+</div>
+
+<!-- ==================== MODULE 1: DATA SOURCE SELECTOR ==================== -->
+<section class="module active" id="mod-source">
+  <div class="section-hd">
+    <h2>Multi-Source Data Connection</h2>
+    <p>Connect, link, and normalize across the leading real-world data sources. Auto-deduplicate patients across sources for the largest possible cohort.</p>
+  </div>
+
+  <div class="data-source-grid">
+    <div class="ds-card selected" onclick="this.classList.toggle('selected')">
+      <div class="ds-name">Komodo Healthcare Map <span class="ds-status">●  Connected</span></div>
+      <div class="ds-size">320M lives · Closed claims + linkage</div>
+      <div style="font-size:.66rem;color:var(--t2);line-height:1.4">Most comprehensive linked claims + EHR. Best for longitudinal patient journey.</div>
+    </div>
+    <div class="ds-card selected" onclick="this.classList.toggle('selected')">
+      <div class="ds-name">IQVIA PharMetrics Plus <span class="ds-status">●  Connected</span></div>
+      <div class="ds-size">235M lives · Comm + MA claims</div>
+      <div style="font-size:.66rem;color:var(--t2);line-height:1.4">Commercial + Medicare Advantage. Best for payer mix and switching analysis.</div>
+    </div>
+    <div class="ds-card selected" onclick="this.classList.toggle('selected')">
+      <div class="ds-name">Optum Clinformatics <span class="ds-status">●  Connected</span></div>
+      <div class="ds-size">75M lives · Claims + lab values</div>
+      <div style="font-size:.66rem;color:var(--t2);line-height:1.4">Claims with lab linkage. Best for surrogate biomarker analysis.</div>
+    </div>
+    <div class="ds-card selected" onclick="this.classList.toggle('selected')">
+      <div class="ds-name">Flatiron Health <span class="ds-status">●  Connected</span></div>
+      <div class="ds-size">3.5M oncology patients</div>
+      <div style="font-size:.66rem;color:var(--t2);line-height:1.4">Curated oncology EHR. Best for line-of-therapy, biomarker, OS endpoints.</div>
+    </div>
+    <div class="ds-card" onclick="this.classList.toggle('selected')">
+      <div class="ds-name">Truveta <span class="ds-status pending">○ Available</span></div>
+      <div class="ds-size">120M lives · Real-time EHR</div>
+      <div style="font-size:.66rem;color:var(--t2);line-height:1.4">Multi-system EHR. Best for safety surveillance.</div>
+    </div>
+    <div class="ds-card" onclick="this.classList.toggle('selected')">
+      <div class="ds-name">TriNetX <span class="ds-status pending">○ Available</span></div>
+      <div class="ds-size">280M patients global</div>
+      <div style="font-size:.66rem;color:var(--t2);line-height:1.4">Federated EHR. Best for trial feasibility & comparative effectiveness.</div>
+    </div>
+    <div class="ds-card" onclick="this.classList.toggle('selected')">
+      <div class="ds-name">Medicare LDS / CMS <span class="ds-status pending">○ Available</span></div>
+      <div class="ds-size">63M lives · Federal claims</div>
+      <div style="font-size:.66rem;color:var(--t2);line-height:1.4">Federal claims. Best for IRA negotiation evidence.</div>
+    </div>
+    <div class="ds-card" onclick="this.classList.toggle('selected')">
+      <div class="ds-name">Aetion Evidence Platform <span class="ds-status pending">○ Available</span></div>
+      <div class="ds-size">Analytical platform · tokenized</div>
+      <div style="font-size:.66rem;color:var(--t2);line-height:1.4">FDA-grade RWE analytics layer. Best for regulatory submissions.</div>
+    </div>
+  </div>
+
+  <div class="grid-12">
+    <div class="card">
+      <div class="card-hd"><h3><span class="ic">🔗</span> Linkage & Deduplication</h3></div>
+      <p class="card-sub">Patients are matched across sources using HIPAA-safe tokenization (Datavant, Privacy Hub) to maximize cohort size while preventing double-counting.</p>
+
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:.74rem;margin-bottom:4px">
+          <span>Patient overlap deduplication</span>
+          <span style="color:var(--green);font-weight:600">98.4%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:98%"></div></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:.74rem;margin-bottom:4px">
+          <span>Source-to-source data validation</span>
+          <span style="color:var(--green);font-weight:600">96.7%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:97%"></div></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:.74rem;margin-bottom:4px">
+          <span>Cohort completeness</span>
+          <span style="color:var(--gold);font-weight:600">87.2%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:87%"></div></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:.74rem;margin-bottom:4px">
+          <span>Diagnosis code mapping</span>
+          <span style="color:var(--green);font-weight:600">99.1%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:99%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd"><h3><span class="ic">📊</span> Data Source Coverage Comparison (NSCLC 2L+)</h3></div>
+      <div class="chart-wrap"><canvas id="ch-coverage"></canvas></div>
+      <div class="insight-card">
+        <div class="insight-hd">📍 Linkage Insight</div>
+        <div class="insight-body">
+          Combining <strong>Komodo + IQVIA PharMetrics + Flatiron</strong> yields the largest unique-patient cohort (487K) with full longitudinal claims plus oncology EHR detail. This is the optimal stack for both commercial and medical analytics on this indication.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><h3><span class="ic">🔒</span> Compliance & Privacy Layer</h3><span class="tag tag-cyan">HIPAA Safe Harbor + Expert Determination</span></div>
+    <table class="tbl">
+      <thead><tr><th>Privacy Control</th><th>Implementation</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>HIPAA Safe Harbor de-identification</td><td>All 18 identifiers removed before analysis</td><td><span class="tag tag-green">✓ Verified</span></td></tr>
+        <tr><td>Expert Determination Method</td><td>Statistical certification by qualified expert (Datavant)</td><td><span class="tag tag-green">✓ Verified</span></td></tr>
+        <tr><td>Tokenization for cross-source linkage</td><td>Privacy-preserving record linkage (PPRL) tokens</td><td><span class="tag tag-green">✓ Verified</span></td></tr>
+        <tr><td>Small cell suppression</td><td>Cohorts &lt;11 patients suppressed in outputs</td><td><span class="tag tag-green">✓ Verified</span></td></tr>
+        <tr><td>Audit trail</td><td>Every query logged with user, timestamp, output</td><td><span class="tag tag-green">✓ Verified</span></td></tr>
+        <tr><td>Data Use Agreements</td><td>All 6 source DUAs current and signed</td><td><span class="tag tag-green">✓ Current</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ==================== MODULE 2: COHORT BUILDER ==================== -->
+<section class="module" id="mod-cohort">
+  <div class="section-hd">
+    <h2>Visual Cohort Builder</h2>
+    <p>Build patient cohorts with drag-and-drop logic. ICD-10, HCPCS, NDC, lab values, dates — all addressable without writing SQL.</p>
+  </div>
+
+  <div class="grid-12">
+    <div class="card">
+      <div class="card-hd"><h3><span class="ic">🎯</span> Cohort Definition</h3></div>
+      <p class="card-sub">Active cohort: <strong>2L+ NSCLC Real-World Cohort (Q3 2026)</strong></p>
+
+      <div class="field">
+        <label class="field-lbl">Indication</label>
+        <select class="field-select">
+          <option>NSCLC (ICD-10: C34.x)</option>
+          <option>Breast Cancer (C50.x)</option>
+          <option>Colorectal (C18-C21)</option>
+          <option>Ulcerative Colitis (K51)</option>
+        </select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label class="field-lbl">Line of Therapy</label>
+          <select class="field-select">
+            <option>2L+</option><option>1L</option><option>3L+</option><option>All Lines</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-lbl">Age Range</label>
+          <select class="field-select">
+            <option>18-89 (all adults)</option><option>18-64</option><option>65-74</option><option>75+</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-lbl">Lookback Period</label>
+        <select class="field-select">
+          <option>3 years (2023-2026)</option><option>1 year</option><option>5 years</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-lbl">Inclusion Criteria</label>
+        <div style="font-size:.72rem;color:var(--t2);padding:10px;background:var(--bg2);border-radius:8px">
+          ✓ ICD-10 C34.x ≥2 diagnoses<br>
+          ✓ ≥1 systemic therapy claim<br>
+          ✓ Continuous enrollment 12+ mo<br>
+          ✓ Age 18+ at index date
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-lbl">Exclusion Criteria</label>
+        <div style="font-size:.72rem;color:var(--t2);padding:10px;background:var(--bg2);border-radius:8px">
+          ✗ Prior other cancer (5y)<br>
+          ✗ Clinical trial enrollment<br>
+          ✗ Hospice/EOL claim
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="toast('Cohort refreshed · 487,234 patients matched')">⚡ Build Cohort</button>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-hd"><h3><span class="ic">👥</span> Cohort Composition</h3><span class="tag tag-cyan">N = 487,234</span></div>
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+          <div style="background:var(--bg2);padding:11px;border-radius:8px">
+            <div style="font-size:.62rem;color:var(--t3);text-transform:uppercase;font-weight:600">Total cohort</div>
+            <div style="font-family:var(--fd);font-size:1.3rem;font-weight:700;color:var(--blue)">487,234</div>
+          </div>
+          <div style="background:var(--bg2);padding:11px;border-radius:8px">
+            <div style="font-size:.62rem;color:var(--t3);text-transform:uppercase;font-weight:600">Median age</div>
+            <div style="font-family:var(--fd);font-size:1.3rem;font-weight:700;color:var(--cyan)">68 y</div>
+          </div>
+          <div style="background:var(--bg2);padding:11px;border-radius:8px">
+            <div style="font-size:.62rem;color:var(--t3);text-transform:uppercase;font-weight:600">% Female</div>
+            <div style="font-family:var(--fd);font-size:1.3rem;font-weight:700;color:var(--magenta)">52.4%</div>
+          </div>
+          <div style="background:var(--bg2);padding:11px;border-radius:8px">
+            <div style="font-size:.62rem;color:var(--t3);text-transform:uppercase;font-weight:600">Median F/U</div>
+            <div style="font-family:var(--fd);font-size:1.3rem;font-weight:700;color:var(--gold)">19 mo</div>
+          </div>
+        </div>
+
+        <div class="chart-wrap"><canvas id="ch-cohort-demo"></canvas></div>
+      </div>
+
+      <div style="height:14px"></div>
+
+      <div class="card">
+        <div class="card-hd"><h3><span class="ic">📋</span> Cohort Subgroups</h3></div>
+        <div class="cohort-row">
+          <div class="cohort-icon">🧬</div>
+          <div>
+            <div class="cohort-name">EGFR-mutant subgroup</div>
+            <div class="cohort-detail">EGFR L858R or exon 19 deletion</div>
+          </div>
+          <div class="cohort-count">62,318</div>
+          <div class="cohort-pct">12.8%</div>
+        </div>
+        <div class="cohort-row">
+          <div class="cohort-icon">🧬</div>
+          <div>
+            <div class="cohort-name">KRAS G12C mutant</div>
+            <div class="cohort-detail">G12C mutation confirmed</div>
+          </div>
+          <div class="cohort-count">38,492</div>
+          <div class="cohort-pct">7.9%</div>
+        </div>
+        <div class="cohort-row">
+          <div class="cohort-icon">🧬</div>
+          <div>
+            <div class="cohort-name">ALK rearrangement</div>
+            <div class="cohort-detail">ALK fusion positive</div>
+          </div>
+          <div class="cohort-count">14,617</div>
+          <div class="cohort-pct">3.0%</div>
+        </div>
+        <div class="cohort-row">
+          <div class="cohort-icon">🧬</div>
+          <div>
+            <div class="cohort-name">PD-L1 high (TPS ≥ 50%)</div>
+            <div class="cohort-detail">High expression subset</div>
+          </div>
+          <div class="cohort-count">142,719</div>
+          <div class="cohort-pct">29.3%</div>
+        </div>
+        <div class="cohort-row">
+          <div class="cohort-icon">👵</div>
+          <div>
+            <div class="cohort-name">Elderly (≥ 75y)</div>
+            <div class="cohort-detail">Special population focus</div>
+          </div>
+          <div class="cohort-count">156,484</div>
+          <div class="cohort-pct">32.1%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MODULE 3: PATIENT JOURNEY & LoT ==================== -->
+<section class="module" id="mod-journey">
+  <div class="section-hd">
+    <h2>Patient Journey & Line-of-Therapy Analysis</h2>
+    <p>Trace patient pathways from diagnosis through multiple treatment lines. Identify drop-off points, treatment durations, and progression patterns.</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:18px">
+    <div class="card"><div class="card-hd"><h3><span class="ic">🛤️</span> Line of Therapy Funnel</h3></div>
+      <div class="chart-wrap tall"><canvas id="ch-lot"></canvas></div>
+      <div class="insight-card">
+        <div class="insight-hd">📍 Funnel Insight</div>
+        <div class="insight-body" style="font-size:.76rem">
+          Only <strong>54% of 2L patients progress to 3L</strong>. The 46% drop-off represents either patient death, hospice transition, or treatment abandonment. This is a critical commercial whitespace for new 2L therapies that extend treatment durability.
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="card-hd"><h3><span class="ic">⏱️</span> Median Treatment Duration by LoT</h3></div>
+      <div class="chart-wrap tall"><canvas id="ch-duration"></canvas></div>
+      <div class="insight-card">
+        <div class="insight-hd">📍 Duration Insight</div>
+        <div class="insight-body" style="font-size:.76rem">
+          <strong>2L median duration is 5.4 months</strong> — well below trial efficacy. Real-world drop-off driven by toxicity (24%), progression (38%), patient choice (12%), administrative reasons (26%).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><h3><span class="ic">🔄</span> Treatment Sequence Sankey (Top Pathways)</h3><span class="tag tag-cyan">Top 10 of 84 pathways</span></div>
+    <table class="tbl">
+      <thead><tr><th>Pathway</th><th>1L → 2L → 3L</th><th>Patient Count</th><th>Median Duration</th><th>% of Cohort</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Pembrolizumab+Chemo → Docetaxel → Ramucirumab+Docetaxel</td><td class="num">42,389</td><td class="num">14.2 mo</td><td class="num">8.7%</td></tr>
+        <tr><td>2</td><td>Pembrolizumab+Chemo → Atezolizumab → Docetaxel</td><td class="num">28,648</td><td class="num">11.8 mo</td><td class="num">5.9%</td></tr>
+        <tr><td>3</td><td>Pembrolizumab → Docetaxel → Ramucirumab+Docetaxel</td><td class="num">24,872</td><td class="num">13.4 mo</td><td class="num">5.1%</td></tr>
+        <tr><td>4</td><td>Carboplatin+Pemetrexed → Pembrolizumab → Docetaxel</td><td class="num">21,940</td><td class="num">12.1 mo</td><td class="num">4.5%</td></tr>
+        <tr><td>5</td><td>Osimertinib (EGFR) → Carboplatin+Pemetrexed → Docetaxel</td><td class="num">18,124</td><td class="num">22.8 mo</td><td class="num">3.7%</td></tr>
+        <tr><td>6</td><td>Pembrolizumab+Chemo → Nivolumab+Ipilimumab → Docetaxel</td><td class="num">14,387</td><td class="num">13.6 mo</td><td class="num">3.0%</td></tr>
+        <tr><td>7</td><td>Atezolizumab+Chemo → Docetaxel → Ramucirumab</td><td class="num">12,196</td><td class="num">10.4 mo</td><td class="num">2.5%</td></tr>
+        <tr><td>8</td><td>Pembrolizumab → Carboplatin+Paclitaxel → Docetaxel</td><td class="num">9,743</td><td class="num">11.1 mo</td><td class="num">2.0%</td></tr>
+        <tr><td>9</td><td>Osimertinib → Carboplatin+Pemetrexed → Pembrolizumab</td><td class="num">7,860</td><td class="num">19.4 mo</td><td class="num">1.6%</td></tr>
+        <tr><td>10</td><td>Alectinib (ALK) → Brigatinib → Lorlatinib</td><td class="num">5,432</td><td class="num">28.6 mo</td><td class="num">1.1%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-hd">⚡ Patient Journey Strategic Brief</div>
+    <div class="insight-body">
+      Three key strategic findings from line-of-therapy analysis:
+      <ul>
+        <li><strong>2L whitespace:</strong> The dominant 2L therapy is Docetaxel monotherapy (used in 38% of 2L patients) — a 25-year-old chemo with significant toxicity. A new 2L IO with better tolerability would capture meaningful share even with modest efficacy improvement.</li>
+        <li><strong>EGFR pathway protection:</strong> Osimertinib remains dominant in EGFR+ 1L (22.8-month median duration), creating a strong "moat" for the EGFR franchise. New 2L therapies should plan around post-osimertinib positioning.</li>
+        <li><strong>Combination chemistry IO continuation:</strong> 67% of 1L pembrolizumab-combo patients progress directly to 2L within 14 months — a large addressable population for new 2L therapy launches.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MODULE 4: PRESCRIBING & SWITCHING ==================== -->
+<section class="module" id="mod-prescribe">
+  <div class="section-hd">
+    <h2>Prescriber Behavior & Switching Analytics</h2>
+    <p>Provider-level prescribing patterns, switch dynamics, and physician segment analysis. Identifies which prescribers drive volume and how to influence them.</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:18px">
+    <div class="card"><div class="card-hd"><h3><span class="ic">👨‍⚕️</span> Prescriber Concentration Curve</h3></div>
+      <div class="chart-wrap"><canvas id="ch-concentration"></canvas></div>
+      <div class="insight-card">
+        <div class="insight-hd">📍 Concentration Insight</div>
+        <div class="insight-body" style="font-size:.76rem">
+          Top <strong>10% of prescribers (480 physicians) drive 62% of 2L NSCLC prescribing volume</strong>. Focus field activation on this segment for highest commercial leverage.
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="card-hd"><h3><span class="ic">🔄</span> Switch Pattern Volume</h3></div>
+      <div class="chart-wrap"><canvas id="ch-switches"></canvas></div>
+      <div class="insight-card">
+        <div class="insight-hd">📍 Switch Insight</div>
+        <div class="insight-body" style="font-size:.76rem">
+          Switches from <strong>Pembrolizumab → Docetaxel</strong> dominate (28% of all switches), driven by progression. A 2L therapy positioned as "post-IO progression" captures this exact transition point.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><h3><span class="ic">🏥</span> Prescriber Segment Analysis</h3><span class="tag tag-cyan">Top 5,000 of 47K active prescribers</span></div>
+    <table class="tbl">
+      <thead><tr><th>Segment</th><th>Count</th><th>Volume Share</th><th>Avg Patients/Mo</th><th>2L Switch Rate</th><th>Key Driver</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Academic NCI Cancer Centers</strong></td><td class="num">218</td><td class="num">14.2%</td><td class="num">42</td><td class="num">68%</td><td>Trial enrollment + biomarker-driven</td></tr>
+        <tr><td><strong>Large Community Practice (10+ MD)</strong></td><td class="num">684</td><td class="num">28.4%</td><td class="num">18</td><td class="num">54%</td><td>Pathway adherence + payer policy</td></tr>
+        <tr><td><strong>Mid Community Practice (3-9 MD)</strong></td><td class="num">1,542</td><td class="num">24.6%</td><td class="num">8</td><td class="num">48%</td><td>Sales force + peer referral</td></tr>
+        <tr><td><strong>Solo Practice</strong></td><td class="num">2,406</td><td class="num">12.8%</td><td class="num">3</td><td class="num">38%</td><td>Local KOL + medical education</td></tr>
+        <tr><td><strong>Integrated Health System</strong></td><td class="num">486</td><td class="num">15.4%</td><td class="num">28</td><td class="num">62%</td><td>System-level pathway + P&T</td></tr>
+        <tr><td><strong>VA / Federal</strong></td><td class="num">156</td><td class="num">4.6%</td><td class="num">14</td><td class="num">42%</td><td>Federal formulary policy</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-hd">⚡ Prescriber Targeting Brief</div>
+    <div class="insight-body">
+      For a new 2L NSCLC launch, the highest-ROI field force allocation is:
+      <ul>
+        <li><strong>Tier 1 priority:</strong> 218 NCI Cancer Center physicians + 684 Large Community Practice physicians (902 total = top 1.9% by volume share) capture 42.6% of 2L NSCLC prescribing. Allocate 12 dedicated oncology specialists.</li>
+        <li><strong>Tier 2 priority:</strong> 1,542 Mid Community Practice physicians capture 24.6% of volume. Hybrid coverage model with 8 oncology specialists + digital engagement.</li>
+        <li><strong>Tier 3 efficiency:</strong> 2,406 Solo + 486 Integrated System physicians capture 28.2% combined. Digital + KOL peer-to-peer model — no dedicated rep coverage.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MODULE 5: PAYER & COST ANALYTICS ==================== -->
+<section class="module" id="mod-payer">
+  <div class="section-hd">
+    <h2>Payer Mix & Cost Analytics</h2>
+    <p>Payer-level prescribing patterns, prior authorization analytics, gross-to-net economics, and IRA exposure modeling.</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:18px">
+    <div class="card"><div class="card-hd"><h3><span class="ic">💳</span> Payer Mix by Volume</h3></div>
+      <div class="chart-wrap"><canvas id="ch-payer-mix"></canvas></div>
+    </div>
+    <div class="card"><div class="card-hd"><h3><span class="ic">📈</span> Prior Authorization Rate by Payer</h3></div>
+      <div class="chart-wrap"><canvas id="ch-pa-rate"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-hd"><h3><span class="ic">💰</span> Cost & Reimbursement Analysis</h3></div>
+    <table class="tbl">
+      <thead><tr><th>Payer</th><th>Volume Share</th><th>WAC ($/mo)</th><th>Allowed Amount</th><th>Effective Net</th><th>GtN%</th><th>PA Approval Rate</th><th>Days to Approval</th></tr></thead>
+      <tbody>
+        <tr><td><strong>UnitedHealthcare</strong></td><td class="num">14.2%</td><td class="num">$18,400</td><td class="num">$15,392</td><td class="num">$11,408</td><td class="num">38%</td><td class="num">86%</td><td class="num">4.2</td></tr>
+        <tr><td><strong>Anthem (Elevance)</strong></td><td class="num">13.8%</td><td class="num">$18,400</td><td class="num">$14,392</td><td class="num">$10,672</td><td class="num">42%</td><td class="num">82%</td><td class="num">5.8</td></tr>
+        <tr><td><strong>Aetna (CVS)</strong></td><td class="num">11.2%</td><td class="num">$18,400</td><td class="num">$14,024</td><td class="num">$10,304</td><td class="num">44%</td><td class="num">78%</td><td class="num">6.4</td></tr>
+        <tr><td><strong>Cigna</strong></td><td class="num">5.4%</td><td class="num">$18,400</td><td class="num">$15,024</td><td class="num">$11,040</td><td class="num">40%</td><td class="num">81%</td><td class="num">5.1</td></tr>
+        <tr><td><strong>Humana</strong></td><td class="num">6.6%</td><td class="num">$18,400</td><td class="num">$13,392</td><td class="num">$9,936</td><td class="num">46%</td><td class="num">74%</td><td class="num">8.2</td></tr>
+        <tr><td><strong>Medicare Part B</strong></td><td class="num">18.8%</td><td class="num">$18,400</td><td class="num">$16,752</td><td class="num">$14,352</td><td class="num">22%</td><td class="num">94%</td><td class="num">1.4</td></tr>
+        <tr><td><strong>Medicare Advantage</strong></td><td class="num">12.4%</td><td class="num">$18,400</td><td class="num">$14,896</td><td class="num">$11,408</td><td class="num">38%</td><td class="num">80%</td><td class="num">4.8</td></tr>
+        <tr><td><strong>Medicaid (Managed)</strong></td><td class="num">8.6%</td><td class="num">$18,400</td><td class="num">$11,392</td><td class="num">$8,096</td><td class="num">56%</td><td class="num">62%</td><td class="num">9.8</td></tr>
+        <tr><td><strong>BCBS Federal</strong></td><td class="num">3.4%</td><td class="num">$18,400</td><td class="num">$14,656</td><td class="num">$11,776</td><td class="num">36%</td><td class="num">84%</td><td class="num">4.6</td></tr>
+        <tr><td><strong>Tricare/Federal</strong></td><td class="num">2.6%</td><td class="num">$18,400</td><td class="num">$15,584</td><td class="num">$13,248</td><td class="num">28%</td><td class="num">92%</td><td class="num">2.1</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="insight-card">
+    <div class="insight-hd">⚡ Payer Strategy Brief</div>
+    <div class="insight-body">
+      <strong>Three high-leverage payer actions for the next 12 months:</strong>
+      <ul>
+        <li><strong>Medicaid PA rate problem:</strong> 62% approval rate is 18 percentage points below commercial average. Develop standardized PA template for Medicaid Managed Care plans. Estimated impact: 15-20% volume recovery in this 8.6% volume segment.</li>
+        <li><strong>Humana PA delay:</strong> 8.2 days to approval is 2x the commercial median. Engage Humana medical director directly to align PA criteria with NCCN guidelines. Risk: patient drop-off during long approval wait.</li>
+        <li><strong>IRA exposure modeling:</strong> Medicare Part B + MA = 31.2% of volume. If included in IRA Cohort 3 (small molecule, post-9-year window), modeled NPV erosion is $890M-1.4B over 5 years. Begin pre-negotiation evidence package now.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== MODULE 6: STRATEGIC INSIGHTS BRIEF ==================== -->
+<section class="module" id="mod-insights">
+  <div class="section-hd">
+    <h2>AI-Generated Strategic Insights Brief</h2>
+    <p>One-click executive brief synthesizing all claims intelligence into commercial and medical strategic recommendations.</p>
+  </div>
+
+  <div class="demo-note"><span class="ic">⚡</span> Generated September 2026 · Synthesized from 487K patient cohort · 4.2 min compute time · 96% confidence · Click sections to expand</div>
+
+  <div class="card">
+    <div class="card-hd">
+      <h3><span class="ic">📋</span> 2L NSCLC Strategic Intelligence Brief — Q3 2026</h3>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" style="padding:7px 12px;font-size:.72rem" onclick="toast('Brief exported to PowerPoint')">📊 PPT</button>
+        <button class="btn btn-secondary" style="padding:7px 12px;font-size:.72rem" onclick="toast('Brief exported to PDF')">📄 PDF</button>
+        <button class="btn btn-secondary" style="padding:7px 12px;font-size:.72rem" onclick="toast('Brief emailed to leadership')">📧 Email</button>
+      </div>
+    </div>
+
+    <div style="background:var(--bg2);padding:18px;border-radius:11px;font-size:.84rem;line-height:1.7">
+
+      <h4 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:8px;color:var(--blue)">Executive Summary</h4>
+      <p style="margin-bottom:14px">
+        Analysis of 487,234 real-world 2L+ NSCLC patients across Komodo, IQVIA PharMetrics, Optum, and Flatiron reveals 5 strategic insights for commercial and medical leadership: (1) <strong>Docetaxel monotherapy dominates 2L</strong> creating clear whitespace for new 2L IO; (2) <strong>Top 1.9% of prescribers drive 42.6% of volume</strong> enabling focused field force investment; (3) <strong>Medicaid PA delays</strong> represent the largest access barrier; (4) <strong>EGFR+ patients</strong> have 22.8-month median 1L duration creating timed engagement opportunity for 2L; (5) <strong>IRA modeled NPV erosion</strong> of $890M-1.4B for Medicare-exposed therapies.
+      </p>
+
+      <h4 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:8px;color:var(--blue)">Insight 1: 2L Commercial Whitespace Opportunity</h4>
+      <p style="margin-bottom:6px"><strong style="color:var(--cyan)">Finding:</strong> Docetaxel monotherapy accounts for 38% of 2L NSCLC therapy — a 25-year-old chemotherapy with significant toxicity (24% discontinuation rate due to AEs in real-world setting).</p>
+      <p style="margin-bottom:6px"><strong style="color:var(--cyan)">Implication:</strong> The dominant 2L therapy has well-documented tolerability issues but no superior alternative has displaced it because of cost and access barriers.</p>
+      <p style="margin-bottom:14px"><strong style="color:var(--cyan)">Recommendation:</strong> New 2L IO entrants should position around "better tolerability + meaningful efficacy" rather than "best-in-class efficacy alone." Real-world 2L treatment duration of 5.4 months suggests addressable market of $4.2B at peak penetration of 35%.</p>
+
+      <h4 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:8px;color:var(--blue)">Insight 2: Field Force Concentration Strategy</h4>
+      <p style="margin-bottom:6px"><strong style="color:var(--cyan)">Finding:</strong> Top 902 prescribers (1.9% of universe) drive 42.6% of 2L NSCLC volume. These are concentrated in NCI Cancer Centers and large community practices.</p>
+      <p style="margin-bottom:6px"><strong style="color:var(--cyan)">Implication:</strong> Traditional broad-coverage rep model is wasteful. A focused specialty team of 20 reps can cover 80%+ of these prescribers vs ~150 reps needed for traditional 80/20 coverage.</p>
+      <p style="margin-bottom:14px"><strong style="color:var(--cyan)">Recommendation:</strong> Build 20-FTE oncology specialty team focused on top 902. Pair with digital + peer-to-peer for next-tier 1,542 prescribers. Annual SG&A savings vs traditional model: $32-48M.</p>
+
+      <h4 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:8px;color:var(--blue)">Insight 3: Payer Access Optimization</h4>
+      <p style="margin-bottom:6px"><strong style="color:var(--cyan)">Finding:</strong> Medicaid Managed Care (8.6% volume) has 62% PA approval rate vs 80%+ commercial. Humana (6.6% volume) has 8.2-day approval delay vs 4-day commercial median.</p>
+      <p style="margin-bottom:6px"><strong style="color:var(--cyan)">Implication:</strong> Two distinct access barriers requiring different solutions — Medicaid criteria template work and Humana medical director engagement.</p>
+      <p style="margin-bottom:14px"><strong style="color:var(--cyan)">Recommendation:</strong> Q4 deliverables — (a) NCCN-aligned PA template for top 5 Medicaid Managed Care plans (Centene, Molina, CareSource, AmeriHealth, AvMed); (b) Humana medical director engagement with utilization data. Estimated volume recovery: 15-20% in target segments.</p>
+
+      <h4 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:8px;color:var(--blue)">Insight 4: EGFR+ Timed Engagement</h4>
+      <p style="margin-bottom:6px"><strong style="color:var(--cyan)">Finding:</strong> EGFR+ patients on 1L Osimertinib have median 22.8-month treatment duration — a long "engagement window" before 2L switch.</p>
+      <p style="margin-bottom:6px"><strong style="color:var(--cyan)">Implication:</strong> Patients can be identified, educated, and pre-positioned for 2L therapy 18+ months before they need it.</p>
+      <p style="margin-bottom:14px"><strong style="color:var(--cyan)">Recommendation:</strong> Launch EGFR-specific patient identification program with prescribers managing &gt; 20 EGFR+ patients. Develop "post-osimertinib progression" educational content. Estimated EGFR 2L share gain: 8-12 percentage points.</p>
+
+      <h4 style="font-family:var(--fd);font-size:1.05rem;margin-bottom:8px;color:var(--blue)">Insight 5: IRA Exposure & Mitigation</h4>
+      <p style="margin-bottom:6px"><strong style="color:var(--cyan)">Finding:</strong> Medicare Part B + Medicare Advantage represent 31.2% of 2L NSCLC volume. Small molecule therapies face IRA Maximum Fair Price negotiation 9 years post-approval.</p>
+      <p style="margin-bottom:6px"><strong style="color:var(--cyan)">Implication:</strong> Modeled NPV erosion under base IRA scenario (30% MFP cut): $890M-1.4B over 5 years post-negotiation.</p>
+      <p style="margin-bottom:0"><strong style="color:var(--cyan)">Recommendation:</strong> (a) Build pre-negotiation evidence package now — real-world OS validation, comparative effectiveness vs SoC, value-based contract pilots; (b) Pursue value-based contracts with top 5 commercial payers to demonstrate confidence in efficacy; (c) Pre-emptive ICER submission for independent value assessment.</p>
+    </div>
+
+    <div class="insight-card">
+      <div class="insight-hd">⚡ Workflow Impact</div>
+      <div class="insight-body">
+        This brief was generated automatically from 487,234 patient records across 4 data sources. Manual production of equivalent intelligence requires:
+        <ul>
+          <li><strong>Before Claims Intelligence IQ:</strong> 3 RWE analysts × 6 weeks × 40 hours = 720 hours × $145/hr = $104,400 per quarterly brief</li>
+          <li><strong>With Claims Intelligence IQ:</strong> 1 senior analyst × 4 hours review = 4 hours × $180/hr = $720 per brief</li>
+          <li><strong>ROI:</strong> 99.4% time reduction · $103,680 cost savings per brief · 716 hours of senior analyst time redirected to higher-value strategic work</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast"><span class="ic">✓</span><span id="toast-msg">Action completed</span></div>
+
+<script>
+// Tab switching
+document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('mod-' + btn.dataset.tab).classList.add('active');
+  setTimeout(() => window.scrollTo({top: 200, behavior: 'smooth'}), 50);
+}));
+
+// Toast
+function toast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function runAnalysis() {
+  toast('Analysis pipeline executing across 4 connected data sources...');
+  setTimeout(() => toast('Analysis complete · 487K patients · 6 insights generated · 4.2 min'), 1800);
+}
+
+// Charts
+const chartOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#9aacd0', font: { size: 10 } } } },
+  scales: {
+    x: { ticks: { color: '#5d6f95', font: { size: 10 } }, grid: { color: 'rgba(36,52,86,.4)' } },
+    y: { ticks: { color: '#5d6f95', font: { size: 10 } }, grid: { color: 'rgba(36,52,86,.4)' } }
+  }
+};
+
+window.addEventListener('load', () => {
+  // Data source coverage
+  new Chart(document.getElementById('ch-coverage'), {
+    type: 'bar',
+    data: {
+      labels: ['Komodo','IQVIA','Optum','Flatiron','Truveta','TriNetX','Medicare LDS'],
+      datasets: [{
+        label: 'Unique NSCLC 2L+ patients (K)',
+        data: [340, 280, 88, 142, 78, 110, 76],
+        backgroundColor: ['rgba(66,150,255,.8)','rgba(0,204,196,.8)','rgba(155,109,255,.8)','rgba(255,184,40,.8)','rgba(255,85,119,.6)','rgba(52,214,112,.6)','rgba(233,77,182,.6)'],
+        borderRadius: 7
+      }]
+    },
+    options: { ...chartOpts, plugins: { legend: { display: false } } }
+  });
+
+  // Cohort demographic
+  new Chart(document.getElementById('ch-cohort-demo'), {
+    type: 'bar',
+    data: {
+      labels: ['18-44','45-54','55-64','65-74','75-84','85+'],
+      datasets: [
+        { label: 'Female', data: [3200, 18400, 62800, 84200, 64200, 21800], backgroundColor: 'rgba(233,77,182,.7)', borderRadius: 5 },
+        { label: 'Male', data: [3800, 17200, 58400, 80100, 55200, 17900], backgroundColor: 'rgba(66,150,255,.7)', borderRadius: 5 }
+      ]
+    },
+    options: { ...chartOpts, scales: { x: { ...chartOpts.scales.x, stacked: true }, y: { ...chartOpts.scales.y, stacked: true } } }
+  });
+
+  // Line of therapy funnel
+  new Chart(document.getElementById('ch-lot'), {
+    type: 'bar',
+    data: {
+      labels: ['1L (incident)','1L (treated)','2L','3L','4L+'],
+      datasets: [{
+        label: 'Patients',
+        data: [620000, 487234, 264842, 142893, 58420],
+        backgroundColor: ['rgba(66,150,255,.85)','rgba(0,204,196,.85)','rgba(155,109,255,.85)','rgba(255,184,40,.85)','rgba(255,85,119,.85)'],
+        borderRadius: 7
+      }]
+    },
+    options: { ...chartOpts, indexAxis: 'y', plugins: { legend: { display: false } } }
+  });
+
+  // Treatment duration by LoT
+  new Chart(document.getElementById('ch-duration'), {
+    type: 'bar',
+    data: {
+      labels: ['1L IO+Chemo','1L IO mono','1L EGFR TKI','1L ALK TKI','2L Chemo','2L Combo','3L+'],
+      datasets: [{
+        label: 'Median duration (months)',
+        data: [8.4, 7.2, 22.8, 28.6, 5.4, 6.8, 4.2],
+        backgroundColor: 'rgba(0,204,196,.8)',
+        borderRadius: 7
+      }]
+    },
+    options: { ...chartOpts, plugins: { legend: { display: false } } }
+  });
+
+  // Prescriber concentration curve
+  new Chart(document.getElementById('ch-concentration'), {
+    type: 'line',
+    data: {
+      labels: ['Top 1%','Top 2%','Top 5%','Top 10%','Top 20%','Top 50%','All'],
+      datasets: [{
+        label: 'Cumulative volume share %',
+        data: [22, 38, 52, 62, 78, 92, 100],
+        borderColor: '#4296ff',
+        backgroundColor: 'rgba(66,150,255,.15)',
+        fill: true, tension: .35, borderWidth: 2,
+        pointRadius: 5, pointBackgroundColor: '#4296ff'
+      }]
+    },
+    options: { ...chartOpts, plugins: { legend: { display: false } }, scales: { ...chartOpts.scales, y: { ...chartOpts.scales.y, ticks: { ...chartOpts.scales.y.ticks, callback: v => v + '%' } } } }
+  });
+
+  // Switch patterns
+  new Chart(document.getElementById('ch-switches'), {
+    type: 'bar',
+    data: {
+      labels: ['Pembro→Docetaxel','Pembro→Atezo','Carbo/Pem→Pembro','Osi→Carbo/Pem','Pembro+Chemo→Nivo+Ipi','Atezo→Docetaxel','Other'],
+      datasets: [{
+        label: 'Switches in cohort',
+        data: [74200, 42800, 35200, 18400, 14600, 12800, 28400],
+        backgroundColor: ['rgba(255,85,119,.85)','rgba(255,184,40,.85)','rgba(155,109,255,.85)','rgba(0,204,196,.85)','rgba(66,150,255,.85)','rgba(52,214,112,.85)','rgba(155,165,200,.5)'],
+        borderRadius: 6
+      }]
+    },
+    options: { ...chartOpts, indexAxis: 'y', plugins: { legend: { display: false } } }
+  });
+
+  // Payer mix doughnut
+  new Chart(document.getElementById('ch-payer-mix'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Medicare Part B','UHC','Anthem','MA','Aetna','Medicaid','Humana','Cigna','BCBS Fed','Other'],
+      datasets: [{
+        data: [18.8, 14.2, 13.8, 12.4, 11.2, 8.6, 6.6, 5.4, 3.4, 5.6],
+        backgroundColor: ['#4296ff','#00ccc4','#9b6dff','#ffb828','#ff5577','#34d670','#ff9550','#e94db6','#5d6f95','#243456'],
+        borderColor: '#101830', borderWidth: 2
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#9aacd0', font: { size: 10 } } } } }
+  });
+
+  // PA rate by payer
+  new Chart(document.getElementById('ch-pa-rate'), {
+    type: 'bar',
+    data: {
+      labels: ['Medicare B','Tricare','UHC','BCBS Fed','Anthem','Cigna','MA','Aetna','Humana','Medicaid'],
+      datasets: [{
+        label: 'PA Approval Rate %',
+        data: [94, 92, 86, 84, 82, 81, 80, 78, 74, 62],
+        backgroundColor: function(c) {
+          const v = c.parsed.y;
+          if (v >= 85) return 'rgba(52,214,112,.85)';
+          if (v >= 75) return 'rgba(255,184,40,.85)';
+          return 'rgba(255,85,119,.85)';
+        },
+        borderRadius: 6
+      }]
+    },
+    options: { ...chartOpts, plugins: { legend: { display: false } }, scales: { ...chartOpts.scales, y: { ...chartOpts.scales.y, min: 50, max: 100, ticks: { ...chartOpts.scales.y.ticks, callback: v => v + '%' } } } }
+  });
+});
+</script>
+
+</body>
+</html>
