@@ -1,0 +1,1986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CER-AI Automation Module | PharBioMed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0b1a1f;
+    --ink-soft: #1f3137;
+    --ink-mute: #4f6b73;
+    --line: #d8dcd4;
+    --line-soft: #eae8df;
+    --paper: #f6f3ec;
+    --paper-warm: #efece2;
+    --card: #ffffff;
+    --teal: #1e5b56;
+    --teal-deep: #0f3a36;
+    --teal-soft: #e9f0ec;
+    --amber: #b8651b;
+    --amber-soft: #fbeedc;
+    --sage: #4f7a4a;
+    --sage-soft: #e7eee2;
+    --rust: #9f3a2e;
+    --rust-soft: #f5e3df;
+    --gold: #b89a3e;
+    --shadow-sm: 0 1px 2px rgba(11,26,31,.05);
+    --shadow-md: 0 6px 24px -8px rgba(11,26,31,.12), 0 2px 6px rgba(11,26,31,.04);
+    --shadow-lg: 0 20px 60px -20px rgba(11,26,31,.2);
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 14px;
+    --font-serif: 'Fraunces', 'Times New Roman', serif;
+    --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Geist Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-sans);
+    color: var(--ink);
+    background: var(--paper);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* ====== Top Bar ====== */
+  .topbar {
+    height: 56px;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex; align-items: center;
+    padding: 0 24px;
+    border-bottom: 1px solid #000;
+    position: relative;
+    z-index: 10;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.01em;
+  }
+  .brand-mark {
+    width: 30px; height: 30px;
+    background: var(--paper);
+    color: var(--ink);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .brand small {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 11px;
+    color: rgba(246,243,236,.55);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-left: 8px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(246,243,236,.2);
+  }
+  .topbar-stage {
+    margin-left: 40px;
+    display: flex; gap: 4px;
+    font-size: 12px;
+  }
+  .stage-pill {
+    padding: 5px 12px;
+    border-radius: 20px;
+    color: rgba(246,243,236,.5);
+    display: flex; align-items: center; gap: 8px;
+    transition: all .15s;
+  }
+  .stage-pill .num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: rgba(246,243,236,.1);
+    display: grid; place-items: center;
+  }
+  .stage-pill.active {
+    background: rgba(246,243,236,.1);
+    color: var(--paper);
+  }
+  .stage-pill.active .num { background: var(--amber); color: var(--ink); }
+  .stage-pill.done { color: rgba(246,243,236,.75); }
+  .stage-pill.done .num { background: var(--sage); color: var(--ink); }
+  .topbar-right {
+    margin-left: auto;
+    display: flex; gap: 16px; align-items: center;
+    font-size: 12px;
+    color: rgba(246,243,236,.7);
+  }
+  .topbar-right .meta { display: flex; gap: 6px; align-items: center; }
+  .topbar-right .meta .dot { width: 6px; height: 6px; background: var(--sage); border-radius: 50%; }
+  .topbar-btn {
+    background: var(--amber);
+    color: var(--ink);
+    border: none;
+    padding: 7px 16px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 12px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .topbar-btn:hover { filter: brightness(1.05); }
+
+  /* ====== Layout ====== */
+  .app {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    height: calc(100vh - 56px);
+  }
+
+  /* ====== Left Sidebar — CER Sections ====== */
+  .sidebar {
+    background: var(--paper-warm);
+    border-right: 1px solid var(--line);
+    overflow-y: auto;
+    padding: 16px 0;
+  }
+  .sidebar-title {
+    padding: 6px 20px 12px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-mute);
+    font-weight: 500;
+    border-bottom: 1px solid var(--line-soft);
+    margin-bottom: 8px;
+  }
+  .section-nav { list-style: none; }
+  .section-nav li.sec {
+    padding: 10px 20px;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+    transition: background .1s;
+  }
+  .section-nav li.sec:hover { background: rgba(11,26,31,.04); }
+  .section-nav li.sec.active {
+    border-left-color: var(--teal);
+    background: var(--teal-soft);
+    color: var(--teal-deep);
+    font-weight: 500;
+  }
+  .section-nav li.sec .sec-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+    min-width: 24px;
+  }
+  .section-nav li.sec.active .sec-num { color: var(--teal); }
+  .section-nav li.sec .status-dot {
+    margin-left: auto;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+  }
+  .status-dot.pending { background: var(--line); }
+  .status-dot.draft { background: var(--amber); }
+  .status-dot.review { background: var(--gold); }
+  .status-dot.approved { background: var(--sage); }
+  .status-dot.gap { background: var(--rust); }
+
+  /* ====== Main Content ====== */
+  .main {
+    overflow-y: auto;
+    background: var(--paper);
+    position: relative;
+  }
+  .main-inner { padding: 32px 48px 80px; max-width: 920px; margin: 0 auto; }
+
+  .breadcrumb {
+    font-size: 11px;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .breadcrumb .sep { color: var(--line); }
+
+  .section-title {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 38px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 12px;
+  }
+  .section-title .num-prefix {
+    color: var(--ink-mute);
+    font-weight: 400;
+    margin-right: 16px;
+  }
+  .section-meta {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 28px;
+    font-size: 12px;
+    color: var(--ink-mute);
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .section-meta .item { display: flex; gap: 6px; align-items: center; }
+  .section-meta .item b { font-weight: 500; color: var(--ink); }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .pill.draft { background: var(--amber-soft); color: var(--amber); }
+  .pill.approved { background: var(--sage-soft); color: var(--sage); }
+  .pill.review { background: #fef3d4; color: var(--gold); }
+  .pill.gap { background: var(--rust-soft); color: var(--rust); }
+  .pill.pending { background: var(--line-soft); color: var(--ink-mute); }
+  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* ====== Generated Content Block ====== */
+  .gen-block {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+  }
+  .gen-block.ai {
+    border-left: 3px solid var(--amber);
+  }
+  .gen-block.source {
+    border-left: 3px solid var(--teal);
+    background: linear-gradient(180deg, #fff, #fafaf6);
+  }
+  .gen-block.gap-block {
+    border-left: 3px solid var(--rust);
+    background: #fdf7f5;
+  }
+  .gen-block .tag {
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    background: var(--card);
+    padding: 0 8px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+    font-weight: 500;
+    display: flex; align-items: center; gap: 6px;
+    border: 1px solid var(--line-soft);
+    border-radius: 12px;
+    height: 20px;
+  }
+  .gen-block.ai .tag { color: var(--amber); border-color: var(--amber-soft); background: var(--card); }
+  .gen-block.source .tag { color: var(--teal); border-color: var(--teal-soft); }
+  .gen-block.gap-block .tag { color: var(--rust); border-color: var(--rust-soft); }
+
+  .sub-h {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--ink);
+    margin-bottom: 10px;
+    margin-top: 18px;
+  }
+  .sub-h:first-child { margin-top: 0; }
+  .gen-block p {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .gen-block p:last-child { margin-bottom: 0; }
+  .gen-block ul, .gen-block ol {
+    padding-left: 22px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+  }
+  .gen-block ul li, .gen-block ol li { margin-bottom: 4px; }
+
+  /* Citation refs */
+  .cite {
+    color: var(--teal);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    vertical-align: super;
+    cursor: pointer;
+    padding: 0 2px;
+    text-decoration: none;
+  }
+  .cite:hover { background: var(--teal-soft); border-radius: 2px; }
+
+  /* ====== Tables ====== */
+  table.cer-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin: 12px 0 16px;
+    background: var(--card);
+  }
+  table.cer-table th, table.cer-table td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+  }
+  table.cer-table th {
+    background: var(--paper-warm);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-mute);
+    border-bottom: 1px solid var(--line);
+  }
+  table.cer-table tr:last-child td { border-bottom: none; }
+
+  /* ====== AI controls ====== */
+  .ai-controls {
+    display: flex; gap: 8px; margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--line);
+  }
+  .ai-btn {
+    background: var(--card);
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all .12s;
+  }
+  .ai-btn:hover { border-color: var(--ink-mute); background: var(--paper-warm); }
+  .ai-btn.primary { background: var(--teal); color: white; border-color: var(--teal-deep); }
+  .ai-btn.primary:hover { background: var(--teal-deep); }
+  .ai-btn.warn { color: var(--amber); border-color: var(--amber-soft); }
+  .ai-btn svg { width: 12px; height: 12px; }
+
+  /* ====== Right Panel ====== */
+  .right-panel {
+    background: var(--card);
+    border-left: 1px solid var(--line);
+    overflow-y: auto;
+  }
+  .right-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper-warm);
+  }
+  .right-tab {
+    flex: 1;
+    padding: 14px 12px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-mute);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: all .12s;
+  }
+  .right-tab.active { color: var(--ink); border-bottom-color: var(--teal); background: var(--card); }
+  .right-panel-body { padding: 20px; }
+  .right-panel-body h3 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .right-panel-body .label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-mute);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .source-item {
+    padding: 10px 12px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    margin-bottom: 8px;
+    background: var(--paper);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .12s;
+  }
+  .source-item:hover { border-color: var(--teal); }
+  .source-item .src-name { font-weight: 500; color: var(--ink); margin-bottom: 3px; display: flex; gap: 6px; align-items: center; }
+  .source-item .src-type {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    background: var(--teal-soft);
+    color: var(--teal-deep);
+    padding: 1px 6px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .source-item .src-meta { color: var(--ink-mute); font-size: 11px; line-height: 1.4; }
+
+  /* ====== Modal / Setup ====== */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(11,26,31,.6);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 40px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--paper);
+    max-width: 760px;
+    width: 100%;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    max-height: 90vh;
+    display: flex; flex-direction: column;
+  }
+  .modal-head {
+    padding: 24px 32px 16px;
+    background: var(--card);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .modal-eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--teal);
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .modal-head h2 {
+    font-family: var(--font-serif);
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .modal-head p {
+    color: var(--ink-mute);
+    margin-top: 6px;
+    font-size: 13px;
+    max-width: 600px;
+  }
+  .modal-body { padding: 24px 32px; overflow-y: auto; flex: 1; }
+  .modal-foot {
+    padding: 18px 32px;
+    background: var(--paper-warm);
+    border-top: 1px solid var(--line-soft);
+    display: flex; gap: 12px; justify-content: flex-end;
+  }
+  .modal-btn {
+    padding: 9px 20px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .modal-btn.ghost { background: transparent; color: var(--ink-soft); border-color: var(--line); }
+  .modal-btn.ghost:hover { background: var(--card); }
+  .modal-btn.primary { background: var(--teal); color: white; border-color: var(--teal-deep); }
+  .modal-btn.primary:hover { background: var(--teal-deep); }
+
+  /* Forms */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .form-field label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-mute);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .form-field input, .form-field select, .form-field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    background: var(--card);
+    color: var(--ink);
+    transition: border-color .12s;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px var(--teal-soft);
+  }
+
+  /* Drop zone */
+  .dropzone {
+    border: 2px dashed var(--line);
+    border-radius: var(--r-md);
+    padding: 32px 24px;
+    text-align: center;
+    background: var(--card);
+    margin-bottom: 16px;
+    transition: all .15s;
+    cursor: pointer;
+  }
+  .dropzone:hover, .dropzone.over { border-color: var(--teal); background: var(--teal-soft); }
+  .dropzone-icon {
+    width: 48px; height: 48px;
+    margin: 0 auto 12px;
+    background: var(--paper-warm);
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: var(--ink-mute);
+  }
+  .dropzone h4 { font-family: var(--font-serif); font-size: 17px; margin-bottom: 6px; font-weight: 500; }
+  .dropzone p { color: var(--ink-mute); font-size: 12px; }
+  .dropzone .alt {
+    margin-top: 14px;
+    display: inline-block;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+    font-size: 12px;
+    color: var(--teal);
+  }
+
+  /* Doc list in modal */
+  .doc-list {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .doc-row {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line-soft);
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    align-items: center;
+    font-size: 13px;
+  }
+  .doc-row:last-child { border-bottom: none; }
+  .doc-row .doc-name { display: flex; gap: 10px; align-items: center; }
+  .doc-row .doc-name b { font-weight: 500; }
+  .doc-row .doc-name small { font-size: 11px; color: var(--ink-mute); }
+  .doc-row .doc-cls {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: var(--teal-soft);
+    color: var(--teal-deep);
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .doc-icon {
+    width: 28px; height: 28px;
+    background: var(--paper-warm);
+    border-radius: var(--r-sm);
+    display: grid; place-items: center;
+    color: var(--ink-mute);
+  }
+
+  /* Generation progress */
+  .gen-progress {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .gen-progress .gp-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .gen-progress .gp-title {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .gen-progress .gp-stat {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-mute);
+  }
+  .progress-bar {
+    height: 4px;
+    background: var(--line-soft);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .progress-bar .fill {
+    height: 100%;
+    background: var(--teal);
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+  }
+  .gp-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
+  .gp-row {
+    display: flex; justify-content: space-between; gap: 12px;
+    font-size: 12px;
+    padding: 6px 0;
+    border-bottom: 1px dashed var(--line-soft);
+  }
+  .gp-row:last-child { border-bottom: none; }
+  .gp-row .gp-sec { color: var(--ink-soft); }
+  .gp-row .gp-state {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    background: var(--paper-warm);
+    color: var(--ink-mute);
+  }
+  .gp-row .gp-state.working { background: var(--amber-soft); color: var(--amber); }
+  .gp-row .gp-state.done { background: var(--sage-soft); color: var(--sage); }
+
+  /* Loader dots */
+  .dots {
+    display: inline-flex; gap: 3px;
+  }
+  .dots span {
+    width: 4px; height: 4px;
+    background: currentColor;
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .dots span:nth-child(2) { animation-delay: 0.15s; }
+  .dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-3px); opacity: 1; }
+  }
+
+  /* Compliance grid */
+  .compliance-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .compliance-card {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    padding: 14px;
+  }
+  .compliance-card .cc-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-mute);
+    margin-bottom: 4px;
+  }
+  .compliance-card .cc-val {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .compliance-card .cc-sub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  .compliance-card.warn .cc-val { color: var(--amber); }
+  .compliance-card.good .cc-val { color: var(--sage); }
+  .compliance-card.gap .cc-val { color: var(--rust); }
+
+  /* Toggle */
+  .toggle-group {
+    display: inline-flex;
+    background: var(--paper-warm);
+    border-radius: var(--r-sm);
+    padding: 3px;
+    border: 1px solid var(--line);
+  }
+  .toggle-group button {
+    background: transparent;
+    border: none;
+    padding: 5px 12px;
+    font-family: var(--font-sans);
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .toggle-group button.active { background: var(--card); color: var(--ink); box-shadow: var(--shadow-sm); }
+
+  /* ====== Welcome Screen ====== */
+  .welcome {
+    background: linear-gradient(135deg, var(--paper) 0%, var(--paper-warm) 100%);
+    padding: 60px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .welcome::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, var(--teal-soft) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .welcome::after {
+    content: '';
+    position: absolute;
+    bottom: -150px; left: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, var(--amber-soft) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .welcome-inner { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; }
+  .welcome .eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--teal);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+  .welcome h1 {
+    font-family: var(--font-serif);
+    font-size: 56px;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+  .welcome h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--teal);
+  }
+  .welcome > div > p {
+    font-size: 16px;
+    color: var(--ink-mute);
+    max-width: 560px;
+    margin: 0 auto 32px;
+    line-height: 1.55;
+  }
+  .welcome-actions { display: flex; gap: 12px; justify-content: center; margin-bottom: 48px; }
+  .welcome-actions .btn-primary {
+    background: var(--teal);
+    color: white;
+    padding: 14px 28px;
+    border-radius: var(--r-sm);
+    border: none;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+  }
+  .welcome-actions .btn-secondary {
+    background: var(--card);
+    color: var(--ink);
+    padding: 14px 28px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--line);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .welcome-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    text-align: left;
+  }
+  .feature-card {
+    background: var(--card);
+    padding: 20px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--line-soft);
+  }
+  .feature-card .fc-num {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    color: var(--teal);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .feature-card h4 {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .feature-card p { font-size: 12.5px; color: var(--ink-mute); line-height: 1.5; }
+
+  /* Equivalence comparison */
+  .equiv-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    margin-bottom: 16px;
+    font-size: 12.5px;
+  }
+  .equiv-table th, .equiv-table td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--line-soft);
+    vertical-align: top;
+  }
+  .equiv-table th {
+    background: var(--teal-soft);
+    color: var(--teal-deep);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .equiv-table td.match { background: var(--sage-soft); }
+  .equiv-table td.diff { background: var(--amber-soft); }
+  .equiv-table .verdict {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 8px;
+    text-transform: uppercase;
+  }
+  .equiv-table .verdict.match { background: var(--sage); color: white; }
+  .equiv-table .verdict.diff { background: var(--amber); color: white; }
+
+  /* Misc */
+  .hide { display: none !important; }
+  .footer-note {
+    margin-top: 32px;
+    padding: 16px 20px;
+    background: var(--paper-warm);
+    border-radius: var(--r-md);
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    line-height: 1.6;
+    border-left: 3px solid var(--gold);
+  }
+  .footer-note b { color: var(--ink); font-weight: 500; }
+
+  /* SVG icons */
+  .icon { width: 14px; height: 14px; stroke-width: 1.6; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-mute); }
+</style>
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">P</div>
+    CER-AI<small>PharBioMed · Clinical Evidence Automation</small>
+  </div>
+  <div class="topbar-stage" id="stagePills">
+    <div class="stage-pill done"><span class="num">1</span> Ingest</div>
+    <div class="stage-pill done"><span class="num">2</span> Classify</div>
+    <div class="stage-pill active"><span class="num">3</span> Generate</div>
+    <div class="stage-pill"><span class="num">4</span> Review &amp; Export</div>
+  </div>
+  <div class="topbar-right">
+    <div class="meta"><span class="dot"></span> MEDDEV 2.7/1 Rev 4 · EU MDR 2017/745</div>
+    <button class="topbar-btn" onclick="openModal('exportModal')">Export Draft CER</button>
+  </div>
+</header>
+
+<!-- ============ APP LAYOUT ============ -->
+<div class="app">
+
+  <!-- ===== LEFT: SECTION NAVIGATION ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Device Under Evaluation</div>
+    <div style="padding: 0 20px 14px; border-bottom: 1px solid var(--line-soft); margin-bottom: 8px;">
+      <div style="font-weight: 500; font-size: 13px;">Device X — Class IIb</div>
+      <div style="color: var(--ink-mute); font-size: 11px; margin-top: 2px;">Manufacturer GmbH · v3.2</div>
+      <div style="display: flex; gap: 6px; margin-top: 8px;">
+        <span class="pill draft"><span class="dot"></span> Draft v0.1</span>
+      </div>
+    </div>
+
+    <div class="sidebar-title">CER Sections (MEDDEV 2.7/1 Rev 4)</div>
+    <ul class="section-nav" id="sectionNav">
+      <li class="sec" data-sec="1"><span class="sec-num">1</span> Executive Summary <span class="status-dot draft"></span></li>
+      <li class="sec" data-sec="2"><span class="sec-num">2</span> General Information <span class="status-dot approved"></span></li>
+      <li class="sec active" data-sec="3"><span class="sec-num">3</span> Scope of Evaluation <span class="status-dot draft"></span></li>
+      <li class="sec" data-sec="3.4"><span class="sec-num">3.4</span> Device Description <span class="status-dot draft"></span></li>
+      <li class="sec" data-sec="4"><span class="sec-num">4</span> Clinical Background / State-of-the-Art <span class="status-dot draft"></span></li>
+      <li class="sec" data-sec="5"><span class="sec-num">5</span> Device Under Evaluation <span class="status-dot review"></span></li>
+      <li class="sec" data-sec="5.3"><span class="sec-num">5.3</span> Demonstration of Equivalence <span class="status-dot review"></span></li>
+      <li class="sec" data-sec="5.4"><span class="sec-num">5.4</span> Manufacturer Data <span class="status-dot draft"></span></li>
+      <li class="sec" data-sec="5.5"><span class="sec-num">5.5</span> Literature Data <span class="status-dot draft"></span></li>
+      <li class="sec" data-sec="5.6"><span class="sec-num">5.6</span> Summary &amp; Appraisal <span class="status-dot review"></span></li>
+      <li class="sec" data-sec="5.7"><span class="sec-num">5.7</span> Analysis of Clinical Data <span class="status-dot draft"></span></li>
+      <li class="sec" data-sec="6"><span class="sec-num">6</span> Outcome of Evaluation <span class="status-dot gap"></span></li>
+      <li class="sec" data-sec="7"><span class="sec-num">7</span> Conclusions <span class="status-dot pending"></span></li>
+      <li class="sec" data-sec="8"><span class="sec-num">8</span> References <span class="status-dot draft"></span></li>
+      <li class="sec" data-sec="9"><span class="sec-num">9</span> Appendices <span class="status-dot pending"></span></li>
+    </ul>
+
+    <div class="sidebar-title" style="margin-top: 16px;">Compliance Snapshot</div>
+    <div style="padding: 0 20px;">
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px;">
+        <span style="color: var(--ink-mute);">GSPRs mapped</span>
+        <b style="color: var(--sage);">14 / 14</b>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px;">
+        <span style="color: var(--ink-mute);">Claims substantiated</span>
+        <b style="color: var(--amber);">8 / 10</b>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px;">
+        <span style="color: var(--ink-mute);">Literature appraised</span>
+        <b>47 articles</b>
+      </div>
+      <div style="display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px;">
+        <span style="color: var(--ink-mute);">Evidence gaps</span>
+        <b style="color: var(--rust);">2</b>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN: CONTENT ===== -->
+  <main class="main" id="main">
+    <div class="main-inner" id="mainInner">
+      <!-- Content rendered by JS -->
+    </div>
+  </main>
+
+  <!-- ===== RIGHT: SOURCES / TRACE ===== -->
+  <aside class="right-panel">
+    <div class="right-tabs">
+      <div class="right-tab active" data-tab="sources">Sources</div>
+      <div class="right-tab" data-tab="trace">Trace</div>
+      <div class="right-tab" data-tab="settings">AI Config</div>
+    </div>
+    <div class="right-panel-body" id="rightPanelBody">
+      <!-- Rendered by JS -->
+    </div>
+  </aside>
+
+</div>
+
+<!-- ============ WELCOME MODAL (initial) ============ -->
+<div class="modal-backdrop show" id="welcomeModal">
+  <div class="modal" style="max-width: 900px;">
+    <div class="welcome">
+      <div class="welcome-inner">
+        <div class="eyebrow">CER-AI · MEDDEV 2.7/1 Rev 4 · EU MDR 2017/745</div>
+        <h1>Generate a <em>compliant</em><br>Clinical Evaluation Report.</h1>
+        <p>Upload your source documents — Risk Management File, IFU, Clinical Investigation Plan, PMCF Report, Design History, PSUR — and the engine drafts a full CER with literature integration, equivalence assessment, GSPR mapping, and benefit-risk analysis. Every section is traceable to its source.</p>
+        <div class="welcome-actions">
+          <button class="btn-primary" onclick="closeWelcome(true)">Try the Sample CER</button>
+          <button class="btn-secondary" onclick="openSetup()">Start a New CER</button>
+        </div>
+        <div class="welcome-features">
+          <div class="feature-card">
+            <div class="fc-num">01</div>
+            <h4>Multi-source ingestion</h4>
+            <p>Auto-classifies uploaded DOCX, PDF, XLSX from R&amp;D, QA, RA, PMS, and Risk Management into the right CER sections.</p>
+          </div>
+          <div class="feature-card">
+            <div class="fc-num">02</div>
+            <h4>Literature integration</h4>
+            <p>PubMed / Embase exports parsed, screened against PICO criteria, appraised by Oxford CEBM levels, and summarized.</p>
+          </div>
+          <div class="feature-card">
+            <div class="fc-num">03</div>
+            <h4>Auditable output</h4>
+            <p>Every paragraph cites its source. GSPR mapping, equivalence per MDCG 2020-5, benefit-risk per Annex I.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SETUP MODAL ============ -->
+<div class="modal-backdrop" id="setupModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-eyebrow">Step 1 of 4 · Device Profile</div>
+      <h2>Tell us about the device.</h2>
+      <p>Captures basic device identification — used to scope the literature search, retrieve relevant standards, and seed Section 3.4 of the CER.</p>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Device Trade Name</label>
+          <input type="text" placeholder="e.g., Device X" value="Device X">
+        </div>
+        <div class="form-field">
+          <label>Version / Model</label>
+          <input type="text" placeholder="e.g., v3.2 / Model 2024" value="v3.2">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Manufacturer (Legal)</label>
+          <input type="text" placeholder="e.g., Manufacturer GmbH" value="Manufacturer GmbH">
+        </div>
+        <div class="form-field">
+          <label>Device Class (MDR Rule)</label>
+          <select>
+            <option>Class I</option>
+            <option>Class IIa</option>
+            <option selected>Class IIb</option>
+            <option>Class III</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Therapeutic Area</label>
+          <select>
+            <option>Cardiovascular</option>
+            <option selected>Neurology / Neuromodulation</option>
+            <option>Orthopedics</option>
+            <option>Ophthalmology</option>
+            <option>Urology / Pelvic Health</option>
+            <option>Digital Health / SaMD</option>
+            <option>General Surgery</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>CER Type</label>
+          <select>
+            <option selected>Initial CER (Pre-CE Mark)</option>
+            <option>Update to existing CER</option>
+            <option>CER under MDR transition</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field" style="margin-top: 16px;">
+        <label>Intended Purpose (free text)</label>
+        <textarea rows="3" placeholder="Briefly describe the intended purpose of the device. The engine will refine and align this with MDR Article 2(12) requirements.">Device X is intended for short-term symptomatic relief in adult patients presenting with the indicated condition, used by trained clinicians in hospital and outpatient settings.</textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="modal-btn ghost" onclick="closeModal('setupModal')">Cancel</button>
+      <button class="modal-btn primary" onclick="closeModal('setupModal'); openModal('uploadModal');">Continue → Upload Sources</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ UPLOAD MODAL ============ -->
+<div class="modal-backdrop" id="uploadModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-eyebrow">Step 2 of 4 · Source Documents</div>
+      <h2>Upload everything you have.</h2>
+      <p>Drop in source files — the engine classifies each by document type and routes content to the matching CER section.</p>
+    </div>
+    <div class="modal-body">
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <div class="dropzone-icon">
+          <svg class="icon" style="width: 22px; height: 22px;" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        </div>
+        <h4>Drag &amp; drop, or click to browse</h4>
+        <p>DOCX, PDF, XLSX up to 50 MB each · Multiple files supported</p>
+        <input type="file" id="fileInput" style="display: none;" multiple accept=".docx,.pdf,.xlsx">
+        <div class="alt">— or — <span onclick="event.stopPropagation(); loadSampleSet()" style="cursor: pointer; text-decoration: underline;">load the demo dataset (10 sample files)</span></div>
+      </div>
+
+      <div id="uploadList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="modal-btn ghost" onclick="closeModal('uploadModal'); openModal('setupModal');">← Back</button>
+      <button class="modal-btn primary" onclick="closeModal('uploadModal'); runGeneration();">Run AI Generation →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EXPORT MODAL ============ -->
+<div class="modal-backdrop" id="exportModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-eyebrow">Step 4 of 4 · Export</div>
+      <h2>Export your draft CER.</h2>
+      <p>The output is a structured DOCX or PDF following your template — review with subject matter experts before submission to the Notified Body.</p>
+    </div>
+    <div class="modal-body">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+        <div style="padding: 18px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--card); cursor: pointer;">
+          <div style="font-family: var(--font-serif); font-size: 17px; margin-bottom: 4px;">DOCX</div>
+          <div style="font-size: 12px; color: var(--ink-mute); margin-bottom: 12px;">Editable Word document with track-changes ready for review.</div>
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--teal);">CER_DeviceX_v3.2_Draft_001.docx · 1.2 MB</div>
+        </div>
+        <div style="padding: 18px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--card); cursor: pointer;">
+          <div style="font-family: var(--font-serif); font-size: 17px; margin-bottom: 4px;">PDF</div>
+          <div style="font-size: 12px; color: var(--ink-mute); margin-bottom: 12px;">Locked PDF/A-1 suitable for archive and Notified Body submission.</div>
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--teal);">CER_DeviceX_v3.2_Draft_001.pdf · 1.8 MB</div>
+        </div>
+      </div>
+
+      <div style="background: var(--paper-warm); padding: 14px 16px; border-radius: var(--r-md); font-size: 12px; color: var(--ink-mute); margin-bottom: 12px;">
+        <b style="color: var(--ink); display: block; margin-bottom: 4px;">Bundle includes:</b>
+        Main CER (62 pages) · Appendix A — Evaluator CV &amp; DOI · Appendix B — Literature search log &amp; PRISMA · Appendix C — Equivalence assessment matrix (MDCG 2020-5) · Appendix D — GSPR conformity table · Appendix E — Source document register
+      </div>
+
+      <div style="background: #fef3d4; padding: 12px 16px; border-radius: var(--r-md); font-size: 11.5px; color: var(--gold); border-left: 3px solid var(--gold);">
+        <b>Reminder:</b> AI-generated draft. Sections flagged with the amber tag require clinical evaluator review and sign-off. Two evidence gaps detected — review Section 5.7 before final approval.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="modal-btn ghost" onclick="closeModal('exportModal');">Cancel</button>
+      <button class="modal-btn primary" onclick="downloadDemo();">Download Draft CER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ GENERATION MODAL ============ -->
+<div class="modal-backdrop" id="genModal">
+  <div class="modal" style="max-width: 640px;">
+    <div class="modal-head">
+      <div class="modal-eyebrow">Step 3 of 4 · AI Generation</div>
+      <h2>Drafting your CER<span class="dots"><span></span><span></span><span></span></span></h2>
+      <p>The engine is reading your source documents, mapping content to CER sections, integrating literature, and assembling the draft.</p>
+    </div>
+    <div class="modal-body">
+      <div class="progress-bar"><div class="fill" id="genFill" style="width: 0%;"></div></div>
+      <div id="genLog" class="gp-list" style="max-height: 280px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====================== STATE & DATA ======================
+
+const SAMPLE_DOCS = [
+  { name: 'Device_X_v3.2_Risk_Management_File.docx', type: 'Risk Mgmt', size: '2.4 MB', section: '5.4.1, 5.7' },
+  { name: 'Device_X_v3.2_IFU_EN_EU.pdf', type: 'IFU', size: '480 KB', section: '3.4.9–3.4.14' },
+  { name: 'Device_X_v3.2_Design_History_File.docx', type: 'DHF', size: '5.1 MB', section: '3.4.16, 5.4.1' },
+  { name: 'CIP_Clinical_Investigation_Plan_001.docx', type: 'CIP', size: '1.2 MB', section: '5.4.2.1' },
+  { name: 'CSR_Pivotal_Study_001_Final.pdf', type: 'CSR', size: '8.7 MB', section: '5.4.2.1, 5.6' },
+  { name: 'PMCF_Plan_v2_2024.docx', type: 'PMCF', size: '380 KB', section: '5.4.2.3, 6.5' },
+  { name: 'PMCF_Report_2024_Q3.pdf', type: 'PMCF', size: '1.8 MB', section: '5.4.2.3' },
+  { name: 'PSUR_2024_Periodic_Safety.pdf', type: 'PSUR', size: '2.1 MB', section: '5.4.2.4' },
+  { name: 'Literature_PubMed_Embase_Export.ris', type: 'Literature', size: '290 KB', section: '5.5' },
+  { name: 'PMS_Plan_v1_8_Vigilance.docx', type: 'PMS', size: '420 KB', section: '6.5' }
+];
+
+const REFERENCES = [
+  { id: 1, text: 'Author A, et al. Systematic review of [therapy area] efficacy. J. Clin. Med. 2023;42(3):412–428.' },
+  { id: 2, text: 'Author B, et al. Meta-analysis of [device class] safety outcomes. Lancet Med Devices. 2024;12(1):66–81.' },
+  { id: 3, text: 'Author C, et al. Long-term registry data of [therapy area] interventions. Eur J Med. 2024;58(4):201–215.' },
+  { id: 4, text: 'Author D, et al. Real-world evidence in MDR-era post-market surveillance. Regul Affairs Quart. 2024;9(2):88–102.' },
+  { id: 5, text: 'European Commission. MEDDEV 2.7/1 Rev 4 — Clinical Evaluation: A Guide for Manufacturers and Notified Bodies. 2016.' },
+  { id: 6, text: 'MDCG 2020-5. Guidance on Clinical Evaluation — Equivalence. European Commission, 2020.' },
+  { id: 7, text: 'Author E, et al. Post-market clinical follow-up: a systematic approach. J. Med. Device Reg. 2023;7(3):145–160.' }
+];
+
+// ====================== SECTION CONTENT (DEMO) ======================
+
+const SECTIONS = {
+  '1': {
+    title: 'Executive Summary',
+    num: '1',
+    status: 'draft',
+    sources: ['CSR_Pivotal_Study_001_Final.pdf', 'PMCF_Report_2024_Q3.pdf', 'PSUR_2024_Periodic_Safety.pdf'],
+    aiNotes: 'Auto-synthesised from CSR, PMCF Report, PSUR and Literature Search.',
+    body: `
+      <div class="gen-block ai">
+        <div class="tag">⚡ AI-drafted · evidence-synthesised</div>
+        <p>The medical device covered in this Clinical Evaluation Report is <b>Device X v3.2</b>, manufactured by <b>Manufacturer GmbH</b>. Device X is a Class IIb medical device intended for short-term symptomatic relief in adult patients presenting with the indicated condition, used by trained clinicians in hospital and outpatient settings.</p>
+        <p>This clinical evaluation was conducted in accordance with <b>EU MDR 2017/745 Article 61 and Annex XIV</b>, following the methodology described in <b>MEDDEV 2.7/1 Rev 4</b>. The evaluation is based on (i) clinical data generated by the manufacturer including one pivotal multi-centre clinical investigation (n=312) <a class="cite">[1]</a>, post-market clinical follow-up data covering 18 months (n=847 patients) <a class="cite">[2]</a>, periodic safety update reporting through Q3 2024, and (ii) systematic appraisal of 47 peer-reviewed publications retrieved from PubMed, Embase, and Cochrane Library.</p>
+        <p>The clinical evidence demonstrates that Device X achieves its intended performance with a favourable safety profile when used as labelled. <b>Primary endpoint success was 84.6%</b> (95% CI: 80.3–88.4%) in the pivotal study, with no device-related serious adverse events. Post-market data is consistent with pre-market findings (cumulative AE rate 3.2 per 1000 device-uses, all non-serious). The benefit-risk profile is positive and aligned with the state-of-the-art.</p>
+        <p><b>Two evidence gaps were identified</b>: (1) limited long-term (&gt;24 months) efficacy data in the elderly subgroup (≥75 years), and (2) absence of data in pregnant or lactating populations. Both gaps are addressed through Post-Market Clinical Follow-up (PMCF) commitments per Section 6.5.</p>
+        <div class="ai-controls">
+          <button class="ai-btn primary"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 6L9 17l-5-5"/></svg> Accept Draft</button>
+          <button class="ai-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Edit Inline</button>
+          <button class="ai-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Re-generate</button>
+          <button class="ai-btn warn">⚠ Flag for SME Review</button>
+        </div>
+      </div>
+    `
+  },
+
+  '2': {
+    title: 'General Information',
+    num: '2',
+    status: 'approved',
+    sources: ['Device_X_v3.2_IFU_EN_EU.pdf', 'Device_X_v3.2_Design_History_File.docx'],
+    body: `
+      <div class="gen-block source">
+        <div class="tag">2.1 · Document objective · auto-populated</div>
+        <p>The objective of this document is to perform and report the clinical evaluation of <b>Device X v3.2</b> as planned in the Clinical Evaluation Plan (CEP-DX-2024-v1.4), in accordance with the requirements of <b>EU MDR 2017/745</b> and following the methodology described in <b>MEDDEV 2.7/1 Rev 4</b>.</p>
+      </div>
+
+      <div class="gen-block source">
+        <div class="tag">2.2 · Referenced documents · auto-populated</div>
+        <table class="cer-table">
+          <thead><tr><th>Type</th><th>Name</th></tr></thead>
+          <tbody>
+            <tr><td>Law</td><td>Regulation (EU) 2017/745 — Medical Device Regulation (MDR), inclusive of EU 2020/561</td></tr>
+            <tr><td>Standard</td><td>ISO 13485:2016 + A11:2021 · ISO 14155:2020 · EN ISO 14971:2019 + A11:2021</td></tr>
+            <tr><td>Guidance</td><td>MEDDEV 2.7/1 Rev 4 · MDCG 2020-5 · MDCG 2020-6 · MDCG 2020-13</td></tr>
+            <tr><td>Internal</td><td>SOP-CLIN-07 Clinical Evaluation Process · WI-CLIN-01 Literature Review · CEP-DX-2024-v1.4</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 2.4 · Justification for choice of evaluator</div>
+        <p>The clinical evaluation has been performed by a multidisciplinary team comprising a board-certified clinician with ≥10 years of practice in the relevant therapeutic area, a regulatory affairs specialist, and a biostatistician. The lead evaluator's CV and Declaration of Interest are provided in <b>Appendix A</b>. The team meets the competence criteria described in MEDDEV 2.7/1 Rev 4 §6.4.</p>
+      </div>
+    `
+  },
+
+  '3': {
+    title: 'Scope of the Clinical Evaluation',
+    num: '3',
+    status: 'draft',
+    sources: ['Device_X_v3.2_IFU_EN_EU.pdf', 'Device_X_v3.2_Design_History_File.docx', 'CEP-DX-2024-v1.4'],
+    body: `
+      <div class="gen-block ai">
+        <div class="tag">⚡ 3.1 · Scope · AI-drafted</div>
+        <p>This CER represents an <b>initial CER</b> of the medical device <b>Device X v3.2</b>, manufactured by <b>Manufacturer GmbH</b>. The purpose of this clinical evaluation is to identify and critically evaluate pertinent clinical data — favourable and unfavourable — from clinical investigations, pre-clinical studies, published scientific and clinical literature, and post-market surveillance activities of Device X v3.2, in order to verify the safety and performance (including clinical benefits) and benefit-risk ratio when used as intended by the manufacturer.</p>
+        <p>This CER establishes conformity with the relevant General Safety and Performance Requirements (GSPRs) of <b>EU MDR Annex I</b>, listed in §3.2. The clinical evaluation methodology follows MEDDEV 2.7/1 Rev 4.</p>
+      </div>
+
+      <div class="gen-block source">
+        <div class="tag">3.2 · Applicable GSPRs · mapped from Annex I</div>
+        <table class="cer-table">
+          <thead><tr><th>GSPR</th><th>Requirement (abbreviated)</th><th>Section</th></tr></thead>
+          <tbody>
+            <tr><td><b>1</b></td><td>Devices shall achieve intended performance and be safe and effective.</td><td>§5.6, §6.1</td></tr>
+            <tr><td><b>2</b></td><td>Risks shall be reduced as far as possible without adverse impact on benefit-risk.</td><td>§5.7, §6.3</td></tr>
+            <tr><td><b>6</b></td><td>Performance shall not be adversely affected during normal use.</td><td>§5.4.1, §5.6.1</td></tr>
+            <tr><td><b>8</b></td><td>All risks and undesirable side-effects shall be minimised and acceptable.</td><td>§5.7.2, §5.7.4</td></tr>
+            <tr><td><b>23.4(c)</b></td><td>IFU shall specify expected clinical benefits.</td><td>§3.4.14</td></tr>
+            <tr><td><b>23.4(g)</b></td><td>IFU shall list residual risks, contraindications, and side-effects.</td><td>§3.4.10–3.4.13</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 3.3 · Clinical Evaluation Objectives</div>
+        <ul>
+          <li>Identify, analyse, and appraise relevant clinical data generated by the manufacturer or available in the scientific literature.</li>
+          <li>Verify safety and performance endpoints aligned with the intended purpose of Device X v3.2.</li>
+          <li>Demonstrate appropriateness and clinical relevance of safety and performance objectives.</li>
+          <li>Establish the benefit-risk profile and confirm that the ratio is positive (benefits outweigh clinical risks).</li>
+          <li>Specify acceptance criteria for benefit-risk acceptability.</li>
+        </ul>
+      </div>
+
+      <div class="footer-note">
+        <b>AI confidence: High.</b> All claims in this section are derived from CEP-DX-2024-v1.4 §2.1–2.3, IFU Section 1, and the Design History File. No human override required at this point.
+      </div>
+    `
+  },
+
+  '3.4': {
+    title: 'Medical Device Description',
+    num: '3.4',
+    status: 'draft',
+    sources: ['Device_X_v3.2_IFU_EN_EU.pdf', 'Device_X_v3.2_Design_History_File.docx'],
+    body: `
+      <div class="gen-block source">
+        <div class="tag">3.4.1 · Trade name &amp; description · auto-populated from IFU</div>
+        <p><b>Device X v3.2</b> is a Class IIb non-implantable medical device manufactured by Manufacturer GmbH. The device consists of [a] a primary functional unit, [b] disposable application accessories (sold separately as Device X-AC kit), and [c] a software companion module (Device X-Control v3.2.1) for therapy control. Variants and configurations are listed below.</p>
+        <table class="cer-table">
+          <thead><tr><th>Variant</th><th>Intended Patient</th><th>Indication</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Device X Standard</td><td>Adult, ≥18 years</td><td>Primary indication</td><td>Active</td></tr>
+            <tr><td>Device X Compact</td><td>Adult, outpatient setting</td><td>Primary indication</td><td>Active</td></tr>
+            <tr><td>Device X v2.1 (prior generation)</td><td>Adult, ≥18 years</td><td>Primary indication</td><td>Discontinued 2023</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 3.4.2 · Principle of Operation / Mode of Action</div>
+        <p>Device X v3.2 operates by [mechanism abstracted from DHF §3.1.2]. The therapeutic effect is mediated through [primary mechanism], with [secondary mechanism] contributing to clinical performance per the manufacturer's design intent. The Device X-Control software v3.2.1 enables clinician configuration of treatment parameters within validated safety bounds.</p>
+        <p>The principle of operation is not based on any medicinal substance, non-viable animal or human tissue, or blood components. The device does not incorporate substances classified as carcinogenic, mutagenic, or toxic to reproduction (CMR) above thresholds described in MDR Annex I §10.4.</p>
+      </div>
+
+      <div class="gen-block source">
+        <div class="tag">3.4.9 · Indications · from IFU §2.1</div>
+        <p>Device X v3.2 is indicated for [primary clinical indication], in adult patients (≥18 years) meeting the following criteria: [criterion A], [criterion B], and [criterion C]. The device is intended for use by trained healthcare professionals in hospital, clinic, or supervised outpatient settings.</p>
+      </div>
+
+      <div class="gen-block source">
+        <div class="tag">3.4.10 · Contraindications · from IFU §2.3</div>
+        <ul>
+          <li>Known hypersensitivity to any component material listed in IFU §8.</li>
+          <li>Active local infection at the application site.</li>
+          <li>Pregnancy or lactation (data not available — see §5.7.4).</li>
+          <li>Pediatric patients (&lt;18 years).</li>
+          <li>Patients with [specific contraindicated comorbidity].</li>
+        </ul>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 3.4.14 · Clinical benefits &amp; performance claims</div>
+        <table class="cer-table">
+          <thead><tr><th>Claim ID</th><th>Claim</th><th>Supporting Evidence</th></tr></thead>
+          <tbody>
+            <tr><td>C-01</td><td>Achieves primary endpoint in ≥80% of patients</td><td>Pivotal CSR §6.2 <a class="cite">[1]</a></td></tr>
+            <tr><td>C-02</td><td>No device-related SAEs in pivotal study</td><td>Pivotal CSR §7 + PSUR 2024</td></tr>
+            <tr><td>C-03</td><td>Mean time-to-clinical-response ≤ 14 days</td><td>CSR §6.3, supported by SLR <a class="cite">[1,3]</a></td></tr>
+            <tr><td>C-04</td><td>Sustained effect through 12 months</td><td>PMCF Report 2024 Q3 <a class="cite">[2]</a></td></tr>
+            <tr><td>C-05</td><td>Compatible with concomitant standard-of-care</td><td>CSR §5.6 + SLR <a class="cite">[3]</a></td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top: 10px;"><b>Note:</b> Two claims (C-06 long-term durability ≥24mo; C-07 use in elderly subgroup) are pending substantiation — flagged in §6.2 as identified gaps with PMCF commitments.</p>
+      </div>
+    `
+  },
+
+  '4': {
+    title: 'Clinical Background / State-of-the-Art',
+    num: '4',
+    status: 'draft',
+    sources: ['Literature_PubMed_Embase_Export.ris', 'CSR_Pivotal_Study_001_Final.pdf'],
+    body: `
+      <div class="gen-block ai">
+        <div class="tag">⚡ 4.1 · Clinical background · AI-synthesised from SLR</div>
+        <p>The clinical condition addressed by Device X falls within [therapeutic area], a domain affecting an estimated [prevalence] adults globally <a class="cite">[1]</a>. Current standard-of-care comprises a stepped-care algorithm starting with [first-line conservative], escalating to [second-line], and reserving [third-line interventional] for refractory cases <a class="cite">[1,3]</a>. Recent clinical practice guidelines from [society A] (2023) and [society B] (2024) recommend [position].</p>
+        <p>Unmet medical needs in this space include (i) variable response rates to first-line therapy (40–55%), (ii) limited durability of effect beyond 12 months, and (iii) safety concerns associated with prolonged use of second-line pharmacotherapy <a class="cite">[3]</a>. Device-based interventions such as Device X are positioned as alternatives that may address durability and pharmacological safety limitations.</p>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 4.2 · State-of-the-art · benchmarked against comparators</div>
+        <p>The state-of-the-art benchmark for [therapeutic area] devices, based on a systematic literature review (n=47 included studies, 2018–2024), comprises:</p>
+        <ul>
+          <li><b>Efficacy benchmark:</b> primary endpoint response rate of <b>72–85%</b> across published Class IIb device studies <a class="cite">[1,3]</a>.</li>
+          <li><b>Safety benchmark:</b> device-related serious adverse event rate &lt; 1% in pooled analyses <a class="cite">[2]</a>.</li>
+          <li><b>Durability benchmark:</b> sustained effect at 12 months reported in 60–75% of patients <a class="cite">[1,3]</a>.</li>
+        </ul>
+        <p>Device X v3.2 performance (response rate 84.6%, no device-related SAEs, 12-month sustained effect 71%) is <b>within or above state-of-the-art</b> across all three benchmarks.</p>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 4.3 · Benefit-Risk overview (state-of-the-art context)</div>
+        <p>The accepted benefit-risk profile of [therapeutic area] devices, against which Device X must be evaluated, accepts a residual risk of mild-to-moderate transient application-site reactions (typical rate 5–12%) in exchange for the clinical benefit of [primary outcome]. Serious risks are limited and managed through clinician training, patient selection criteria, and post-procedure monitoring. Device X mitigations align with this state-of-the-art expectation; see §5.7.</p>
+      </div>
+    `
+  },
+
+  '5': {
+    title: 'Device Under Evaluation',
+    num: '5',
+    status: 'review',
+    sources: ['CIP_Clinical_Investigation_Plan_001.docx', 'CSR_Pivotal_Study_001_Final.pdf', 'PMCF_Report_2024_Q3.pdf'],
+    body: `
+      <div class="gen-block source">
+        <div class="tag">5.1 · Type of evaluation</div>
+        <p>This clinical evaluation follows <b>Route C</b> per MEDDEV 2.7/1 Rev 4 §8 — clinical evaluation based on clinical investigation(s) of the device under evaluation, supplemented by literature data and post-market surveillance.</p>
+      </div>
+
+      <div class="gen-block source">
+        <div class="tag">5.2 · Data sources and types</div>
+        <table class="cer-table">
+          <thead><tr><th>Source</th><th>Type</th><th>Evidence Level (Oxford CEBM)</th><th>n</th></tr></thead>
+          <tbody>
+            <tr><td>Pivotal multi-centre RCT</td><td>Manufacturer-generated</td><td>Level 1b</td><td>312</td></tr>
+            <tr><td>PMCF longitudinal cohort</td><td>Manufacturer-generated</td><td>Level 2b</td><td>847</td></tr>
+            <tr><td>PSUR aggregate data</td><td>Manufacturer-generated</td><td>Level 4</td><td>3,420</td></tr>
+            <tr><td>Literature — SLRs &amp; meta-analyses</td><td>Published</td><td>Level 1a</td><td>5 articles</td></tr>
+            <tr><td>Literature — RCTs (comparator devices)</td><td>Published</td><td>Level 1b–2b</td><td>18 articles</td></tr>
+            <tr><td>Literature — observational</td><td>Published</td><td>Level 2c–4</td><td>24 articles</td></tr>
+          </tbody>
+        </table>
+      </div>
+    `
+  },
+
+  '5.3': {
+    title: 'Demonstration of Equivalence',
+    num: '5.3',
+    status: 'review',
+    sources: ['Device_X_v3.2_Design_History_File.docx', 'Equivalent_Device_Technical_File.pdf'],
+    body: `
+      <div class="gen-block ai">
+        <div class="tag">⚡ Equivalence per MDCG 2020-5</div>
+        <p>Equivalence is claimed between <b>Device X v3.2</b> (subject device) and <b>Equivalent Device E1</b> (a CE-marked Class IIb device with the same intended purpose) in support of selected literature data leveraged within this CER. The assessment is conducted per the three-pillar test of MDCG 2020-5: clinical, technical, and biological characteristics must <b>all</b> match for equivalence to be established.</p>
+      </div>
+
+      <div class="gen-block source">
+        <div class="tag">Equivalence assessment matrix</div>
+        <table class="equiv-table">
+          <thead>
+            <tr>
+              <th style="width: 26%;">Characteristic</th>
+              <th style="width: 30%;">Device X v3.2 (Subject)</th>
+              <th style="width: 30%;">Equivalent Device E1</th>
+              <th style="width: 14%;">Verdict</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="4" style="background: var(--paper-warm); font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; color: var(--ink-mute);">Clinical Characteristics</td></tr>
+            <tr><td>Intended purpose</td><td class="match">Symptomatic relief, primary indication</td><td class="match">Symptomatic relief, primary indication</td><td><span class="verdict match">Match</span></td></tr>
+            <tr><td>Patient population</td><td class="match">Adult ≥18 yrs</td><td class="match">Adult ≥18 yrs</td><td><span class="verdict match">Match</span></td></tr>
+            <tr><td>Anatomy / physiology</td><td class="match">Application site identical</td><td class="match">Application site identical</td><td><span class="verdict match">Match</span></td></tr>
+            <tr><td>Severity / disease stage</td><td class="match">Mild-to-moderate</td><td class="match">Mild-to-moderate</td><td><span class="verdict match">Match</span></td></tr>
+            <tr><td colspan="4" style="background: var(--paper-warm); font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; color: var(--ink-mute);">Technical Characteristics</td></tr>
+            <tr><td>Design principle</td><td class="match">Same mechanism class</td><td class="match">Same mechanism class</td><td><span class="verdict match">Match</span></td></tr>
+            <tr><td>Specifications</td><td class="match">Within ±5% across measured parameters</td><td class="match">Reference</td><td><span class="verdict match">Match</span></td></tr>
+            <tr><td>Method of use</td><td class="diff">Software-assisted parameter setting</td><td class="diff">Manual parameter setting</td><td><span class="verdict diff">Justified*</span></td></tr>
+            <tr><td>Conditions of use</td><td class="match">Hospital + outpatient</td><td class="match">Hospital + outpatient</td><td><span class="verdict match">Match</span></td></tr>
+            <tr><td colspan="4" style="background: var(--paper-warm); font-weight: 500; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; color: var(--ink-mute);">Biological Characteristics</td></tr>
+            <tr><td>Contact materials</td><td class="match">Medical-grade silicone + Ti-6Al-4V (ISO 10993-compliant)</td><td class="match">Medical-grade silicone + Ti-6Al-4V</td><td><span class="verdict match">Match</span></td></tr>
+            <tr><td>Duration of contact</td><td class="match">Short-term (&lt; 30 days)</td><td class="match">Short-term (&lt; 30 days)</td><td><span class="verdict match">Match</span></td></tr>
+            <tr><td>Body site contact</td><td class="match">External, intact skin</td><td class="match">External, intact skin</td><td><span class="verdict match">Match</span></td></tr>
+          </tbody>
+        </table>
+        <p style="font-size: 11.5px; color: var(--ink-mute); margin-top: 8px;"><b>*</b> Software-assisted parameter setting is a non-clinically-relevant difference: parameter ranges are bounded identically; software validation per IEC 62304 is documented in DHF §6.3. Justification accepted per MDCG 2020-5 §A.4.</p>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ Equivalence discussion</div>
+        <p>Based on the matrix above, <b>equivalence is established</b> between Device X v3.2 and Equivalent Device E1 across all three pillars (clinical, technical, biological) per MDCG 2020-5. The single technical difference (software-assisted vs. manual parameter setting) does not represent a clinically meaningful divergence and is fully justified. Manufacturer GmbH confirms it has <b>sufficient access to the technical documentation</b> of Equivalent Device E1 through a contractual agreement (Appendix B), satisfying MDR Article 61(5) requirements.</p>
+      </div>
+    `
+  },
+
+  '5.4': {
+    title: 'Manufacturer Data',
+    num: '5.4',
+    status: 'draft',
+    sources: ['CSR_Pivotal_Study_001_Final.pdf', 'PMCF_Report_2024_Q3.pdf', 'PSUR_2024_Periodic_Safety.pdf', 'Device_X_v3.2_Risk_Management_File.docx'],
+    body: `
+      <div class="gen-block source">
+        <div class="tag">5.4.1.1 · Verification &amp; validation summary</div>
+        <p>Pre-clinical verification and validation testing was conducted per ISO 10993 series (biocompatibility), IEC 60601-1 (general electrical safety), IEC 60601-1-2 (EMC), and IEC 62366-1 (usability engineering). All acceptance criteria were met. Full test reports are listed in DHF Annex VV.</p>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 5.4.2.1 · Pivotal Clinical Investigation</div>
+        <p>The pivotal multi-centre randomised controlled trial (Study DX-001, n=312, conducted across 14 European sites, 2021–2023) compared Device X v3.2 against the standard-of-care comparator. Key design parameters:</p>
+        <ul>
+          <li><b>Design:</b> Prospective, multi-centre, randomised 1:1, single-blind, controlled</li>
+          <li><b>Primary endpoint:</b> Treatment response at 12 weeks (≥50% improvement on validated scale)</li>
+          <li><b>Sample size:</b> 312 randomised (156 Device X v3.2; 156 comparator)</li>
+          <li><b>Compliance with ISO 14155:2020 and ICH-GCP:</b> Documented, independent DSMB-monitored</li>
+        </ul>
+        <p><b>Results:</b> Primary endpoint achieved in <b>84.6% (132/156)</b> of Device X arm vs. 67.3% (105/156) of comparator arm (Δ +17.3%, p&lt;0.001, 95% CI 7.2–27.4%). No device-related serious adverse events. Five non-serious device-related events (3.2%), all transient and resolved without sequelae.</p>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 5.4.2.3 · Post-Market Clinical Follow-up</div>
+        <p>PMCF Plan v2 (2024) defines longitudinal data capture through a multi-centre registry (n=847 patients enrolled, 18-month median follow-up as of 2024 Q3). Key PMCF outcomes to date:</p>
+        <table class="cer-table">
+          <thead><tr><th>Metric</th><th>Value (95% CI)</th><th>Benchmark</th><th>Verdict</th></tr></thead>
+          <tbody>
+            <tr><td>Sustained response at 12 months</td><td>71% (67.4–74.4%)</td><td>60–75% SoTA</td><td>Within range</td></tr>
+            <tr><td>Cumulative device-related AE rate</td><td>3.2 / 1,000 device-uses</td><td>&lt; 5 / 1,000 (target)</td><td>Met</td></tr>
+            <tr><td>Device-related SAE rate</td><td>0.0%</td><td>&lt; 1.0% (SoTA)</td><td>Met</td></tr>
+            <tr><td>Patient satisfaction (EQ-5D)</td><td>0.78 (0.74–0.82)</td><td>n/a</td><td>Reported</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gen-block source">
+        <div class="tag">5.4.2.4 · Post-Market Surveillance (PSUR 2024)</div>
+        <p>PSUR period 2024 (Q1–Q3) covers an estimated 3,420 patient-exposures across the EU market. Complaint rate: 2.1 per 1,000 device-uses. No Field Safety Corrective Actions (FSCAs) initiated in the reporting period. Regulatory database search (EUDAMED, FDA MAUDE, BfArM) returned no incidents requiring escalation.</p>
+      </div>
+    `
+  },
+
+  '5.5': {
+    title: 'Clinical Data from Literature',
+    num: '5.5',
+    status: 'draft',
+    sources: ['Literature_PubMed_Embase_Export.ris'],
+    body: `
+      <div class="gen-block source">
+        <div class="tag">5.5.2 · Literature search methodology</div>
+        <p>A systematic literature search was conducted in accordance with the methodology described in the Clinical Evaluation Plan and per MEDDEV 2.7/1 Rev 4 §9.3. Databases searched: <b>PubMed/MEDLINE, Embase, Cochrane Library, ClinicalTrials.gov</b>. Search date range: <b>1 Jan 2018 – 30 Sep 2024</b>. Full search strings, syntax, and date stamps are archived in Appendix B.</p>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 5.5.5 · Literature search results · PRISMA flow</div>
+        <div class="compliance-grid">
+          <div class="compliance-card">
+            <div class="cc-label">Records identified</div>
+            <div class="cc-val">412</div>
+            <div class="cc-sub">After de-duplication</div>
+          </div>
+          <div class="compliance-card warn">
+            <div class="cc-label">Excluded · title/abstract</div>
+            <div class="cc-val">298</div>
+            <div class="cc-sub">Off-topic / non-clinical</div>
+          </div>
+          <div class="compliance-card warn">
+            <div class="cc-label">Excluded · full-text</div>
+            <div class="cc-val">67</div>
+            <div class="cc-sub">PICO mismatch</div>
+          </div>
+          <div class="compliance-card good">
+            <div class="cc-label">Included</div>
+            <div class="cc-val">47</div>
+            <div class="cc-sub">5 SLR · 18 RCT · 24 obs</div>
+          </div>
+        </div>
+        <p>Included articles were appraised against the <b>Oxford CEBM Levels of Evidence</b> and a study-quality checklist adapted from MEDDEV 2.7/1 Rev 4 Appendix A6. Weighting reflects evidence level and methodological quality. Appraised data is summarised in §5.6 and synthesised against state-of-the-art in §4.2.</p>
+      </div>
+    `
+  },
+
+  '5.6': {
+    title: 'Summary &amp; Appraisal of Clinical Data',
+    num: '5.6',
+    status: 'review',
+    sources: ['CSR_Pivotal_Study_001_Final.pdf', 'PMCF_Report_2024_Q3.pdf', 'Literature_PubMed_Embase_Export.ris'],
+    body: `
+      <div class="gen-block ai">
+        <div class="tag">⚡ 5.6.1 · Performance summary</div>
+        <p>Across the integrated body of evidence — manufacturer pivotal RCT (n=312), PMCF cohort (n=847), and 47 appraised literature publications — Device X v3.2 consistently meets or exceeds the performance acceptance criteria pre-specified in the Clinical Evaluation Plan. Primary endpoint achievement (84.6% in pivotal RCT; 71% sustained at 12 months in PMCF) sits at the upper end of state-of-the-art benchmarks (72–85% reported across comparator devices) <a class="cite">[1,3]</a>.</p>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 5.6.2 · Safety summary</div>
+        <p>Safety profile is favourable. Across pivotal, PMCF, and PSUR data covering ~4,580 cumulative patient-exposures: <b>zero device-related serious adverse events</b>; <b>3.2 device-related non-serious events per 1,000 device-uses</b> — all transient, resolved without sequelae, and below the pre-specified 5/1,000 threshold. Safety findings are consistent with published literature on equivalent devices <a class="cite">[2]</a>.</p>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 5.6.3 · Clinical benefits</div>
+        <p>Demonstrated clinical benefits of Device X v3.2 include:</p>
+        <ul>
+          <li><b>Symptomatic improvement:</b> ≥50% improvement on validated outcome scale achieved in 84.6% of patients (RCT) and sustained in 71% at 12 months (PMCF).</li>
+          <li><b>Functional restoration:</b> Mean improvement in patient-reported functional status (EQ-5D index +0.18 from baseline, p&lt;0.001).</li>
+          <li><b>Reduced reliance on second-line pharmacotherapy:</b> 42% reduction in concomitant medication use at 6 months vs. comparator (post-hoc analysis, CSR Appendix C).</li>
+          <li><b>Acceptable user/patient experience:</b> Patient satisfaction score 0.78 (0.74–0.82).</li>
+        </ul>
+      </div>
+    `
+  },
+
+  '5.7': {
+    title: 'Analysis of Clinical Data',
+    num: '5.7',
+    status: 'draft',
+    sources: ['Device_X_v3.2_Risk_Management_File.docx', 'CSR_Pivotal_Study_001_Final.pdf'],
+    body: `
+      <div class="gen-block ai">
+        <div class="tag">⚡ 5.7.1 · Requirement on safety</div>
+        <p>The clinical data demonstrate that, when used per the IFU, Device X v3.2 does not compromise the clinical condition or safety of patients, users, or third parties. All identified hazards are addressed via the Risk Management File (per ISO 14971:2019) with risk controls implemented in design, labelling, and user training. Residual risks are quantified, communicated in the IFU, and judged acceptable when weighed against clinical benefit. <b>GSPR 1, 2, 6, 8 met.</b></p>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 5.7.2 · Acceptable benefit-risk profile</div>
+        <p>Benefit-risk analysis was performed in accordance with MEDDEV 2.7/1 Rev 4 §10 and EU MDR Annex I §1, 2, 8. The principal clinical benefit (symptomatic improvement and functional restoration in 84.6% of treated patients, sustained in 71% at 12 months) is judged to <b>substantially outweigh</b> the residual risks (transient non-serious application-site reactions in 3.2/1,000 device-uses; no device-related SAEs).</p>
+        <p>The overall benefit-risk profile is <b>positive</b> and aligns with state-of-the-art for [therapeutic area] devices.</p>
+      </div>
+
+      <div class="gen-block gap-block">
+        <div class="tag">⚠ Identified evidence gap · 5.7.3</div>
+        <p><b>Gap G-01:</b> Long-term durability beyond 24 months is not yet supported by manufacturer-generated data. PMCF Report 2024 Q3 covers a median 18-month follow-up. Literature reports beyond 24 months are limited to two observational studies of modest sample size <a class="cite">[3]</a>.</p>
+        <p><b>Mitigation:</b> PMCF protocol extended to 36-month minimum follow-up per PMCF Plan v2 §3.2. Re-evaluation of long-term performance at next CER update (planned 2025 Q4).</p>
+      </div>
+
+      <div class="gen-block gap-block">
+        <div class="tag">⚠ Identified evidence gap · 5.7.4</div>
+        <p><b>Gap G-02:</b> No clinical data are available in the pregnant/lactating population or in patients &lt; 18 years. These populations are <b>contraindicated</b> in the current IFU (§3.4.10).</p>
+        <p><b>Mitigation:</b> Contraindication retained. No PMCF activity required for excluded populations. Re-assessment only if labelling expansion is proposed.</p>
+      </div>
+    `
+  },
+
+  '6': {
+    title: 'Outcome of the Clinical Evaluation',
+    num: '6',
+    status: 'gap',
+    sources: ['All sections'],
+    body: `
+      <div class="gen-block ai">
+        <div class="tag">⚡ 6.1 · Substantiation of claims · matrix</div>
+        <table class="cer-table">
+          <thead><tr><th>Claim</th><th>Evidence</th><th>Strength</th><th>Substantiated?</th></tr></thead>
+          <tbody>
+            <tr><td>C-01 ≥80% primary endpoint achievement</td><td>RCT + PMCF + SLR</td><td>Strong (L1b + L1a)</td><td><span class="pill approved"><span class="dot"></span> Yes</span></td></tr>
+            <tr><td>C-02 No device-related SAEs</td><td>RCT + PMCF + PSUR</td><td>Strong</td><td><span class="pill approved"><span class="dot"></span> Yes</span></td></tr>
+            <tr><td>C-03 Mean time-to-response ≤ 14 days</td><td>RCT + SLR</td><td>Moderate</td><td><span class="pill approved"><span class="dot"></span> Yes</span></td></tr>
+            <tr><td>C-04 Sustained effect through 12 months</td><td>PMCF + SLR</td><td>Moderate</td><td><span class="pill approved"><span class="dot"></span> Yes</span></td></tr>
+            <tr><td>C-05 Compatible with concomitant SoC</td><td>RCT + SLR</td><td>Moderate</td><td><span class="pill approved"><span class="dot"></span> Yes</span></td></tr>
+            <tr><td>C-06 Durability ≥ 24 months</td><td>Limited literature</td><td>Weak</td><td><span class="pill gap"><span class="dot"></span> Gap (PMCF)</span></td></tr>
+            <tr><td>C-07 Use in elderly (≥75 yrs)</td><td>Subgroup analysis underpowered</td><td>Weak</td><td><span class="pill gap"><span class="dot"></span> Gap (PMCF)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 6.2 · Discussion of identified gaps</div>
+        <p>Two of seven labelled claims (C-06 long-term durability and C-07 elderly subgroup performance) are <b>not fully substantiated</b> by the current evidence base. Both gaps are addressed through dedicated PMCF activities per §6.5; corresponding claims have been softened in the IFU pending future evidence (see DHF Change Record CR-2024-0312).</p>
+      </div>
+
+      <div class="gen-block ai">
+        <div class="tag">⚡ 6.5 · PMS &amp; PMCF activities</div>
+        <p>The manufacturer's Post-Market Surveillance Plan (PMS-DX-v1.8) and Post-Market Clinical Follow-up Plan (PMCF-DX-v2.0) define the on-going evidence generation program. Key activities:</p>
+        <ul>
+          <li>Continuous EUDAMED, FDA MAUDE, and national vigilance database monitoring (monthly cycle).</li>
+          <li>Annual PSUR per MDR Article 86 (Class IIb).</li>
+          <li>PMCF registry continuation to 36-month minimum follow-up, n=1,200 target by 2026 Q2 — addresses Gap G-01.</li>
+          <li>PMCF sub-study in elderly cohort (n=150, age ≥75) initiated 2024 Q4 — addresses Gap G-02.</li>
+          <li>CER update planned 2025 Q4.</li>
+        </ul>
+      </div>
+    `
+  },
+
+  '7': {
+    title: 'Conclusions',
+    num: '7',
+    status: 'pending',
+    sources: ['All sections — synthesis'],
+    body: `
+      <div class="gen-block ai">
+        <div class="tag">⚡ Final conclusion · AI-synthesised across all sections</div>
+        <p>Based on the totality of clinical evidence — pivotal RCT (n=312), 18-month PMCF cohort (n=847), PSUR data covering ~3,420 patient-exposures, and 47 appraised peer-reviewed publications — the following conclusions are reached for <b>Device X v3.2</b>:</p>
+        <ol>
+          <li><b>Conformity with relevant GSPRs of EU MDR Annex I is established</b> (GSPR 1, 2, 6, 8, 23.4(c), 23.4(g)).</li>
+          <li><b>Clinical safety:</b> Device X v3.2 does not compromise patient or user safety when used per the IFU. Residual risks are quantified, communicated, and acceptable.</li>
+          <li><b>Clinical performance:</b> Device X v3.2 achieves its intended performance with primary endpoint response in 84.6% of treated patients (RCT) and sustained effect in 71% at 12 months (PMCF) — at or above state-of-the-art.</li>
+          <li><b>Benefit-risk profile is positive.</b> Clinical benefits substantially outweigh residual risks.</li>
+          <li><b>Two identified evidence gaps</b> (long-term durability beyond 24 months; elderly subgroup) are addressed through committed PMCF activities. Corresponding labelling claims have been moderated pending further evidence.</li>
+          <li><b>CER update frequency:</b> Annual (per MDR Article 61 and the manufacturer's Risk Class IIb monitoring cycle).</li>
+        </ol>
+        <p style="margin-top: 14px; padding: 12px; background: var(--sage-soft); border-radius: var(--r-md); border-left: 3px solid var(--sage);"><b>Overall conclusion:</b> The clinical evidence supports the conclusion that <b>Device X v3.2 is safe, performs as intended, and presents a positive benefit-risk profile</b> when used in accordance with the Instructions for Use, in the labelled patient population, by trained healthcare professionals.</p>
+      </div>
+    `
+  },
+
+  '8': {
+    title: 'References',
+    num: '8',
+    status: 'draft',
+    sources: ['Literature export · auto-formatted'],
+    body: `
+      <div class="gen-block source">
+        <div class="tag">8 · References · Vancouver style · auto-formatted</div>
+        <ol style="font-size: 12.5px; line-height: 1.7;">
+          ${REFERENCES.map(r => `<li>${r.text}</li>`).join('')}
+        </ol>
+        <p style="margin-top: 12px; font-size: 11px; color: var(--ink-mute);">Reference list synchronised with EndNote library (CER_DeviceX_v3.2.enl). All in-text citations cross-validated.</p>
+      </div>
+    `
+  },
+
+  '9': {
+    title: 'Appendices',
+    num: '9',
+    status: 'pending',
+    sources: [],
+    body: `
+      <div class="gen-block source">
+        <div class="tag">Appendix register</div>
+        <table class="cer-table">
+          <thead><tr><th>ID</th><th>Title</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>Appendix A</td><td>Clinical Evaluator CV &amp; Declaration of Interest</td><td><span class="pill approved"><span class="dot"></span> Attached</span></td></tr>
+            <tr><td>Appendix B</td><td>Literature Search Log &amp; PRISMA Flow Diagram</td><td><span class="pill approved"><span class="dot"></span> Attached</span></td></tr>
+            <tr><td>Appendix C</td><td>Equivalence Assessment Matrix (MDCG 2020-5)</td><td><span class="pill approved"><span class="dot"></span> Attached</span></td></tr>
+            <tr><td>Appendix D</td><td>GSPR Conformity Table (full)</td><td><span class="pill review"><span class="dot"></span> Draft</span></td></tr>
+            <tr><td>Appendix E</td><td>Source Document Register &amp; Version Log</td><td><span class="pill review"><span class="dot"></span> Draft</span></td></tr>
+            <tr><td>Appendix F</td><td>Risk-Benefit Determination Worksheet</td><td><span class="pill pending"><span class="dot"></span> Pending</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    `
+  }
+};
+
+const RIGHT_PANEL = {
+  sources: () => `
+    <div class="label">Source documents for this section</div>
+    ${(SECTIONS[currentSec]?.sources || []).map(s => `
+      <div class="source-item">
+        <div class="src-name">
+          <span class="src-type">DOC</span>
+          <b>${s.length > 38 ? s.slice(0, 36) + '…' : s}</b>
+        </div>
+        <div class="src-meta">Linked to current section · traceability preserved</div>
+      </div>
+    `).join('') || '<div style="font-size: 12px; color: var(--ink-mute);">No source-mapped documents for this section.</div>'}
+
+    <h3 style="margin-top: 24px;">All Project Sources</h3>
+    <div class="label">${SAMPLE_DOCS.length} files ingested</div>
+    ${SAMPLE_DOCS.map(d => `
+      <div class="source-item">
+        <div class="src-name">
+          <span class="src-type">${d.type}</span>
+          <b>${d.name.length > 30 ? d.name.slice(0, 28) + '…' : d.name}</b>
+        </div>
+        <div class="src-meta">${d.size} · → Sections ${d.section}</div>
+      </div>
+    `).join('')}
+  `,
+  trace: () => `
+    <h3>Section Trace</h3>
+    <div class="label">How this section was generated</div>
+    <div style="background: var(--paper-warm); padding: 12px; border-radius: var(--r-md); font-size: 12px; line-height: 1.65; margin-bottom: 16px;">
+      <div style="margin-bottom: 8px;"><b style="color: var(--teal);">Model:</b> Fine-tuned Llama-3.1-70B<br>(CER-domain-tuned, MEDDEV 2.7/1 corpus)</div>
+      <div style="margin-bottom: 8px;"><b style="color: var(--teal);">Temperature:</b> 0.2 (low — regulatory output)</div>
+      <div style="margin-bottom: 8px;"><b style="color: var(--teal);">Context window:</b> Source-grounded RAG (no external knowledge)</div>
+      <div><b style="color: var(--teal);">Generation time:</b> 4.2 s</div>
+    </div>
+    <div class="label">Source mapping</div>
+    <div style="font-size: 12px; line-height: 1.6; color: var(--ink-soft);">
+      <p style="margin-bottom: 8px;">Every paragraph in this section is grounded in identified source content. Sentences without ≥0.85 retrieval confidence are flagged for SME review.</p>
+      <p style="margin-bottom: 8px;"><b>Retrieval confidence: 92.4%</b></p>
+      <p><b>Human review flags:</b> 0</p>
+    </div>
+    <div style="margin-top: 20px;" class="label">Audit log</div>
+    <div style="font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-mute); line-height: 1.7;">
+      <div>14:23:11 · ingest · 10 documents</div>
+      <div>14:23:18 · classify · types assigned</div>
+      <div>14:23:42 · literature_search · 47 hits</div>
+      <div>14:24:05 · gsp_map · 14/14 mapped</div>
+      <div>14:24:31 · equivalence · matrix built</div>
+      <div>14:24:58 · section_gen · 15 sections</div>
+      <div>14:25:12 · review_flags · 2 evidence gaps</div>
+      <div>14:25:13 · audit_log · finalised</div>
+    </div>
+  `,
+  settings: () => `
+    <h3>AI Configuration</h3>
+    <div style="margin-bottom: 16px;">
+      <div class="label">Generation mode</div>
+      <div class="toggle-group" style="width: 100%; display: flex;">
+        <button class="active" style="flex: 1;">Strict (RAG-only)</button>
+        <button style="flex: 1;">Balanced</button>
+        <button style="flex: 1;">Creative</button>
+      </div>
+      <div style="font-size: 11px; color: var(--ink-mute); margin-top: 6px; line-height: 1.5;">Strict mode generates only from source documents — recommended for regulatory output. No external model knowledge.</div>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <div class="label">Citation strictness</div>
+      <div class="toggle-group" style="width: 100%; display: flex;">
+        <button style="flex: 1;">Loose</button>
+        <button class="active" style="flex: 1;">Strict</button>
+      </div>
+      <div style="font-size: 11px; color: var(--ink-mute); margin-top: 6px; line-height: 1.5;">Strict mode requires every claim to cite an internal document or literature reference.</div>
+    </div>
+    <div style="margin-bottom: 16px;">
+      <div class="label">Standards applied</div>
+      <div style="font-size: 12px; line-height: 1.7;">
+        <div>☑ EU MDR 2017/745</div>
+        <div>☑ MEDDEV 2.7/1 Rev 4</div>
+        <div>☑ MDCG 2020-5 (Equivalence)</div>
+        <div>☑ MDCG 2020-6 (Evidence)</div>
+        <div>☑ MDCG 2020-13 (Assessment)</div>
+        <div>☑ ISO 14155:2020</div>
+        <div>☑ ISO 14971:2019 + A11:2021</div>
+        <div>☐ ISO 13485:2016 (QMS — separate audit)</div>
+      </div>
+    </div>
+    <div>
+      <div class="label">Output language</div>
+      <div class="toggle-group" style="width: 100%; display: flex;">
+        <button class="active" style="flex: 1;">English (EU)</button>
+        <button style="flex: 1;">German</button>
+        <button style="flex: 1;">French</button>
+      </div>
+    </div>
+  `
+};
+
+// ====================== INTERACTION ======================
+
+let currentSec = '3';
+let currentTab = 'sources';
+
+function renderSection(sec) {
+  currentSec = sec;
+  const S = SECTIONS[sec];
+  if (!S) return;
+  const main = document.getElementById('mainInner');
+  const pillCls = S.status === 'approved' ? 'approved' :
+                  S.status === 'gap' ? 'gap' :
+                  S.status === 'review' ? 'review' :
+                  S.status === 'pending' ? 'pending' : 'draft';
+  const pillLabel = S.status === 'approved' ? 'Approved' :
+                    S.status === 'gap' ? 'Has Gaps' :
+                    S.status === 'review' ? 'Needs Review' :
+                    S.status === 'pending' ? 'Pending' : 'AI Draft';
+  main.innerHTML = `
+    <div class="breadcrumb">Device X v3.2 <span class="sep">›</span> CER Draft v0.1 <span class="sep">›</span> Section ${S.num}</div>
+    <h1 class="section-title"><span class="num-prefix">${S.num}</span>${S.title.replace(/&amp;/g, '&')}</h1>
+    <div class="section-meta">
+      <div class="item"><b>Status:</b> <span class="pill ${pillCls}"><span class="dot"></span> ${pillLabel}</span></div>
+      <div class="item"><b>Sources:</b> ${S.sources.length} document${S.sources.length === 1 ? '' : 's'}</div>
+      <div class="item"><b>Last updated:</b> just now</div>
+      <div class="item"><b>Standard:</b> MEDDEV 2.7/1 Rev 4 §${S.num}</div>
+    </div>
+    ${S.body}
+  `;
+  document.querySelectorAll('.section-nav li.sec').forEach(li => {
+    li.classList.toggle('active', li.dataset.sec === sec);
+  });
+  renderRightPanel();
+}
+
+function renderRightPanel() {
+  document.getElementById('rightPanelBody').innerHTML = RIGHT_PANEL[currentTab]();
+}
+
+document.querySelectorAll('.section-nav li.sec').forEach(li => {
+  li.addEventListener('click', () => renderSection(li.dataset.sec));
+});
+
+document.querySelectorAll('.right-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.right-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentTab = tab.dataset.tab;
+    renderRightPanel();
+  });
+});
+
+// ===== Modal management =====
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function closeWelcome(loadSample) {
+  closeModal('welcomeModal');
+  if (loadSample) loadSampleSet();
+  renderSection('3');
+}
+function openSetup() {
+  closeModal('welcomeModal');
+  openModal('setupModal');
+}
+
+// ===== Upload flow =====
+function loadSampleSet() {
+  const list = document.getElementById('uploadList');
+  list.innerHTML = `
+    <div class="label" style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-mute); margin: 14px 0 8px; font-weight: 500;">Ingested · auto-classified</div>
+    <div class="doc-list">
+      ${SAMPLE_DOCS.map(d => `
+        <div class="doc-row">
+          <div class="doc-name">
+            <div class="doc-icon">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div>
+              <b>${d.name}</b><br><small>${d.size} · routed to §${d.section}</small>
+            </div>
+          </div>
+          <span class="doc-cls">${d.type}</span>
+          <span class="pill approved"><span class="dot"></span> Classified</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+// File upload handler
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  if (e.target.files.length > 0) loadSampleSet();
+});
+
+// ===== Generation simulation =====
+function runGeneration() {
+  openModal('genModal');
+  const log = document.getElementById('genLog');
+  const fill = document.getElementById('genFill');
+  const steps = [
+    { label: 'Section 1 — Executive Summary', dur: 600 },
+    { label: 'Section 2 — General Information', dur: 400 },
+    { label: 'Section 3 — Scope of Evaluation', dur: 500 },
+    { label: 'Section 3.4 — Device Description', dur: 700 },
+    { label: 'Section 4 — Clinical Background / SoTA', dur: 900 },
+    { label: 'Section 5.3 — Equivalence (MDCG 2020-5)', dur: 800 },
+    { label: 'Section 5.4 — Manufacturer Data', dur: 700 },
+    { label: 'Section 5.5 — Literature Integration (n=47)', dur: 1100 },
+    { label: 'Section 5.6 — Summary & Appraisal', dur: 600 },
+    { label: 'Section 5.7 — Analysis · Benefit-Risk', dur: 700 },
+    { label: 'Section 6 — Outcome · Gap Detection', dur: 500 },
+    { label: 'Section 7 — Conclusions', dur: 600 },
+    { label: 'Section 8 — References (Vancouver)', dur: 300 },
+    { label: 'GSPR conformity table', dur: 400 },
+    { label: 'Audit trail · finalising', dur: 300 }
+  ];
+  log.innerHTML = steps.map((s, i) => `
+    <div class="gp-row" id="step-${i}"><span class="gp-sec">${s.label}</span><span class="gp-state">queued</span></div>
+  `).join('');
+  let i = 0;
+  const total = steps.length;
+  function next() {
+    if (i >= total) {
+      setTimeout(() => {
+        closeModal('genModal');
+        renderSection('3');
+      }, 500);
+      return;
+    }
+    const row = document.getElementById(`step-${i}`);
+    row.querySelector('.gp-state').textContent = 'generating…';
+    row.querySelector('.gp-state').className = 'gp-state working';
+    setTimeout(() => {
+      row.querySelector('.gp-state').textContent = 'done';
+      row.querySelector('.gp-state').className = 'gp-state done';
+      fill.style.width = `${((i + 1) / total) * 100}%`;
+      i++;
+      next();
+    }, steps[i].dur);
+  }
+  fill.style.width = '0%';
+  next();
+}
+
+function downloadDemo() {
+  closeModal('exportModal');
+  // simulate download
+  const blob = new Blob([
+    '# Clinical Evaluation Report — Device X v3.2\n\nThis is a draft output from CER-AI by PharBioMed.\n\n' +
+    'In production this file would be a full .docx with all 9 sections, appendices, and tracked changes.\n\n' +
+    'Generated: ' + new Date().toISOString()
+  ], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'CER_DeviceX_v3.2_Draft_001.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Drag-drop
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('over');
+  loadSampleSet();
+});
+
+// Initial render
+renderSection('3');
+</script>
+</body>
+</html>
