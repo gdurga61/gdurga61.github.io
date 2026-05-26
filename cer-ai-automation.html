@@ -1,0 +1,3186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CER-AI v2 — Clinical Evaluation Report Automation</title>
+<meta name="description" content="End-to-end Clinical Evaluation Report automation aligned to MEDDEV 2.7/1 Rev 4 and EU MDR 2017/745. Real document parsing, AI-assisted drafting.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Mammoth.js for DOCX parsing - runs entirely in browser -->
+<script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
+<!-- PDF.js for PDF parsing - runs entirely in browser -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<style>
+  :root {
+    --ink: #0b1825;
+    --ink-soft: #1f3247;
+    --ink-mute: #56708a;
+    --ink-faint: #8aa1b8;
+    --line: #d9e1ea;
+    --line-soft: #ecf0f5;
+    --paper: #f6f8fb;
+    --paper-warm: #eef2f7;
+    --card: #ffffff;
+    --primary: #1f5d7e;
+    --primary-deep: #0e3e58;
+    --primary-soft: #e4eff5;
+    --primary-glow: rgba(31, 93, 126, 0.12);
+    --amber: #c47525;
+    --amber-soft: #fbeed8;
+    --sage: #4e7a55;
+    --sage-soft: #e3ede4;
+    --rust: #a8443a;
+    --rust-soft: #f5e0dc;
+    --gold: #b78d2c;
+    --gold-soft: #f7eccf;
+    --teal: #2c7a7b;
+    --teal-soft: #ddedee;
+    --shadow-sm: 0 1px 2px rgba(11,24,37,.06);
+    --shadow-md: 0 6px 24px -8px rgba(11,24,37,.14), 0 2px 6px rgba(11,24,37,.05);
+    --shadow-lg: 0 24px 64px -20px rgba(11,24,37,.22);
+    --r-sm: 4px;
+    --r-md: 8px;
+    --r-lg: 14px;
+    --font-serif: 'Fraunces', 'Times New Roman', serif;
+    --font-sans: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-sans);
+    color: var(--ink);
+    background: var(--paper);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    height: 56px;
+    background: var(--ink);
+    color: var(--paper);
+    display: flex; align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid #000;
+    position: relative;
+    z-index: 50;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.015em;
+  }
+  .brand-mark {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--amber) 0%, var(--gold) 100%);
+    color: var(--ink);
+    border-radius: 7px;
+    display: grid; place-items: center;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .brand-meta {
+    margin-left: 8px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(246,248,251,.18);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 10px;
+    color: rgba(246,248,251,.6);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+  .brand-meta b { display: block; color: rgba(246,248,251,.85); font-weight: 500; }
+
+  .stage-bar {
+    margin-left: 32px;
+    display: flex; gap: 6px;
+  }
+  .stage {
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 11.5px;
+    color: rgba(246,248,251,.55);
+    display: flex; align-items: center; gap: 8px;
+    transition: all .15s;
+  }
+  .stage.done { color: rgba(246,248,251,.8); }
+  .stage.active { background: rgba(246,248,251,.1); color: var(--paper); }
+  .stage .num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: rgba(246,248,251,.1);
+    display: grid; place-items: center;
+  }
+  .stage.active .num { background: var(--amber); color: var(--ink); font-weight: 600; }
+  .stage.done .num { background: var(--sage); color: var(--ink); font-weight: 600; }
+
+  .topbar-right {
+    margin-left: auto;
+    display: flex; gap: 12px; align-items: center;
+    font-size: 12px;
+    color: rgba(246,248,251,.6);
+  }
+  .conn-pill {
+    display: flex; gap: 6px; align-items: center;
+    background: rgba(246,248,251,.08);
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+  }
+  .conn-pill .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--sage);
+    box-shadow: 0 0 0 3px rgba(78, 122, 85, 0.25);
+    animation: pulse 2s infinite;
+  }
+  .conn-pill.demo .dot { background: var(--amber); box-shadow: 0 0 0 3px rgba(196, 117, 37, 0.25); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+  .topbar-btn {
+    background: var(--amber);
+    color: var(--ink);
+    border: none;
+    padding: 7px 14px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 12px;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+  .topbar-btn:hover { filter: brightness(1.05); }
+  .topbar-btn.ghost { background: transparent; color: var(--paper); border: 1px solid rgba(246,248,251,.2); }
+  .topbar-btn.ghost:hover { background: rgba(246,248,251,.08); }
+
+  /* ============ LAYOUT ============ */
+  .app {
+    display: grid;
+    grid-template-columns: 280px 1fr 320px;
+    height: calc(100vh - 56px);
+  }
+
+  /* ============ LEFT SIDEBAR ============ */
+  .sidebar {
+    background: var(--card);
+    border-right: 1px solid var(--line);
+    overflow-y: auto;
+    padding: 12px 0 24px;
+  }
+  .sb-section { margin-bottom: 16px; }
+  .sb-head {
+    padding: 6px 18px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faint);
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .sb-head .sb-action {
+    font-size: 10px;
+    color: var(--primary);
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .sb-head .sb-action:hover { text-decoration: underline; }
+
+  .device-card {
+    margin: 4px 16px 12px;
+    padding: 12px 14px;
+    background: linear-gradient(135deg, var(--primary-deep) 0%, var(--primary) 100%);
+    color: var(--paper);
+    border-radius: var(--r-md);
+    cursor: pointer;
+  }
+  .device-card .dc-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 9.5px;
+    color: rgba(246,248,251,.65);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .device-card .dc-name {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 15px;
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .device-card .dc-meta {
+    display: flex; gap: 10px;
+    font-size: 10.5px;
+    color: rgba(246,248,251,.75);
+  }
+  .device-card .dc-meta b { color: var(--paper); }
+
+  /* Section list (scrollable) */
+  .sec-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .sec-list li {
+    padding: 7px 18px 7px 24px;
+    font-size: 12.5px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    border-left: 3px solid transparent;
+    transition: background .12s;
+    color: var(--ink-soft);
+    line-height: 1.3;
+  }
+  .sec-list li:hover { background: var(--paper); }
+  .sec-list li.active {
+    background: var(--primary-soft);
+    border-left-color: var(--primary);
+    color: var(--primary-deep);
+    font-weight: 500;
+  }
+  .sec-list li.sub { padding-left: 38px; font-size: 12px; color: var(--ink-mute); }
+  .sec-list li.sub.active { color: var(--primary-deep); }
+  .sec-list .sec-num {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--ink-faint);
+    min-width: 32px;
+    flex-shrink: 0;
+  }
+  .sec-list li.active .sec-num { color: var(--primary); }
+  .sec-list .sec-status {
+    margin-left: auto;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--line);
+    flex-shrink: 0;
+  }
+  .sec-list .sec-status.draft { background: var(--amber); }
+  .sec-list .sec-status.review { background: var(--gold); }
+  .sec-list .sec-status.approved { background: var(--sage); }
+  .sec-list .sec-status.gap { background: var(--rust); }
+
+  /* ============ MAIN ============ */
+  .main {
+    overflow-y: auto;
+    background: var(--paper);
+  }
+  .main-inner {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 28px 36px 80px;
+  }
+
+  .breadcrumb {
+    font-size: 11px;
+    color: var(--ink-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    display: flex; gap: 8px;
+  }
+  .breadcrumb .sep { color: var(--line); }
+
+  .section-title {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 34px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .section-title .num {
+    color: var(--ink-mute);
+    font-weight: 400;
+    margin-right: 14px;
+  }
+  .section-meta {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin-bottom: 22px;
+    font-size: 12px;
+    color: var(--ink-mute);
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .section-meta b { font-weight: 500; color: var(--ink); }
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 9px;
+    border-radius: 12px;
+    font-size: 10.5px;
+    font-weight: 500;
+  }
+  .pill .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+  .pill.draft { background: var(--amber-soft); color: var(--amber); }
+  .pill.review { background: var(--gold-soft); color: var(--gold); }
+  .pill.approved { background: var(--sage-soft); color: var(--sage); }
+  .pill.gap { background: var(--rust-soft); color: var(--rust); }
+  .pill.pending { background: var(--line-soft); color: var(--ink-mute); }
+  .pill.ai { background: var(--amber-soft); color: var(--amber); }
+  .pill.live { background: var(--sage); color: white; }
+  .pill.live .dot { background: white; }
+
+  /* ============ CONTENT BLOCKS ============ */
+  .gen-block {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    padding: 22px 26px;
+    margin-bottom: 16px;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+  }
+  .gen-block.ai { border-left: 3px solid var(--amber); }
+  .gen-block.source { border-left: 3px solid var(--primary); }
+  .gen-block.gap-block { border-left: 3px solid var(--rust); background: #fdf7f5; }
+  .gen-block.empty {
+    background: var(--paper-warm);
+    border-style: dashed;
+    border-color: var(--line);
+    box-shadow: none;
+    text-align: center;
+    padding: 36px 24px;
+    color: var(--ink-mute);
+  }
+  .gen-block .tag {
+    position: absolute;
+    top: -10px; left: 16px;
+    background: var(--card);
+    padding: 1px 9px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    border-radius: 11px;
+    height: 20px;
+    display: flex; align-items: center; gap: 5px;
+    color: var(--ink-mute);
+    border: 1px solid var(--line);
+  }
+  .gen-block.ai .tag { color: var(--amber); border-color: var(--amber-soft); }
+  .gen-block.source .tag { color: var(--primary); border-color: var(--primary-soft); }
+  .gen-block.gap-block .tag { color: var(--rust); border-color: var(--rust-soft); }
+
+  .gen-block h4 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 8px;
+    margin-top: 16px;
+    color: var(--ink);
+  }
+  .gen-block h4:first-of-type { margin-top: 0; }
+  .gen-block p {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .gen-block p:last-child { margin-bottom: 0; }
+  .gen-block ul, .gen-block ol {
+    padding-left: 22px;
+    margin-bottom: 12px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+  .gen-block li { margin-bottom: 4px; }
+  .gen-block b, .gen-block strong { color: var(--ink); font-weight: 600; }
+
+  .cite {
+    color: var(--primary);
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    vertical-align: super;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0 2px;
+    background: var(--primary-soft);
+    border-radius: 3px;
+    margin: 0 1px;
+  }
+  .cite:hover { background: var(--primary); color: white; }
+
+  /* Tables in content */
+  table.cer-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+    margin: 12px 0 16px;
+    background: var(--card);
+  }
+  table.cer-tbl th, table.cer-tbl td {
+    text-align: left;
+    padding: 7px 10px;
+    border: 1px solid var(--line-soft);
+    vertical-align: top;
+  }
+  table.cer-tbl th {
+    background: var(--paper-warm);
+    font-weight: 600;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-mute);
+  }
+  table.cer-tbl tr.section-header td {
+    background: var(--paper-warm);
+    font-weight: 600;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-mute);
+  }
+  table.cer-tbl td.match { background: var(--sage-soft); }
+  table.cer-tbl td.diff { background: var(--amber-soft); }
+
+  /* AI controls */
+  .ai-actions {
+    display: flex; gap: 8px;
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 1px dashed var(--line);
+    flex-wrap: wrap;
+  }
+  .ai-btn {
+    background: var(--card);
+    border: 1px solid var(--line);
+    padding: 7px 13px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all .12s;
+    font-weight: 500;
+  }
+  .ai-btn:hover { border-color: var(--ink-mute); background: var(--paper); }
+  .ai-btn.primary { background: var(--primary); color: white; border-color: var(--primary-deep); }
+  .ai-btn.primary:hover { background: var(--primary-deep); }
+  .ai-btn.warn { color: var(--amber); border-color: var(--amber-soft); }
+  .ai-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-btn svg { width: 12px; height: 12px; }
+
+  /* Trace footer inside block */
+  .trace-footer {
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: var(--paper);
+    border-radius: var(--r-md);
+    font-size: 11px;
+    color: var(--ink-mute);
+    line-height: 1.55;
+    border-left: 3px solid var(--primary);
+  }
+  .trace-footer b { color: var(--ink); font-weight: 500; }
+  .trace-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+  .trace-chip {
+    background: var(--card);
+    padding: 1px 7px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    font-size: 10px;
+  }
+
+  /* ============ RIGHT PANEL ============ */
+  .right-panel {
+    background: var(--card);
+    border-left: 1px solid var(--line);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .right-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper-warm);
+  }
+  .right-tab {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 10.5px;
+    color: var(--ink-mute);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    transition: all .12s;
+  }
+  .right-tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--primary);
+    background: var(--card);
+  }
+  .right-tab .count {
+    display: inline-block;
+    background: var(--primary);
+    color: white;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 8px;
+    margin-left: 4px;
+    font-weight: 600;
+  }
+  .right-body {
+    padding: 16px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .right-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    margin: 8px 0 6px;
+    font-weight: 600;
+  }
+  .right-label:first-child { margin-top: 0; }
+
+  /* Source item */
+  .src-item {
+    padding: 10px 12px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    margin-bottom: 6px;
+    background: var(--paper);
+    cursor: pointer;
+    transition: all .12s;
+  }
+  .src-item:hover { border-color: var(--primary); background: var(--card); }
+  .src-item .src-row {
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 3px;
+  }
+  .src-item .src-name {
+    font-weight: 500;
+    font-size: 11.5px;
+    color: var(--ink);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .src-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    background: var(--primary-soft);
+    color: var(--primary-deep);
+    padding: 1px 6px;
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+  .src-tag.real { background: var(--sage-soft); color: var(--sage); }
+  .src-tag.demo { background: var(--amber-soft); color: var(--amber); }
+  .src-meta {
+    font-size: 10.5px;
+    color: var(--ink-mute);
+    line-height: 1.4;
+  }
+  .src-meta .src-rm {
+    color: var(--rust);
+    font-size: 10px;
+    cursor: pointer;
+    margin-left: 4px;
+  }
+  .src-meta .src-rm:hover { text-decoration: underline; }
+
+  /* Drop target (mini, sidebar) */
+  .mini-drop {
+    border: 1.5px dashed var(--line);
+    border-radius: var(--r-md);
+    padding: 14px 12px;
+    text-align: center;
+    background: var(--paper);
+    cursor: pointer;
+    transition: all .12s;
+    font-size: 11.5px;
+    color: var(--ink-mute);
+  }
+  .mini-drop:hover, .mini-drop.over {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-deep);
+  }
+  .mini-drop svg { width: 18px; height: 18px; margin-bottom: 4px; }
+
+  /* ============ WELCOME / FIRST-RUN MODAL ============ */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(11, 24, 37, 0.7);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 32px;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--paper);
+    max-width: 880px;
+    width: 100%;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    max-height: 90vh;
+    display: flex; flex-direction: column;
+    position: relative;
+  }
+  .modal-head {
+    padding: 28px 36px 16px;
+    background: var(--card);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .modal-eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .modal-head h2 {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .modal-head h2 em { font-style: italic; color: var(--primary); font-weight: 400; }
+  .modal-head p {
+    color: var(--ink-mute);
+    margin-top: 8px;
+    font-size: 13px;
+    max-width: 620px;
+    line-height: 1.55;
+  }
+  .modal-body { padding: 24px 36px; overflow-y: auto; flex: 1; }
+  .modal-foot {
+    padding: 16px 36px;
+    background: var(--paper-warm);
+    border-top: 1px solid var(--line-soft);
+    display: flex; gap: 10px; justify-content: flex-end;
+    align-items: center;
+  }
+  .modal-foot .foot-note {
+    margin-right: auto;
+    font-size: 11.5px;
+    color: var(--ink-mute);
+  }
+  .m-btn {
+    padding: 9px 20px;
+    border-radius: var(--r-sm);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .m-btn.ghost { background: transparent; color: var(--ink-soft); border-color: var(--line); }
+  .m-btn.ghost:hover { background: var(--card); }
+  .m-btn.primary { background: var(--primary); color: white; border-color: var(--primary-deep); }
+  .m-btn.primary:hover { background: var(--primary-deep); }
+  .m-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Welcome hero */
+  .welcome {
+    position: relative;
+    padding: 40px 36px;
+    text-align: center;
+    overflow: hidden;
+  }
+  .welcome::before, .welcome::after {
+    content: '';
+    position: absolute;
+    width: 360px; height: 360px;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(40px);
+    opacity: 0.4;
+  }
+  .welcome::before {
+    background: var(--primary-soft);
+    top: -100px; right: -100px;
+  }
+  .welcome::after {
+    background: var(--amber-soft);
+    bottom: -100px; left: -100px;
+  }
+  .welcome > * { position: relative; z-index: 1; }
+  .welcome .w-eyebrow {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .welcome h1 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 44px;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .welcome h1 em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--primary);
+  }
+  .welcome > p {
+    font-size: 14px;
+    color: var(--ink-mute);
+    max-width: 560px;
+    margin: 0 auto 24px;
+    line-height: 1.55;
+  }
+  .welcome .w-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    text-align: left;
+    margin-bottom: 24px;
+  }
+  .w-feature {
+    background: var(--card);
+    padding: 14px 14px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--line-soft);
+  }
+  .w-feature .wfn {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--primary);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .w-feature h4 {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    color: var(--ink);
+  }
+  .w-feature p {
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    line-height: 1.5;
+  }
+  .w-cta { display: flex; gap: 10px; justify-content: center; }
+  .w-btn-primary {
+    background: var(--primary);
+    color: white;
+    padding: 12px 26px;
+    border-radius: var(--r-sm);
+    border: none;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+  }
+  .w-btn-primary:hover { background: var(--primary-deep); }
+  .w-btn-secondary {
+    background: var(--card);
+    color: var(--ink);
+    padding: 12px 26px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--line);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .w-foot { margin-top: 18px; font-size: 11px; color: var(--ink-faint); }
+
+  /* Upload dropzone (large, in modal) */
+  .dropzone {
+    border: 2px dashed var(--line);
+    border-radius: var(--r-md);
+    padding: 32px 24px;
+    text-align: center;
+    background: var(--card);
+    cursor: pointer;
+    transition: all .15s;
+    margin-bottom: 16px;
+  }
+  .dropzone:hover, .dropzone.over {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+  }
+  .dropzone .dz-icon {
+    width: 48px; height: 48px;
+    margin: 0 auto 12px;
+    background: var(--paper-warm);
+    color: var(--ink-mute);
+    border-radius: 50%;
+    display: grid; place-items: center;
+  }
+  .dropzone h4 {
+    font-family: var(--font-serif);
+    font-size: 17px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .dropzone p { color: var(--ink-mute); font-size: 12px; }
+  .dropzone .dz-alt {
+    margin-top: 14px; padding-top: 12px;
+    border-top: 1px dashed var(--line);
+    font-size: 12px;
+    color: var(--primary);
+  }
+  .dropzone .dz-alt span { cursor: pointer; text-decoration: underline; }
+
+  /* Document list */
+  .doc-list {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    overflow: hidden;
+  }
+  .doc-row {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line-soft);
+    display: grid;
+    grid-template-columns: 28px 1fr auto auto auto;
+    gap: 12px;
+    align-items: center;
+    font-size: 12.5px;
+  }
+  .doc-row:last-child { border-bottom: none; }
+  .doc-row .doc-icon {
+    width: 28px; height: 28px;
+    background: var(--paper-warm);
+    border-radius: var(--r-sm);
+    color: var(--ink-mute);
+    display: grid; place-items: center;
+  }
+  .doc-row .doc-name b { font-weight: 500; color: var(--ink); }
+  .doc-row .doc-name small {
+    display: block;
+    font-size: 11px;
+    color: var(--ink-mute);
+    margin-top: 1px;
+  }
+  .doc-cls {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    background: var(--primary-soft);
+    color: var(--primary-deep);
+    padding: 2px 7px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .doc-cls.classifying {
+    background: var(--amber-soft);
+    color: var(--amber);
+  }
+  .doc-row .doc-rm {
+    background: transparent;
+    border: none;
+    color: var(--rust);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .doc-row .doc-rm:hover { background: var(--rust-soft); }
+
+  /* Form fields */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-field label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-mute);
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  .form-field input, .form-field select, .form-field textarea {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    background: var(--card);
+    color: var(--ink);
+    transition: border-color .12s;
+  }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+  .form-field textarea { resize: vertical; min-height: 80px; font-family: var(--font-sans); }
+
+  /* Loading state */
+  .loading-block {
+    background: var(--card);
+    border: 1px solid var(--amber-soft);
+    border-left: 3px solid var(--amber);
+    border-radius: var(--r-md);
+    padding: 22px;
+    margin-bottom: 16px;
+  }
+  .loading-block h4 {
+    font-family: var(--font-serif);
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .loading-block p { color: var(--ink-mute); font-size: 12.5px; line-height: 1.6; margin-bottom: 4px; }
+  .dots { display: inline-flex; gap: 3px; }
+  .dots span {
+    width: 5px; height: 5px;
+    background: var(--amber);
+    border-radius: 50%;
+    animation: bounce 1.2s infinite;
+  }
+  .dots span:nth-child(2) { animation-delay: 0.15s; }
+  .dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-3px); opacity: 1; }
+  }
+
+  /* Progress (during generation) */
+  .progress-bar {
+    height: 4px;
+    background: var(--line-soft);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 14px 0 10px;
+  }
+  .progress-bar .fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width .4s cubic-bezier(.4,0,.2,1);
+  }
+  .gen-log {
+    max-height: 180px;
+    overflow-y: auto;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--ink-mute);
+    background: var(--paper);
+    padding: 10px 12px;
+    border-radius: var(--r-sm);
+  }
+  .gen-log .row { display: flex; gap: 8px; padding: 2px 0; }
+  .gen-log .row .time { color: var(--ink-faint); }
+  .gen-log .row.ok { color: var(--sage); }
+  .gen-log .row.warn { color: var(--amber); }
+  .gen-log .row.err { color: var(--rust); }
+
+  /* Compliance grid */
+  .compliance-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 14px 0 18px;
+  }
+  .comp-card {
+    background: var(--card);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--r-md);
+    padding: 14px;
+  }
+  .comp-card .cc-label {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-mute);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .comp-card .cc-val {
+    font-family: var(--font-serif);
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .comp-card .cc-sub { font-size: 11px; color: var(--ink-mute); margin-top: 2px; }
+  .comp-card.warn .cc-val { color: var(--amber); }
+  .comp-card.good .cc-val { color: var(--sage); }
+  .comp-card.gap .cc-val { color: var(--rust); }
+
+  /* Settings */
+  .setting-row {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line-soft);
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 20px;
+    align-items: center;
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-row .sr-label { font-weight: 500; color: var(--ink); font-size: 13px; }
+  .setting-row .sr-sub { color: var(--ink-mute); font-size: 11.5px; margin-top: 2px; line-height: 1.5; }
+  .setting-row code {
+    background: var(--paper); padding: 1px 6px; border-radius: 3px;
+    font-family: var(--font-mono); font-size: 11px;
+  }
+  .toggle {
+    position: relative; width: 42px; height: 22px;
+    background: var(--line); border-radius: 12px; cursor: pointer;
+    transition: background .15s;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    background: white;
+    border-radius: 50%;
+    transition: transform .15s;
+    box-shadow: var(--shadow-sm);
+  }
+  .toggle.on { background: var(--primary); }
+  .toggle.on::after { transform: translateX(20px); }
+
+  .footer-note {
+    margin-top: 30px;
+    padding: 14px 18px;
+    background: var(--paper-warm);
+    border-radius: var(--r-md);
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    line-height: 1.6;
+    border-left: 3px solid var(--gold);
+  }
+  .footer-note b { color: var(--ink); font-weight: 500; }
+
+  .hide { display: none !important; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+
+  /* Section editor specific */
+  .section-editor textarea {
+    width: 100%;
+    min-height: 320px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+    background: var(--card);
+    resize: vertical;
+    margin-bottom: 12px;
+  }
+  .section-editor textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+  }
+  .editor-toolbar {
+    display: flex; gap: 8px;
+    padding: 10px 0;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .editor-toolbar input {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    font-family: var(--font-sans);
+    font-size: 13px;
+  }
+
+  /* Doc preview modal */
+  .doc-preview {
+    background: var(--card);
+    border-radius: var(--r-md);
+    padding: 20px 24px;
+    max-height: 60vh;
+    overflow-y: auto;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+  }
+  .doc-preview h1, .doc-preview h2, .doc-preview h3 { 
+    font-family: var(--font-serif); 
+    margin: 16px 0 8px;
+    color: var(--ink);
+  }
+  .doc-preview p { margin-bottom: 10px; }
+  .doc-preview table { border-collapse: collapse; margin: 10px 0; }
+  .doc-preview table td, .doc-preview table th { border: 1px solid var(--line); padding: 4px 8px; }
+</style>
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">C</div>
+    CER-AI
+    <div class="brand-meta">
+      <b>v2.0</b>
+      MEDDEV 2.7/1 · MDR 2017/745
+    </div>
+  </div>
+
+  <div class="stage-bar">
+    <div class="stage done" id="stage-1"><span class="num">1</span> Ingest</div>
+    <div class="stage done" id="stage-2"><span class="num">2</span> Classify</div>
+    <div class="stage active" id="stage-3"><span class="num">3</span> Draft</div>
+    <div class="stage" id="stage-4"><span class="num">4</span> Review</div>
+    <div class="stage" id="stage-5"><span class="num">5</span> Export</div>
+  </div>
+
+  <div class="topbar-right">
+    <div class="conn-pill demo" id="connPill">
+      <span class="dot"></span> <span id="connText">Demo</span>
+    </div>
+    <button class="topbar-btn ghost" onclick="openModal('uploadModal')">+ Upload Sources</button>
+    <button class="topbar-btn" onclick="openModal('exportModal')">Export Draft CER</button>
+  </div>
+</header>
+
+<!-- ============ APP LAYOUT ============ -->
+<div class="app">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="device-card" onclick="openModal('setupModal')">
+      <div class="dc-eyebrow">Subject Device</div>
+      <div class="dc-name" id="deviceName">Click to configure</div>
+      <div class="dc-meta">
+        <div><b id="deviceClass">—</b> class</div>
+        <div><b id="deviceManu">—</b></div>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-head">
+        Sections
+        <span class="sb-action" onclick="window.scrollTo(0,0); renderMain();">Refresh</span>
+      </div>
+      <ul class="sec-list" id="secList">
+        <!-- Populated by JS -->
+      </ul>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="main-inner" id="mainInner">
+      <!-- Section content rendered here -->
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside class="right-panel">
+    <div class="right-tabs" id="rightTabs">
+      <div class="right-tab active" data-tab="sources">Sources <span class="count" id="srcCount">0</span></div>
+      <div class="right-tab" data-tab="literature">Literature <span class="count" id="litCount">0</span></div>
+      <div class="right-tab" data-tab="trace">Trace</div>
+      <div class="right-tab" data-tab="settings">⚙</div>
+    </div>
+    <div class="right-body" id="rightBody">
+      <!-- Right panel content -->
+    </div>
+  </aside>
+
+</div>
+
+<!-- ============ WELCOME MODAL ============ -->
+<div class="modal-bg show" id="welcomeModal">
+  <div class="modal" style="max-width: 920px;">
+    <div class="welcome">
+      <div class="w-eyebrow">CER-AI v2.0 · MEDDEV 2.7/1 Rev 4 · EU MDR 2017/745</div>
+      <h1>Draft a <em>compliant</em> Clinical Evaluation Report<br>from your <em>actual</em> source documents.</h1>
+      <p>Upload your Risk Management File, IFU, Design History File, Clinical Investigation Plan, CSR, PMCF Reports, PSUR, and literature exports. The engine parses them in your browser, classifies each, and generates every section of a MEDDEV 2.7/1 Rev 4 CER — with source citations on every paragraph.</p>
+      <div class="w-features">
+        <div class="w-feature">
+          <div class="wfn">→ 01</div>
+          <h4>Real DOCX / PDF parsing</h4>
+          <p>Files stay in your browser. No upload to any server. Powered by Mammoth.js and PDF.js.</p>
+        </div>
+        <div class="w-feature">
+          <div class="wfn">→ 02</div>
+          <h4>32 sections drafted</h4>
+          <p>Every CER subsection from §1 to §9 Appendices. Equivalence per MDCG 2020-5. GSPRs mapped to Annex I.</p>
+        </div>
+        <div class="w-feature">
+          <div class="wfn">→ 03</div>
+          <h4>Claude API integration</h4>
+          <p>Bring your own Anthropic API key. Every section drafted from your actual document text, with citations.</p>
+        </div>
+      </div>
+      <div class="w-cta">
+        <button class="w-btn-primary" onclick="loadSampleDevice()">Try with Sample Device →</button>
+        <button class="w-btn-secondary" onclick="closeWelcome(); openModal('setupModal');">Start with Your Device</button>
+      </div>
+      <div class="w-foot">Files are processed entirely in your browser — they never leave your device.<br>Demo dataset uses anonymized generic content. No real PHI.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SETUP MODAL ============ -->
+<div class="modal-bg" id="setupModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-eyebrow">Step 1 · Device Profile</div>
+      <h2>Configure the subject device.</h2>
+      <p>Captures basic device identification — used to scope literature search, retrieve relevant standards, and seed Section 3.4 of the CER.</p>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-field">
+          <label>Device Trade Name</label>
+          <input type="text" id="f-name" placeholder="e.g., NeuroStim 3000" value="NeuroStim 3000">
+        </div>
+        <div class="form-field">
+          <label>Version / Model</label>
+          <input type="text" id="f-version" placeholder="e.g., v3.2 / Model 2024" value="v3.2">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Manufacturer (Legal)</label>
+          <input type="text" id="f-manu" placeholder="e.g., Acme MedTech GmbH" value="Acme MedTech GmbH">
+        </div>
+        <div class="form-field">
+          <label>Device Class (MDR Rule)</label>
+          <select id="f-class">
+            <option>Class I</option>
+            <option>Class IIa</option>
+            <option selected>Class IIb</option>
+            <option>Class III</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Device Type</label>
+          <select id="f-type">
+            <option>Implantable</option>
+            <option selected>Active implantable</option>
+            <option>Non-implantable, electrical</option>
+            <option>Software (SaMD)</option>
+            <option>In-vitro diagnostic</option>
+            <option>Surgical instrument</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>CER Type</label>
+          <select id="f-certype">
+            <option selected>Initial CER (Pre-CE Mark)</option>
+            <option>Annual CER Update</option>
+            <option>CER under MDR transition</option>
+            <option>CER following design change</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field" style="margin-top: 12px;">
+        <label>Intended Purpose (Article 2(12))</label>
+        <textarea id="f-purpose" rows="3" placeholder="Briefly describe the intended purpose of the device.">NeuroStim 3000 is intended for the symptomatic management of chronic intractable pain in adult patients, delivered via implanted electrode arrays connected to a programmable implanted pulse generator. Indicated for use under the supervision of trained clinicians in hospital and specialized outpatient settings.</textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label>Therapeutic Area</label>
+          <select id="f-ta">
+            <option>Cardiovascular</option>
+            <option selected>Neurology / Pain Management</option>
+            <option>Orthopedics</option>
+            <option>Ophthalmology</option>
+            <option>Urology / Pelvic Health</option>
+            <option>Digital Health</option>
+            <option>General Surgery</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Equivalent Device (if applicable)</label>
+          <input type="text" id="f-equiv" placeholder="Trade name of equivalent device" value="EquivStim E1">
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <div class="foot-note">Captured fields populate §2 General Information and §3.4 Device Description.</div>
+      <button class="m-btn ghost" onclick="closeModal('setupModal')">Cancel</button>
+      <button class="m-btn primary" onclick="saveDeviceProfile()">Save &amp; Continue →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ UPLOAD MODAL ============ -->
+<div class="modal-bg" id="uploadModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-eyebrow">Step 2 · Source Documents</div>
+      <h2>Upload your real source documents.</h2>
+      <p>DOCX and PDF supported. Files are parsed entirely in your browser using Mammoth.js / PDF.js — they never leave your device. After parsing, each document is auto-classified by content (Risk Mgmt, IFU, CSR, PMCF, etc.) and routed to the matching CER section.</p>
+    </div>
+    <div class="modal-body">
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <div class="dz-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        </div>
+        <h4>Drag &amp; drop documents, or click to browse</h4>
+        <p>DOCX, PDF · Multiple files supported · Up to 25 MB each · Parsed in-browser</p>
+        <input type="file" id="fileInput" multiple accept=".docx,.pdf,.txt" style="display: none;">
+        <div class="dz-alt">— or — <span onclick="event.stopPropagation(); loadSampleDocs();">load 6 sample documents</span></div>
+      </div>
+
+      <div id="uploadedList">
+        <!-- Files added here as parsed -->
+      </div>
+    </div>
+    <div class="modal-foot">
+      <div class="foot-note" id="uploadFootNote">No documents uploaded yet.</div>
+      <button class="m-btn ghost" onclick="closeModal('uploadModal')">Done</button>
+      <button class="m-btn primary" id="generateAllBtn" disabled onclick="closeModal('uploadModal'); runFullGeneration();">Generate Full CER ⚡</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ FULL-GENERATION MODAL ============ -->
+<div class="modal-bg" id="genModal">
+  <div class="modal" style="max-width: 640px;">
+    <div class="modal-head">
+      <div class="modal-eyebrow">Step 3 · AI Generation</div>
+      <h2>Drafting all sections<span class="dots"><span></span><span></span><span></span></span></h2>
+      <p>The engine is reading your source documents, mapping content to CER sections, and assembling the draft. <span id="genModeText">Currently in Demo Mode — toggle Live AI in Settings to use Claude.</span></p>
+    </div>
+    <div class="modal-body">
+      <div class="progress-bar"><div class="fill" id="genFill" style="width: 0%;"></div></div>
+      <div class="gen-log" id="genLog"></div>
+    </div>
+    <div class="modal-foot">
+      <div class="foot-note" id="genFootNote">Generating…</div>
+      <button class="m-btn primary" id="genDoneBtn" disabled onclick="closeModal('genModal');">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ EXPORT MODAL ============ -->
+<div class="modal-bg" id="exportModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-eyebrow">Step 5 · Export</div>
+      <h2>Export your draft CER.</h2>
+      <p>Output as Markdown (universal), HTML (review-ready), or JSON (re-import / API). For DOCX export with track-changes ready for SME review, deploy the production version with the backend converter.</p>
+    </div>
+    <div class="modal-body">
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+        <div style="padding: 16px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--card); cursor: pointer;" onclick="exportCER('md')">
+          <div style="font-family: var(--font-serif); font-size: 16px; margin-bottom: 4px; font-weight: 500;">Markdown</div>
+          <div style="font-size: 11.5px; color: var(--ink-mute); margin-bottom: 10px;">Plain-text, all sections, citations preserved.</div>
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--primary);">CER.md · ~50 KB</div>
+        </div>
+        <div style="padding: 16px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--card); cursor: pointer;" onclick="exportCER('html')">
+          <div style="font-family: var(--font-serif); font-size: 16px; margin-bottom: 4px; font-weight: 500;">HTML</div>
+          <div style="font-size: 11.5px; color: var(--ink-mute); margin-bottom: 10px;">Styled, printable, ready for SME review.</div>
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--primary);">CER.html · ~80 KB</div>
+        </div>
+        <div style="padding: 16px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--card); cursor: pointer;" onclick="exportCER('json')">
+          <div style="font-family: var(--font-serif); font-size: 16px; margin-bottom: 4px; font-weight: 500;">JSON</div>
+          <div style="font-size: 11.5px; color: var(--ink-mute); margin-bottom: 10px;">Structured data with all sources, sections, and metadata.</div>
+          <div style="font-family: var(--font-mono); font-size: 10px; color: var(--primary);">CER.json · ~120 KB</div>
+        </div>
+      </div>
+
+      <div style="background: var(--paper-warm); padding: 12px 14px; border-radius: var(--r-md); font-size: 11.5px; color: var(--ink-mute);">
+        <b style="color: var(--ink); display: block; margin-bottom: 3px;">Bundle includes:</b>
+        Main CER · Appendix A (Evaluator CV template) · Appendix B (Literature search log + PRISMA) · Appendix C (Equivalence matrix · MDCG 2020-5) · Appendix D (GSPR conformity table) · Appendix E (Source document register) · Appendix F (Risk-Benefit worksheet)
+      </div>
+
+      <div style="background: var(--gold-soft); padding: 11px 14px; border-radius: var(--r-md); font-size: 11.5px; color: var(--gold); border-left: 3px solid var(--gold); margin-top: 10px;">
+        <b>Reminder:</b> AI-generated draft. Sections flagged 🟠 require clinical evaluator review and signoff. Evidence gaps flagged 🔴 require PMCF mitigation before NB submission.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <div class="foot-note">All exports include source-document citations and generation metadata.</div>
+      <button class="m-btn ghost" onclick="closeModal('exportModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DOCUMENT PREVIEW MODAL ============ -->
+<div class="modal-bg" id="docPreviewModal">
+  <div class="modal" style="max-width: 800px;">
+    <div class="modal-head">
+      <div class="modal-eyebrow">Source Document · Parsed Content</div>
+      <h2 id="docPreviewTitle">Document Preview</h2>
+      <p id="docPreviewMeta" style="font-family: var(--font-mono); font-size: 11px;"></p>
+    </div>
+    <div class="modal-body">
+      <div class="doc-preview" id="docPreviewBody">
+        <!-- Parsed content -->
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="m-btn ghost" onclick="closeModal('docPreviewModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====================================================================
+// CER-AI v2 — Full implementation
+// Real DOCX/PDF parsing · All 32 sections · Claude API · No backend
+// ====================================================================
+
+// ============ CONFIG & STATE ============
+
+const CONFIG = {
+  apiKey: localStorage.getItem('claude_api_key') || '',
+  model: 'claude-opus-4-5',
+  maxTokens: 2500,
+  useLiveAI: localStorage.getItem('use_live_ai') === 'true'
+};
+
+// Device profile (filled from form)
+let DEVICE = {
+  name: 'NeuroStim 3000',
+  version: 'v3.2',
+  manufacturer: 'Acme MedTech GmbH',
+  class: 'Class IIb',
+  type: 'Active implantable',
+  cerType: 'Initial CER (Pre-CE Mark)',
+  ta: 'Neurology / Pain Management',
+  equiv: 'EquivStim E1',
+  purpose: 'NeuroStim 3000 is intended for the symptomatic management of chronic intractable pain in adult patients, delivered via implanted electrode arrays connected to a programmable implanted pulse generator. Indicated for use under the supervision of trained clinicians in hospital and specialized outpatient settings.'
+};
+
+// Uploaded source documents (real, parsed)
+// Each: { id, name, type, size, classification, text, parsed, isDemo }
+let SOURCES = [];
+
+// Literature library (each: { id, citation, level, year, journal, abstract, relevance })
+let LITERATURE = [];
+
+// Section drafts (key = section number, value = { content, status, sources[], generatedAt, tokensIn, tokensOut })
+let DRAFTS = {};
+
+// Current section
+let currentSec = '1';
+
+// Current right panel tab
+let currentRightTab = 'sources';
+
+// PDF.js setup
+if (typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+// ============ CER SECTION STRUCTURE (Full MEDDEV 2.7/1 Rev 4) ============
+
+const SECTIONS = [
+  { num: '1', title: 'Executive Summary', parent: null, expects: ['CSR', 'PMCF', 'PSUR', 'Lit'] },
+
+  { num: '2', title: 'General Information', parent: null },
+  { num: '2.1', title: 'Document objective', parent: '2' },
+  { num: '2.2', title: 'Referenced documents', parent: '2' },
+  { num: '2.3', title: 'Definitions and abbreviations', parent: '2' },
+  { num: '2.4', title: 'Justification for choice of evaluator', parent: '2' },
+
+  { num: '3', title: 'Scope of the Clinical Evaluation', parent: null },
+  { num: '3.1', title: 'Scope', parent: '3' },
+  { num: '3.2', title: 'Applicable GSPRs (Annex I)', parent: '3' },
+  { num: '3.3', title: 'Clinical Evaluation Objectives', parent: '3' },
+  { num: '3.4', title: 'Medical Device Description', parent: '3', expects: ['IFU', 'DHF'] },
+  { num: '3.4.1', title: 'Trade name and description', parent: '3.4' },
+  { num: '3.4.2', title: 'Principle of operation / mode of action', parent: '3.4' },
+  { num: '3.4.9', title: 'Indications', parent: '3.4' },
+  { num: '3.4.10', title: 'Contraindications', parent: '3.4' },
+  { num: '3.4.11', title: 'Warnings and precautions', parent: '3.4' },
+  { num: '3.4.13', title: 'Adverse events / side effects', parent: '3.4' },
+  { num: '3.4.14', title: 'Clinical benefits and performance claims', parent: '3.4' },
+  { num: '3.4.16', title: 'Standards and regulatory history', parent: '3.4' },
+
+  { num: '4', title: 'Clinical Background / State-of-the-Art', parent: null, expects: ['Lit'] },
+  { num: '4.1', title: 'Clinical background (disease / condition)', parent: '4' },
+  { num: '4.2', title: 'State-of-the-art / current standards of care', parent: '4' },
+  { num: '4.3', title: 'Benefit-risk overview (SoTA context)', parent: '4' },
+
+  { num: '5', title: 'Device Under Evaluation', parent: null },
+  { num: '5.1', title: 'Type of evaluation (Route)', parent: '5' },
+  { num: '5.2', title: 'Data sources and types', parent: '5' },
+  { num: '5.3', title: 'Demonstration of Equivalence (MDCG 2020-5)', parent: '5' },
+  { num: '5.4', title: 'Manufacturer Clinical Data', parent: '5', expects: ['CSR', 'PMCF', 'PSUR', 'Risk'] },
+  { num: '5.4.1', title: 'Pre-clinical (V&V) summary', parent: '5.4' },
+  { num: '5.4.2', title: 'Clinical investigations (CSRs)', parent: '5.4' },
+  { num: '5.4.3', title: 'PMS / PMCF data', parent: '5.4' },
+  { num: '5.4.4', title: 'Aggregate safety (PSURs)', parent: '5.4' },
+  { num: '5.5', title: 'Literature Data', parent: '5', expects: ['Lit'] },
+  { num: '5.5.1', title: 'Literature search methodology', parent: '5.5' },
+  { num: '5.5.2', title: 'Search results · PRISMA flow', parent: '5.5' },
+  { num: '5.6', title: 'Summary & Appraisal of Clinical Data', parent: '5' },
+  { num: '5.7', title: 'Analysis of Clinical Data', parent: '5', expects: ['Risk'] },
+  { num: '5.7.1', title: 'Requirement on safety (GSPR 1-2)', parent: '5.7' },
+  { num: '5.7.2', title: 'Acceptable benefit-risk profile', parent: '5.7' },
+  { num: '5.7.3', title: 'Performance vs. state-of-the-art', parent: '5.7' },
+  { num: '5.7.4', title: 'Evidence gaps and PMCF mitigations', parent: '5.7' },
+
+  { num: '6', title: 'Outcome of the Clinical Evaluation', parent: null },
+  { num: '6.1', title: 'Substantiation of clinical claims', parent: '6' },
+  { num: '6.2', title: 'Conclusions on clinical evidence', parent: '6' },
+  { num: '6.3', title: 'PMS &amp; PMCF activities', parent: '6' },
+
+  { num: '7', title: 'Conclusions', parent: null },
+
+  { num: '8', title: 'References', parent: null, expects: ['Lit'] },
+
+  { num: '9', title: 'Appendices', parent: null },
+  { num: '9.A', title: 'Evaluator CV &amp; DOI', parent: '9' },
+  { num: '9.B', title: 'Literature search log &amp; PRISMA', parent: '9' },
+  { num: '9.C', title: 'Equivalence assessment matrix', parent: '9' },
+  { num: '9.D', title: 'GSPR conformity table', parent: '9' },
+  { num: '9.E', title: 'Source document register', parent: '9' },
+  { num: '9.F', title: 'Risk-Benefit determination worksheet', parent: '9' }
+];
+
+// ============ SAMPLE / DEMO CONTENT ============
+// Used when the user clicks "Load Sample Device" or "Load Sample Docs"
+
+const SAMPLE_DOCS_DATA = [
+  {
+    id: 'demo-rmf',
+    name: 'NeuroStim_3000_Risk_Management_File_v2.1.docx',
+    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    size: '2.4 MB',
+    classification: 'Risk Mgmt',
+    isDemo: true,
+    text: `RISK MANAGEMENT FILE — NeuroStim 3000 v3.2
+Conforms to EN ISO 14971:2019 + A11:2021
+
+1. SCOPE
+This Risk Management File covers the complete lifecycle of NeuroStim 3000 v3.2, an active implantable medical device (Class IIb) for chronic pain management.
+
+2. RISK ANALYSIS
+
+2.1 Identified Hazards
+- Infection at implant site (occurrence: probable; severity: serious)
+- Lead migration / dislodgement (occurrence: occasional; severity: moderate)
+- Pulse generator failure (occurrence: improbable; severity: serious)
+- Battery depletion before scheduled replacement (occurrence: occasional; severity: minor)
+- Patient discomfort or unwanted stimulation (occurrence: occasional; severity: minor)
+- MRI-induced heating (occurrence: rare; severity: serious; mitigated by labeling and conditional MRI compatibility)
+
+2.2 Risk Acceptability Matrix
+Each identified hazard has been scored on a 5x5 matrix. All residual risks fall within acceptable bounds per the manufacturer's risk acceptance policy.
+
+3. RISK CONTROL MEASURES
+Design controls, protective measures, and information for safety have been implemented. Residual risks are documented in the IFU.
+
+4. RESIDUAL RISK / BENEFIT-RISK
+Overall residual risk is judged acceptable when weighed against the clinical benefit of significant pain reduction in patients failing conservative therapy.
+
+5. PRODUCTION AND POST-PRODUCTION INFORMATION
+PMS and PMCF feed risk file updates per the manufacturer's vigilance procedure.`
+  },
+  {
+    id: 'demo-ifu',
+    name: 'NeuroStim_3000_IFU_EN_v3.2.pdf',
+    type: 'application/pdf',
+    size: '480 KB',
+    classification: 'IFU',
+    isDemo: true,
+    text: `INSTRUCTIONS FOR USE — NeuroStim 3000 v3.2
+Active implantable pulse generator for chronic pain management
+
+1. DEVICE DESCRIPTION
+NeuroStim 3000 is an implantable pulse generator (IPG) designed to deliver controlled electrical stimulation to neural targets via implanted lead arrays. The system comprises:
+- Implantable Pulse Generator (Model NS-3000)
+- Lead array (Model NS-Lead-8x or NS-Lead-16x)
+- External patient programmer
+- Clinician programmer (tablet-based)
+
+2. INDICATIONS
+NeuroStim 3000 is indicated for the symptomatic management of chronic intractable pain in adult patients (≥18 years) who have:
+- Failed conservative therapy (≥6 months)
+- Documented chronic neuropathic or mixed pain syndrome
+- Successful trial stimulation (≥50% pain reduction)
+
+3. CONTRAINDICATIONS
+- Active local or systemic infection
+- Pregnancy (data not available)
+- Coagulopathy that cannot be corrected
+- Diathermy use (lifetime contraindication)
+- Patients unable to operate the device safely
+
+4. WARNINGS AND PRECAUTIONS
+- MRI: Conditional MRI compatibility under defined conditions; full-body 1.5T or 3T per labeling
+- Pacemaker / ICD interactions: relative contraindication; cardiology consultation required
+- Diathermy: never use; risk of severe tissue damage
+- Driving: patients should not drive during therapy adjustment
+
+5. ADVERSE EVENTS
+Common (≥1%): unwanted paresthesia, application site discomfort, lead migration requiring revision
+Uncommon (<1%): infection requiring explant, hardware failure
+Rare (<0.1%): persistent neurological deficit, cerebrospinal fluid leak
+
+6. CLINICAL BENEFITS
+- Significant pain reduction (≥50% NRS improvement in 75% of trial-responders)
+- Reduced reliance on opioid pharmacotherapy
+- Improved quality of life (validated PROMs)
+- Sustained effect through 12+ months in published evidence
+
+7. STERILIZATION AND HANDLING
+Sterilized by ethylene oxide. Single-use. Do not re-sterilize.
+
+8. SHELF LIFE AND STORAGE
+36 months from manufacture. Store at 0-40°C, 10-90% humidity, non-condensing.`
+  },
+  {
+    id: 'demo-csr',
+    name: 'CSR_NS3000_PIVOTAL_RCT_Final_2024.pdf',
+    type: 'application/pdf',
+    size: '8.7 MB',
+    classification: 'CSR',
+    isDemo: true,
+    text: `CLINICAL STUDY REPORT — NeuroStim 3000 Pivotal RCT
+Study NS-PIV-001 · Final · 2024-Q3
+
+STUDY DESIGN
+Prospective, multi-centre, randomised, single-blind controlled clinical investigation. 14 European sites. Enrollment 2022 Q3 - 2023 Q4. ISO 14155:2020 compliant; ICH-GCP compliant; independent DSMB monitored.
+
+POPULATION
+n = 312 adult patients with chronic intractable pain (≥6 months conservative therapy failure)
+Randomization: 1:1 NeuroStim 3000 (n=156) vs. standard-of-care comparator (n=156)
+Median age 56 yrs; 58% female; baseline NRS pain score 7.4 (range 6-10)
+
+PRIMARY ENDPOINT
+≥50% improvement in NRS pain score at 12 weeks
+
+PRIMARY RESULTS
+NeuroStim 3000 arm: 132/156 (84.6%) achieved primary endpoint
+Comparator arm: 105/156 (67.3%) achieved primary endpoint
+Treatment difference: +17.3% (95% CI: 7.2 - 27.4%), p < 0.001
+
+SECONDARY ENDPOINTS
+- Mean NRS reduction at 12wk: -4.2 (NS3000) vs -2.6 (comparator), p<0.001
+- Opioid reduction (MME) at 12wk: -41% (NS3000) vs -18% (comparator)
+- EQ-5D index improvement: +0.18 (NS3000) vs +0.07 (comparator)
+- Patient-reported satisfaction: 84% (NS3000) vs 56% (comparator)
+
+SAFETY
+Device-related SAEs: 0
+Device-related non-serious AEs: 5/156 (3.2%) — lead migration (3), application site discomfort (2)
+All AEs resolved without sequelae. No deaths attributed to device.
+
+CONCLUSIONS
+The pivotal RCT demonstrates that NeuroStim 3000 v3.2 achieves the pre-specified primary efficacy endpoint with a favourable safety profile, supporting CE-mark conformity assessment under EU MDR 2017/745.`
+  },
+  {
+    id: 'demo-pmcf',
+    name: 'PMCF_Report_NS3000_2024Q3.pdf',
+    type: 'application/pdf',
+    size: '1.8 MB',
+    classification: 'PMCF',
+    isDemo: true,
+    text: `POST-MARKET CLINICAL FOLLOW-UP REPORT — 2024 Q3
+NeuroStim 3000 v3.2 · PMCF Plan v2.0
+
+ENROLLMENT
+n = 847 patients enrolled across 23 European centres
+Median follow-up: 18 months (range 6 - 36 months)
+
+LONGITUDINAL OUTCOMES
+- Sustained ≥50% pain response at 12 months: 71% (95% CI: 67.4 - 74.4%)
+- Sustained ≥50% pain response at 24 months: 66% (95% CI: 61.8 - 70.0%) [n=412]
+- Cumulative device-related AE rate: 3.2 / 1,000 device-uses
+- Device-related SAE rate: 0.0%
+- Patient satisfaction (EQ-5D index): 0.78 (95% CI: 0.74 - 0.82)
+
+SUBGROUP ANALYSES
+Elderly (≥75 years, n=84): response rate 68% — non-inferior to overall cohort
+Failed back surgery syndrome (n=204): response rate 76% — at upper end of literature benchmark
+Diabetic neuropathic pain (n=146): response rate 69%
+
+EVIDENCE GAPS IDENTIFIED
+1. Long-term (≥5 year) durability — current PMCF median follow-up insufficient; protocol extension to 60 months recommended.
+2. Pediatric population — no data; remains contraindicated.
+3. Pregnancy / lactation — no data; remains contraindicated.
+
+REGULATORY DATABASE SEARCH
+EUDAMED: 0 incidents requiring escalation
+National vigilance (BfArM, ANSM, MHRA): 0 FSCAs
+FDA MAUDE (informational): 2 device-related complaints, both resolved
+
+CONCLUSION
+PMCF data are consistent with pivotal study findings and support continued safe market presence with planned protocol extension to 60-month follow-up.`
+  },
+  {
+    id: 'demo-psur',
+    name: 'PSUR_NS3000_2024_Annual.pdf',
+    type: 'application/pdf',
+    size: '2.1 MB',
+    classification: 'PSUR',
+    isDemo: true,
+    text: `PERIODIC SAFETY UPDATE REPORT (PSUR) — 2024 Annual
+NeuroStim 3000 v3.2 · Class IIb · MDR Article 86
+
+REPORTING PERIOD: 1 Jan 2024 - 31 Dec 2024
+PATIENT EXPOSURES: estimated 3,420 patient-years across EU market
+
+COMPLAINT METRICS
+- Total complaints: 72 (rate: 2.1 per 1,000 device-uses)
+- Serious adverse incidents: 0
+- Field Safety Corrective Actions: 0
+- Trends analysis: no signals warranting risk file update
+
+REGULATORY DATABASE REVIEW
+- EUDAMED: 0 incidents
+- FDA MAUDE: 2 informational complaints (handled)
+- BfArM, ANSM, MHRA, AIFA: 0 escalations
+
+BENEFIT-RISK CONFIRMATION
+The benefit-risk profile remains positive based on aggregate clinical and post-market data. No labeling changes required.
+
+PSUR CONCLUSIONS
+The accumulated safety and performance data support continued conformity with MDR Annex I GSPRs. Next PSUR due 2025-Q4.`
+  },
+  {
+    id: 'demo-dhf',
+    name: 'NS3000_Design_History_File_summary.docx',
+    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    size: '5.1 MB',
+    classification: 'DHF',
+    isDemo: true,
+    text: `DESIGN HISTORY FILE SUMMARY — NeuroStim 3000 v3.2
+Conforms to EN ISO 13485:2016, EN ISO 14971:2019
+
+DESIGN INPUTS
+- Functional requirements derived from clinical need assessment
+- Patient safety requirements per MDR Annex I
+- Compatibility with existing surgical workflow
+
+PRINCIPLE OF OPERATION
+NeuroStim 3000 delivers controlled electrical stimulation pulses to neural targets via implanted leads. The pulse generator uses lithium-ion rechargeable battery technology with a programmable microprocessor controlling stimulation parameters within validated safety bounds. Software validated per IEC 62304.
+
+MATERIALS (BIOCOMPATIBILITY per ISO 10993)
+- Pulse generator titanium housing (Ti-6Al-4V, medical grade)
+- Lead body silicone insulation (medical-grade, ISO 10993 compliant)
+- Electrode contacts: platinum-iridium alloy
+- All implant-contact materials cleared by ISO 10993-1 risk assessment
+
+VERIFICATION AND VALIDATION
+- IEC 60601-1, 60601-1-2, 60601-1-6 (general electrical safety, EMC, usability)
+- ISO 14708-3 (Active implantable medical devices)
+- IEC 62304 (Software lifecycle)
+- IEC 62366-1 (Usability engineering)
+- ASTM F2052, F2213, F2503 (MRI compatibility)
+
+CHANGES vs. PRIOR GENERATION (v2.1 → v3.2)
+- Increased battery capacity (+22%)
+- Closed-loop adaptive stimulation algorithm (new)
+- Improved MRI conditional compatibility (3T full-body)
+- Companion smartphone-based patient app
+
+STANDARDS COMPLIANCE
+ISO 13485:2016, ISO 14971:2019 + A11:2021, ISO 14155:2020, IEC 62304:2006/AMD1:2015, IEC 62366-1:2015, ISO 10993-1:2018, ISO 14708-3:2017`
+  }
+];
+
+const SAMPLE_LITERATURE = [
+  { id: 1, citation: 'Deer TR, et al. Long-term outcomes of spinal neural stimulation for chronic intractable pain: 5-year follow-up of a multi-centre registry. Neuromodulation. 2024;27(3):412-425.', level: '2b', year: 2024, journal: 'Neuromodulation', relevance: 0.95, abstract: 'Multi-centre prospective registry of 683 patients with FBSS receiving SCS therapy. Primary endpoint: sustained ≥50% pain reduction at 60 months. Result: 62% of patients met sustained-response criteria; opioid MME reduced from 78 mg/d baseline to 31 mg/d at 5 years.' },
+  { id: 2, citation: 'Kapural L, et al. 10-kHz high-frequency neural stimulation: 36-month outcomes from the SENZA-RCT extension. Pain Pract. 2023;23(4):348-360.', level: '1b', year: 2023, journal: 'Pain Pract', relevance: 0.91, abstract: 'Long-term extension of SENZA-RCT. Demonstrates sustained pain relief and opioid reduction through 36 months. Treatment effect stable beyond 24 months.' },
+  { id: 3, citation: 'Mehanna R, et al. Long-term effects of deep brain stimulation in advanced Parkinson disease: a 15-year follow-up. Lancet Neurol. 2023;22(2):142-152.', level: '2b', year: 2023, journal: 'Lancet Neurol', relevance: 0.88, abstract: 'Long-term cohort study demonstrating sustained motor improvement over 15 years with manageable safety profile in carefully selected PD patients.' },
+  { id: 4, citation: 'Smith JA, et al. Systematic review of implantable pulse generator-based therapies for chronic intractable pain. Cochrane Database Syst Rev. 2023;(7):CD013876.', level: '1a', year: 2023, journal: 'Cochrane Reviews', relevance: 0.97, abstract: 'Cochrane systematic review of 47 RCTs. Pooled effect size for ≥50% pain response: RR 2.4 (95% CI 1.9-3.0) vs. conservative care. GRADE quality: moderate.' },
+  { id: 5, citation: 'European Society of Pain Medicine. Consensus guidelines on neuromodulation for chronic pain: 2024 update. Eur J Pain. 2024;28(4):501-525.', level: '1a', year: 2024, journal: 'Eur J Pain', relevance: 0.94, abstract: 'Updated consensus guidelines on patient selection, trial protocols, and outcomes assessment. Endorses use in FBSS, CRPS, peripheral neuropathies; recommends multidisciplinary patient selection.' },
+  { id: 6, citation: 'Wang H, et al. Adverse events associated with implantable neural stimulation: a meta-analysis of 28,000 patients. J Neurosurg. 2024;140(2):201-215.', level: '1a', year: 2024, journal: 'J Neurosurg', relevance: 0.92, abstract: 'Pooled meta-analysis of 28,471 patients. Device-related serious adverse event rate: 0.4% (95% CI 0.2-0.7%). Non-serious AE rate: 4.1%. No deaths attributed to device.' },
+  { id: 7, citation: 'Andersson G, et al. Real-world evidence in MDR-era post-market surveillance: case studies from European registries. Regul Affairs Q. 2024;9(2):88-102.', level: '4', year: 2024, journal: 'Regul Affairs Q', relevance: 0.85, abstract: 'Review of RWE methodologies applied to MDR post-market obligations. Identifies best practices for registry design and PMCF integration.' },
+  { id: 8, citation: 'European Commission. MEDDEV 2.7/1 Rev 4 — Clinical Evaluation: A Guide for Manufacturers and Notified Bodies. 2016.', level: 'Guidance', year: 2016, journal: 'EC Guidance', relevance: 1.0, abstract: 'Authoritative methodological guidance for clinical evaluation under EU MDR.' },
+  { id: 9, citation: 'MDCG 2020-5. Clinical Evaluation — Equivalence: a guide for manufacturers and notified bodies. European Commission, 2020.', level: 'Guidance', year: 2020, journal: 'EC Guidance', relevance: 1.0, abstract: 'Equivalence assessment methodology requiring clinical, technical, and biological pillar matching.' },
+  { id: 10, citation: 'Deer TR, et al. Best practices for patient selection in neural stimulation: NACC consensus 2023 update. Neuromodulation. 2023;26(2):204-228.', level: '1a', year: 2023, journal: 'Neuromodulation', relevance: 0.96, abstract: 'Updated consensus on patient selection criteria. Identifies subgroups with higher sustained-response probability.' }
+];
+
+// ============ UTILITIES ============
+
+function $(id) { return document.getElementById(id); }
+function htmlEscape(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function openModal(id) { $(id).classList.add('show'); }
+function closeModal(id) { $(id).classList.remove('show'); }
+function closeWelcome() { $('welcomeModal').classList.remove('show'); }
+
+function fmtBytes(n) {
+  if (n < 1024) return n + ' B';
+  if (n < 1024*1024) return (n/1024).toFixed(0) + ' KB';
+  return (n/1024/1024).toFixed(1) + ' MB';
+}
+
+function genId() { return 'src_' + Math.random().toString(36).slice(2, 10); }
+
+// ============ DOCUMENT CLASSIFIER ============
+// Heuristic content classification - works on parsed text
+
+function classifyDocument(filename, text) {
+  const f = filename.toLowerCase();
+  const t = text.toLowerCase().slice(0, 8000);
+
+  // Filename patterns first (strong signal)
+  if (/risk.*manag|rmf/i.test(f)) return 'Risk Mgmt';
+  if (/(^|_)ifu(_|\.)|instructions.for.use/i.test(f)) return 'IFU';
+  if (/(^|_)dhf(_|\.)|design.history/i.test(f)) return 'DHF';
+  if (/cip|clinical.investigation.plan/i.test(f)) return 'CIP';
+  if (/csr|clinical.study.report|pivotal/i.test(f)) return 'CSR';
+  if (/pmcf|post.market.clinical/i.test(f)) return 'PMCF';
+  if (/psur|periodic.safety/i.test(f)) return 'PSUR';
+  if (/pms|post.market.surv/i.test(f)) return 'PMS';
+  if (/cep|clinical.evaluation.plan/i.test(f)) return 'CEP';
+  if (/ris|nbib|endnote|bibtex|references|citations|literature/i.test(f)) return 'Lit';
+
+  // Content patterns (heuristics)
+  const scores = {
+    'Risk Mgmt': (t.match(/hazard|risk control|iso 14971|residual risk|risk management/g) || []).length,
+    'IFU': (t.match(/indications|contraindications|warnings|instructions for use|adverse events/g) || []).length,
+    'DHF': (t.match(/design input|verification|validation|design history|materials/g) || []).length,
+    'CSR': (t.match(/primary endpoint|randomi.ed|n=\d|study population|results/g) || []).length,
+    'PMCF': (t.match(/post.market clinical|pmcf|registry|long.term follow/g) || []).length,
+    'PSUR': (t.match(/periodic safety|psur|reporting period|patient exposure/g) || []).length,
+    'CIP': (t.match(/clinical investigation plan|study protocol|inclusion criteria/g) || []).length,
+    'Lit': (t.match(/journal|et al|doi:|abstract|peer.reviewed/g) || []).length
+  };
+  
+  // Pick highest scorer if any score > 2
+  let best = null, bestScore = 2;
+  for (const [k, v] of Object.entries(scores)) {
+    if (v > bestScore) { best = k; bestScore = v; }
+  }
+  return best || 'Source';
+}
+
+// ============ FILE PARSING ============
+
+async function parseFile(file) {
+  const name = file.name;
+  const lower = name.toLowerCase();
+
+  // DOCX
+  if (lower.endsWith('.docx')) {
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({ arrayBuffer });
+    return result.value;
+  }
+
+  // PDF
+  if (lower.endsWith('.pdf')) {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= Math.min(pdf.numPages, 100); i++) { // cap at 100 pages
+      const page = await pdf.getPage(i);
+      const tc = await page.getTextContent();
+      const pageText = tc.items.map(it => it.str).join(' ');
+      fullText += pageText + '\n\n';
+    }
+    return fullText;
+  }
+
+  // Plain text
+  if (lower.endsWith('.txt')) {
+    return await file.text();
+  }
+
+  throw new Error('Unsupported file type. Use .docx, .pdf, or .txt.');
+}
+
+async function handleFileUpload(files) {
+  const list = $('uploadedList');
+  for (const file of files) {
+    const id = genId();
+    const row = document.createElement('div');
+    row.className = 'doc-list';
+    row.style.marginBottom = '6px';
+    row.innerHTML = `
+      <div class="doc-row" data-id="${id}">
+        <div class="doc-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+        </div>
+        <div class="doc-name">
+          <b>${htmlEscape(file.name)}</b>
+          <small>${fmtBytes(file.size)} · parsing in browser…</small>
+        </div>
+        <span class="doc-cls classifying">Parsing…</span>
+        <span class="src-tag real">REAL</span>
+        <button class="doc-rm" title="Remove" onclick="removeSource('${id}', this)">×</button>
+      </div>
+    `;
+    list.appendChild(row);
+    try {
+      const text = await parseFile(file);
+      const classification = classifyDocument(file.name, text);
+      SOURCES.push({
+        id, name: file.name, type: file.type, size: file.size,
+        classification, text, parsed: true, isDemo: false
+      });
+      const docRow = row.querySelector('.doc-row');
+      docRow.querySelector('.doc-name small').textContent = `${fmtBytes(file.size)} · ${text.length.toLocaleString()} chars parsed`;
+      const cls = docRow.querySelector('.doc-cls');
+      cls.classList.remove('classifying');
+      cls.textContent = classification;
+      cls.onclick = () => previewDoc(id);
+    } catch (e) {
+      const docRow = row.querySelector('.doc-row');
+      docRow.querySelector('.doc-name small').textContent = `Parse failed: ${e.message}`;
+      docRow.querySelector('.doc-cls').textContent = 'ERROR';
+      docRow.querySelector('.doc-cls').style.background = 'var(--rust-soft)';
+      docRow.querySelector('.doc-cls').style.color = 'var(--rust)';
+    }
+  }
+  updateUploadFooter();
+  refreshSidebar();
+  renderRightPanel();
+}
+
+function removeSource(id, btn) {
+  SOURCES = SOURCES.filter(s => s.id !== id);
+  btn.closest('.doc-list').remove();
+  updateUploadFooter();
+  refreshSidebar();
+  renderRightPanel();
+}
+
+function updateUploadFooter() {
+  const note = $('uploadFootNote');
+  const btn = $('generateAllBtn');
+  if (SOURCES.length === 0) {
+    note.textContent = 'No documents uploaded yet.';
+    btn.disabled = true;
+  } else {
+    const counts = {};
+    SOURCES.forEach(s => { counts[s.classification] = (counts[s.classification] || 0) + 1; });
+    const summary = Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(' · ');
+    note.textContent = `${SOURCES.length} document${SOURCES.length > 1 ? 's' : ''} ready — ${summary}`;
+    btn.disabled = false;
+  }
+  $('srcCount').textContent = SOURCES.length;
+  $('litCount').textContent = LITERATURE.length;
+}
+
+function previewDoc(id) {
+  const src = SOURCES.find(s => s.id === id);
+  if (!src) return;
+  $('docPreviewTitle').textContent = src.name;
+  $('docPreviewMeta').textContent = `${src.classification} · ${fmtBytes(src.size)} · ${src.text.length.toLocaleString()} characters extracted · ${src.isDemo ? 'Demo content' : 'Real upload, browser-parsed'}`;
+  const preview = $('docPreviewBody');
+  // Show first 5000 chars
+  const text = src.text.slice(0, 5000);
+  preview.textContent = text + (src.text.length > 5000 ? '\n\n[…truncated for preview · full content used in generation…]' : '');
+  openModal('docPreviewModal');
+}
+
+// ============ SAMPLE LOADERS ============
+
+function loadSampleDevice() {
+  closeWelcome();
+  // Already have default DEVICE — just load sample docs
+  loadSampleDocs();
+  // Generate sample sections too
+  setTimeout(() => {
+    runFullGeneration();
+  }, 600);
+}
+
+function loadSampleDocs() {
+  // Avoid duplicates
+  if (SOURCES.some(s => s.isDemo)) return;
+  SAMPLE_DOCS_DATA.forEach(d => {
+    SOURCES.push({ ...d, parsed: true });
+  });
+  LITERATURE = [...SAMPLE_LITERATURE];
+  // Refresh UI
+  const list = $('uploadedList');
+  if (list) {
+    list.innerHTML = '';
+    SOURCES.forEach(s => {
+      const row = document.createElement('div');
+      row.className = 'doc-list';
+      row.style.marginBottom = '6px';
+      row.innerHTML = `
+        <div class="doc-row" data-id="${s.id}">
+          <div class="doc-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+            </svg>
+          </div>
+          <div class="doc-name">
+            <b>${htmlEscape(s.name)}</b>
+            <small>${s.size} · ${s.text.length.toLocaleString()} chars</small>
+          </div>
+          <span class="doc-cls" onclick="previewDoc('${s.id}')">${s.classification}</span>
+          <span class="src-tag demo">DEMO</span>
+          <button class="doc-rm" onclick="removeSource('${s.id}', this)">×</button>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+  }
+  updateUploadFooter();
+  refreshSidebar();
+  renderRightPanel();
+}
+
+// ============ SIDEBAR ============
+
+function refreshSidebar() {
+  // Device card
+  $('deviceName').textContent = DEVICE.name + ' ' + DEVICE.version;
+  $('deviceClass').textContent = DEVICE.class.replace('Class ', '');
+  $('deviceManu').textContent = DEVICE.manufacturer.split(' ')[0];
+
+  // Section list with statuses
+  const list = $('secList');
+  list.innerHTML = '';
+  SECTIONS.forEach(s => {
+    const li = document.createElement('li');
+    const isSub = !!s.parent;
+    li.className = (isSub ? 'sub ' : '') + (s.num === currentSec ? 'active' : '');
+    li.dataset.num = s.num;
+    const draft = DRAFTS[s.num];
+    let statusClass = '';
+    if (draft) {
+      if (draft.status === 'approved') statusClass = 'approved';
+      else if (draft.status === 'review') statusClass = 'review';
+      else if (draft.status === 'gap') statusClass = 'gap';
+      else statusClass = 'draft';
+    }
+    li.innerHTML = `
+      <span class="sec-num">§${s.num}</span>
+      <span>${s.title}</span>
+      <span class="sec-status ${statusClass}"></span>
+    `;
+    li.onclick = () => selectSection(s.num);
+    list.appendChild(li);
+  });
+}
+
+function selectSection(num) {
+  currentSec = num;
+  refreshSidebar();
+  renderMain();
+}
+
+// ============ MAIN PANEL ============
+
+function getSection(num) { return SECTIONS.find(s => s.num === num); }
+
+function renderMain() {
+  const S = getSection(currentSec);
+  if (!S) return;
+  const draft = DRAFTS[S.num];
+  const main = $('mainInner');
+  const parent = S.parent ? getSection(S.parent) : null;
+
+  const statusPill = draft
+    ? `<span class="pill ${draft.status === 'approved' ? 'approved' : draft.status === 'review' ? 'review' : draft.status === 'gap' ? 'gap' : 'ai'}"><span class="dot"></span> ${draft.status === 'approved' ? 'Approved' : draft.status === 'review' ? 'Needs Review' : draft.status === 'gap' ? 'Has Gap' : 'AI Draft'}</span>`
+    : `<span class="pill pending"><span class="dot"></span> Not yet drafted</span>`;
+
+  main.innerHTML = `
+    <div class="breadcrumb">
+      <span>${DEVICE.name} ${DEVICE.version}</span>
+      <span class="sep">›</span>
+      <span>CER Draft</span>
+      ${parent ? `<span class="sep">›</span><span>§${parent.num} ${parent.title.replace(/&amp;/g, '&')}</span>` : ''}
+      <span class="sep">›</span>
+      <span>§${S.num}</span>
+    </div>
+    <h1 class="section-title"><span class="num">§${S.num}</span>${S.title.replace(/&amp;/g, '&')}</h1>
+    <div class="section-meta">
+      <div>${statusPill}</div>
+      <div><b>Standard:</b> MEDDEV 2.7/1 Rev 4</div>
+      <div><b>Expected sources:</b> ${S.expects ? S.expects.join(', ') : 'see template'}</div>
+      <div><b>Sources mapped:</b> ${matchingSources(S).length}</div>
+    </div>
+    ${draft ? renderDraftedSection(S, draft) : renderEmptySection(S)}
+  `;
+}
+
+function matchingSources(S) {
+  // Match sources by classification against section's expected types
+  if (!S.expects) return [];
+  // Map our expects to source classifications
+  const classMap = {
+    'CSR': ['CSR'],
+    'PMCF': ['PMCF', 'PMS'],
+    'PSUR': ['PSUR'],
+    'IFU': ['IFU'],
+    'DHF': ['DHF'],
+    'Risk': ['Risk Mgmt'],
+    'Lit': ['Lit']
+  };
+  const expected = new Set();
+  S.expects.forEach(e => (classMap[e] || [e]).forEach(c => expected.add(c)));
+  return SOURCES.filter(s => expected.has(s.classification));
+}
+
+function renderEmptySection(S) {
+  const matched = matchingSources(S);
+  const litMatched = (S.expects && S.expects.includes('Lit')) ? LITERATURE.length : 0;
+  return `
+    <div class="gen-block empty">
+      <h4 style="color: var(--ink); font-family: var(--font-serif); font-size: 17px; margin-bottom: 8px;">Section not yet drafted</h4>
+      <p style="margin-bottom: 14px;">${matched.length > 0 ? `<b>${matched.length}</b> matching source document${matched.length > 1 ? 's' : ''} available${litMatched ? ` · <b>${litMatched}</b> literature item${litMatched > 1 ? 's' : ''}` : ''}.` : 'No source documents matched to this section yet. Upload documents or load samples to enable AI drafting.'}</p>
+      <div style="display: flex; gap: 8px; justify-content: center;">
+        <button class="ai-btn primary" onclick="generateSection('${S.num}')" ${SOURCES.length === 0 ? 'disabled' : ''}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          ${CONFIG.useLiveAI && CONFIG.apiKey ? 'Draft with Claude' : 'Draft this section (demo)'}
+        </button>
+        ${SOURCES.length === 0 ? '<button class="ai-btn" onclick="openModal(\'uploadModal\')">Upload sources first</button>' : ''}
+      </div>
+    </div>
+    ${renderSectionGuide(S)}
+  `;
+}
+
+function renderSectionGuide(S) {
+  const guides = {
+    '1': `<p>Synthesis of the entire CER. Should reference: scope and intended purpose, summary of clinical data (pivotal + PMCF + literature), key safety/performance findings, identified evidence gaps, conclusion on benefit-risk and conformity with MDR Annex I GSPRs.</p>`,
+    '3.4': `<p>Comprehensive medical device description covering: trade name, principle of operation/mode of action, variants and configurations, indications, contraindications, warnings, precautions, adverse events, performance claims, applicable standards. Most content derives from IFU and DHF.</p>`,
+    '4': `<p>Current state of clinical practice in the relevant indication. Includes: disease epidemiology, current standard-of-care algorithms, accepted benefit-risk profile of comparator technologies, treatment guidelines, unmet medical needs. Primarily from literature.</p>`,
+    '5.3': `<p>Equivalence assessment per MDCG 2020-5. All three pillars (clinical, technical, biological) must match for equivalence to be claimed. Requires sufficient access to the equivalent device's technical documentation.</p>`,
+    '5.5': `<p>Systematic literature search per the CEP methodology. Search strings, databases, date ranges, PRISMA flow with included/excluded counts, appraisal of included studies against Oxford CEBM evidence levels.</p>`,
+    '6.1': `<p>Each clinical claim made in the IFU mapped to its supporting evidence (RCT, PMCF, literature). Strength of evidence (Oxford CEBM) declared. Unsubstantiated claims flagged with PMCF mitigation.</p>`,
+    '7': `<p>Overall conclusion on (i) GSPR conformity, (ii) clinical safety, (iii) clinical performance, (iv) benefit-risk profile. CER update frequency. Pending PMCF activities.</p>`
+  };
+  const g = guides[S.num];
+  if (!g) return '';
+  return `<div class="gen-block source" style="margin-top: 20px;">
+    <div class="tag">📘 Template guidance · MEDDEV 2.7/1 Rev 4</div>
+    ${g}
+  </div>`;
+}
+
+function renderDraftedSection(S, draft) {
+  let html = '';
+
+  // Section content
+  html += `
+    <div class="gen-block ai">
+      <div class="tag">⚡ ${draft.isLive ? 'Live · ' + (CONFIG.model || 'Claude') : 'Demo draft'} · drafted from ${draft.sourcesUsed?.length || 0} source${draft.sourcesUsed?.length === 1 ? '' : 's'}</div>
+      ${formatContent(draft.content)}
+      <div class="trace-footer">
+        <b>Generation trace</b>
+        <div class="trace-row">
+          ${(draft.sourcesUsed || []).map(s => `<span class="trace-chip">📄 ${s}</span>`).join('')}
+          ${draft.isLive ? `<span class="trace-chip">🤖 ${CONFIG.model}</span>` : '<span class="trace-chip">🎯 Demo mode</span>'}
+          ${draft.tokensIn ? `<span class="trace-chip">📥 ${draft.tokensIn} input tokens</span>` : ''}
+          ${draft.tokensOut ? `<span class="trace-chip">📤 ${draft.tokensOut} output tokens</span>` : ''}
+          <span class="trace-chip">⏱ ${draft.duration || '—'}</span>
+        </div>
+      </div>
+      <div class="ai-actions">
+        <button class="ai-btn primary" onclick="approveSection('${S.num}')">✓ Approve</button>
+        <button class="ai-btn" onclick="editSectionInline('${S.num}')">Edit Inline</button>
+        <button class="ai-btn" onclick="generateSection('${S.num}')">🔄 Re-generate</button>
+        <button class="ai-btn warn" onclick="flagSection('${S.num}')">⚠ Flag for SME</button>
+      </div>
+    </div>
+  `;
+
+  return html;
+}
+
+function formatContent(text) {
+  // Lightweight markdown rendering: paragraphs, headers, lists, bold, citations [1]
+  let html = htmlEscape(text);
+  html = html.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  html = html.replace(/\[(\d+)\]/g, '<a class="cite">[$1]</a>');
+  const paras = html.split(/\n\n+/);
+  return paras.map(p => {
+    const t = p.trim();
+    if (!t) return '';
+    if (t.startsWith('### ')) return `<h4>${t.slice(4)}</h4>`;
+    if (t.startsWith('## ')) return `<h4>${t.slice(3)}</h4>`;
+    if (t.startsWith('# ')) return `<h4>${t.slice(2)}</h4>`;
+    // List
+    if (t.match(/^[-•*]\s/m)) {
+      const items = t.split(/\n/).map(l => l.replace(/^[-•*]\s/, '').trim()).filter(Boolean);
+      return `<ul>${items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+    }
+    if (t.match(/^\d+\.\s/m)) {
+      const items = t.split(/\n/).map(l => l.replace(/^\d+\.\s/, '').trim()).filter(Boolean);
+      return `<ol>${items.map(i => `<li>${i}</li>`).join('')}</ol>`;
+    }
+    return `<p>${t.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+}
+
+// ============ AI GENERATION ============
+
+function buildSectionPrompt(S, sourceTexts, literatureRefs) {
+  const sourceBlock = sourceTexts.map((s, i) => `--- SOURCE ${i+1}: ${s.name} (${s.classification}) ---\n${s.text.slice(0, 6000)}`).join('\n\n');
+  const litBlock = literatureRefs.length > 0
+    ? '\n\n--- LITERATURE REFERENCES (cite with [n] notation) ---\n' + literatureRefs.map(l => `[${l.id}] ${l.citation}\n    Abstract: ${l.abstract}`).join('\n')
+    : '';
+
+  const sectionGuides = {
+    '1': 'Write a complete Executive Summary. Cover: device identification, regulatory framework (MDR + MEDDEV 2.7/1), data sources, key efficacy and safety findings (cite specific numbers from CSR/PMCF/PSUR), identified evidence gaps, overall benefit-risk conclusion. Use formal regulatory writing style.',
+    '2.1': 'Write the Document Objective subsection — a brief paragraph stating the objective of the CER, referencing the CEP and citing MDR + MEDDEV 2.7/1 Rev 4 methodology.',
+    '2.4': 'Write the Justification for choice of evaluator. Describe the multidisciplinary team competence per MEDDEV 2.7/1 Rev 4 §6.4. Reference Appendix A for CV and DOI.',
+    '3.1': 'Write the Scope subsection. Identify whether this is an initial CER or update. State the purpose: to identify and critically evaluate clinical data — favourable and unfavourable — in order to verify safety, performance, and benefit-risk when used as intended.',
+    '3.2': 'Identify the applicable GSPRs from MDR Annex I that this CER addresses. Construct a table with GSPR number, requirement summary, and which CER section addresses each.',
+    '3.3': 'List the Clinical Evaluation Objectives as bullet points: identify clinical data, verify safety and performance endpoints, demonstrate appropriateness, establish benefit-risk, specify acceptance criteria.',
+    '3.4.1': 'Write the Trade Name and Description subsection. Use the IFU and DHF content to describe the device, its components, variants, and configurations. Be specific and factual.',
+    '3.4.2': 'Write the Principle of Operation / Mode of Action subsection. Describe how the device works, citing the DHF. Note whether any medicinal substances, animal/human tissue, or CMR substances are involved.',
+    '3.4.9': 'Write the Indications subsection. Extract verbatim or near-verbatim from the IFU. Include patient population criteria.',
+    '3.4.10': 'Write the Contraindications subsection. Extract from the IFU. Format as a bulleted list.',
+    '3.4.11': 'Write the Warnings and Precautions subsection. Extract from the IFU.',
+    '3.4.13': 'Write the Adverse Events / Side Effects subsection. Extract from the IFU, organized by frequency (common, uncommon, rare).',
+    '3.4.14': 'Write the Clinical Benefits and Performance Claims subsection. Create a table mapping each claim to its supporting evidence (RCT, PMCF, literature). Flag unsubstantiated claims.',
+    '4.1': 'Write the Clinical Background subsection on the disease/condition. Use literature to describe epidemiology, pathophysiology, current standard of care, treatment algorithm. Cite literature with [n] notation.',
+    '4.2': 'Write the State-of-the-Art subsection. Based on the literature, establish the accepted efficacy and safety benchmarks for comparator devices in this therapeutic area. The subject device performance will later be compared to these benchmarks.',
+    '4.3': 'Write the Benefit-Risk Overview subsection (state-of-the-art context). Describe the accepted benefit-risk profile for devices in this class — what residual risks are typically accepted in exchange for what clinical benefits.',
+    '5.1': 'State the type of evaluation per MEDDEV 2.7/1 Rev 4 §8 — typically Route C (clinical evaluation based on clinical investigation of the device under evaluation, supplemented by literature).',
+    '5.2': 'List the data sources and types used in this evaluation: manufacturer-generated (pivotal RCT, PMCF, PSUR) and literature-derived. Provide a table with study type, evidence level (Oxford CEBM), and patient counts.',
+    '5.3': 'Write the Demonstration of Equivalence subsection per MDCG 2020-5. Construct the three-pillar equivalence matrix (clinical, technical, biological characteristics) comparing the subject device to the equivalent device. State the conclusion on whether equivalence is established.',
+    '5.4.1': 'Summarize the pre-clinical verification and validation testing (ISO 10993 biocompatibility, IEC 60601 series, IEC 62366 usability, ISO 14708 active implantable standards if applicable). Cite from the DHF.',
+    '5.4.2': 'Summarize the pivotal clinical investigation(s) — CSR data. Include study design, population, primary/secondary endpoints, results (with numbers), and conclusion. Reference ISO 14155:2020 and ICH-GCP compliance.',
+    '5.4.3': 'Summarize the PMCF data. Cover enrollment, follow-up duration, longitudinal outcomes, subgroup analyses, evidence gaps identified.',
+    '5.4.4': 'Summarize the PSUR / aggregate safety data. Cover reporting period, patient exposures, complaint rate, FSCAs, regulatory database review, benefit-risk confirmation.',
+    '5.5.1': 'Write the Literature Search Methodology subsection. Describe the databases searched, search strings, date range, inclusion/exclusion criteria, appraisal methodology.',
+    '5.5.2': 'Write the Search Results / PRISMA Flow subsection. Numbers identified, excluded by title/abstract, excluded by full-text, included for appraisal. Distribution by evidence level.',
+    '5.6': 'Write the Summary and Appraisal of Clinical Data subsection. Synthesize across pivotal + PMCF + literature. Compare performance and safety against state-of-the-art benchmarks established in §4.2.',
+    '5.7.1': 'Write the Requirement on Safety subsection. State that clinical data demonstrate the device does not compromise safety when used per IFU. Reference GSPR 1 and GSPR 2 compliance. Cite Risk Management File.',
+    '5.7.2': 'Write the Acceptable Benefit-Risk subsection. Per MEDDEV 2.7/1 Rev 4 §10. State that the principal clinical benefit substantially outweighs the residual risks. Cite specific numbers.',
+    '5.7.3': 'Write the Performance vs. State-of-the-Art subsection. Compare subject device performance to literature benchmarks established in §4.2.',
+    '5.7.4': 'Write the Evidence Gaps and PMCF Mitigations subsection. Identify any gaps in evidence and describe how they will be addressed through PMCF activities.',
+    '6.1': 'Write the Substantiation of Clinical Claims subsection. Construct a table mapping each labeling claim to its evidence, strength of evidence, and substantiation verdict (Yes / Gap).',
+    '6.2': 'Write the Conclusions on Clinical Evidence subsection. State whether the evidence base is sufficient to demonstrate GSPR conformity. Reference any gaps and their mitigations.',
+    '6.3': 'Write the PMS and PMCF Activities subsection. Describe the ongoing surveillance program: vigilance database monitoring, periodic safety reporting (PSUR/PBRER), PMCF registry continuation, planned CER update frequency.',
+    '7': 'Write the Conclusions section. Final, definitive statements on: (1) GSPR conformity established, (2) clinical safety, (3) clinical performance vs. state-of-the-art, (4) positive benefit-risk profile, (5) identified gaps and their PMCF mitigations, (6) CER update frequency. Conclude with overall conformity statement.',
+    '8': 'Generate the References list in Vancouver style, including all literature cited in this CER.'
+  };
+
+  const guide = sectionGuides[S.num] || `Write subsection §${S.num} ${S.title} per MEDDEV 2.7/1 Rev 4 methodology. Use only the source documents and literature provided.`;
+
+  return `You are a Senior Clinical Evaluator drafting Section §${S.num} (${S.title}) of a Clinical Evaluation Report.
+
+REGULATORY FRAMEWORK:
+- EU MDR 2017/745
+- MEDDEV 2.7/1 Rev 4
+- ISO 14155:2020 (clinical investigation GCP)
+- ISO 14971:2019 (risk management)
+
+DEVICE PROFILE:
+- Trade name: ${DEVICE.name} ${DEVICE.version}
+- Manufacturer: ${DEVICE.manufacturer}
+- Class: ${DEVICE.class}
+- Device type: ${DEVICE.type}
+- Therapeutic area: ${DEVICE.ta}
+- Intended purpose: ${DEVICE.purpose}
+- Equivalent device (if applicable): ${DEVICE.equiv}
+
+YOUR TASK:
+${guide}
+
+REQUIREMENTS:
+- Cite every claim with either source documents (use natural reference like "per the CSR" or "per the Risk Management File") or literature [n] notation.
+- Use formal regulatory writing style. Be precise. Avoid marketing language.
+- Use markdown formatting: ## for sub-headings, **bold** for emphasis, bullet lists with -, numbered lists with 1.
+- Do not invent data. If information is not in the provided sources, do not include it. If a gap exists, identify it.
+- Target length: 250-600 words depending on section complexity.
+
+PROVIDED SOURCES:
+${sourceBlock}
+${litBlock}
+
+Now write Section §${S.num} - ${S.title}.`;
+}
+
+// Demo content templates (used when no Claude API)
+function getDemoContent(S) {
+  const demoMap = {
+    '1': `## Executive Summary
+
+The medical device covered in this Clinical Evaluation Report is **${DEVICE.name} ${DEVICE.version}**, manufactured by **${DEVICE.manufacturer}**. The device is a ${DEVICE.class} ${DEVICE.type.toLowerCase()} intended for ${DEVICE.purpose.split(',')[0].toLowerCase().replace('is intended for ', '')}.
+
+This clinical evaluation was conducted in accordance with **EU MDR 2017/745 Article 61 and Annex XIV**, following the methodology described in **MEDDEV 2.7/1 Rev 4**. The evaluation is based on:
+
+- One pivotal multi-centre randomised controlled clinical investigation (n=312)
+- Post-market clinical follow-up data covering 18 months median follow-up (n=847 patients)
+- Periodic safety update reporting through 2024
+- Systematic appraisal of peer-reviewed publications retrieved from medical literature databases
+
+The clinical evidence demonstrates that ${DEVICE.name} achieves its intended performance with a favourable safety profile when used as labelled. **Primary endpoint success was 84.6%** (95% CI: 80.3-88.4%) in the pivotal study, with no device-related serious adverse events. Post-market data is consistent with pre-market findings (cumulative AE rate 3.2 per 1,000 device-uses, all non-serious). The benefit-risk profile is positive and aligned with state-of-the-art.
+
+**Two evidence gaps were identified**: (1) limited long-term (>5 year) efficacy data in the elderly subgroup, and (2) absence of data in pregnant or lactating populations. Both gaps are addressed through Post-Market Clinical Follow-up (PMCF) commitments documented in §6.3.
+
+The overall conclusion is that ${DEVICE.name} **conforms to the relevant General Safety and Performance Requirements** (GSPRs) of EU MDR Annex I and presents a **positive benefit-risk profile** for the indicated patient population.`,
+    
+    '3.1': `## Scope
+
+This Clinical Evaluation Report represents an **initial CER** of the medical device **${DEVICE.name} ${DEVICE.version}**, manufactured by **${DEVICE.manufacturer}**. The purpose of this clinical evaluation is to identify and critically evaluate pertinent clinical data — favourable and unfavourable — from clinical investigations, pre-clinical studies, published scientific and clinical literature, and post-market surveillance activities of ${DEVICE.name} ${DEVICE.version}, in order to verify the safety and performance (including clinical benefits) and benefit-risk ratio when used as intended by the manufacturer.
+
+This CER establishes conformity with the relevant General Safety and Performance Requirements (GSPRs) of **EU MDR Annex I**, listed in §3.2. The clinical evaluation methodology follows MEDDEV 2.7/1 Rev 4.
+
+The intended purpose under evaluation is: *${DEVICE.purpose}*`,
+
+    '3.4.1': `## Trade Name and Description
+
+**${DEVICE.name} ${DEVICE.version}** is a ${DEVICE.class} ${DEVICE.type.toLowerCase()} manufactured by ${DEVICE.manufacturer}. Per the Instructions for Use (IFU) and Design History File (DHF), the device system comprises:
+
+- An implantable pulse generator (IPG) with rechargeable lithium-ion battery
+- Implantable lead arrays with platinum-iridium electrodes
+- External patient programmer for therapy adjustment
+- Tablet-based clinician programmer
+
+The device is provided sterile via ethylene oxide sterilization, single-use, with a 36-month shelf life from manufacture (storage 0-40°C, 10-90% humidity non-condensing).
+
+**Variants and configurations** available in the current generation:
+
+- ${DEVICE.name} Standard — primary configuration for adult patients
+- ${DEVICE.name} Compact — reduced-form-factor variant
+- ${DEVICE.name} v2.1 — prior generation, discontinued 2023`,
+
+    '3.4.9': `## Indications
+
+Per the IFU §2, ${DEVICE.name} ${DEVICE.version} is indicated for the **symptomatic management of chronic intractable pain in adult patients** (≥18 years) who meet the following criteria:
+
+- Failed conservative therapy of ≥6 months duration
+- Documented chronic neuropathic or mixed pain syndrome
+- Demonstrated ≥50% pain reduction during successful trial stimulation
+
+The device is intended for use **under the supervision of trained healthcare professionals** in hospital and specialized outpatient settings.`,
+
+    '3.4.10': `## Contraindications
+
+Per the IFU §3, contraindications for ${DEVICE.name} ${DEVICE.version} include:
+
+- Active local or systemic infection
+- Pregnancy (clinical data not available — see §5.7.4)
+- Coagulopathy that cannot be corrected
+- Diathermy use (lifetime contraindication — risk of severe tissue damage)
+- Patients unable to operate the device safely
+- Pediatric patients (<18 years; data not available)
+- Known hypersensitivity to any component material per IFU §8`,
+
+    '3.4.13': `## Adverse Events / Side Effects
+
+Adverse events documented in the IFU, pivotal CSR, and PMCF Report are organized by frequency:
+
+**Common (≥1%):**
+- Unwanted paresthesia or stimulation
+- Application-site discomfort
+- Lead migration requiring surgical revision
+
+**Uncommon (<1%):**
+- Infection requiring device explantation
+- Hardware failure
+
+**Rare (<0.1%):**
+- Persistent neurological deficit
+- Cerebrospinal fluid leak
+
+Across the integrated body of evidence (pivotal RCT + PMCF + PSUR, covering ~4,580 cumulative patient-exposures): **zero device-related serious adverse events** and **3.2 device-related non-serious events per 1,000 device-uses** — all transient and resolved without sequelae.`,
+
+    '3.4.14': `## Clinical Benefits and Performance Claims
+
+The clinical benefits claimed for ${DEVICE.name} ${DEVICE.version}, with supporting evidence:
+
+| Claim ID | Claim | Supporting Evidence | Strength |
+|---|---|---|---|
+| C-01 | ≥80% primary endpoint achievement | Pivotal CSR §6.2 + PMCF Report | Strong (Level 1b + 2b) |
+| C-02 | Zero device-related SAEs | CSR + PMCF + PSUR | Strong |
+| C-03 | Sustained effect through 12 months | PMCF 2024-Q3 | Moderate (Level 2b) |
+| C-04 | Reduction in concomitant pharmacotherapy | CSR §6.3 + literature [2] | Moderate |
+| C-05 | Compatibility with standard-of-care | CSR §5.6 + literature [4] | Moderate |
+| C-06 | Long-term durability ≥5 years | Limited literature [1] | **Weak — Gap** |
+| C-07 | Use in elderly subgroup (≥75 yrs) | PMCF subgroup, n=84 | **Weak — Gap** |
+
+Two claims (C-06 long-term durability; C-07 elderly subgroup) are pending substantiation and are addressed through PMCF mitigations per §5.7.4 and §6.3.`,
+
+    '4.1': `## Clinical Background
+
+The clinical condition addressed by ${DEVICE.name} falls within ${DEVICE.ta}, an area affecting an estimated 100 million adults globally per current epidemiological literature [4]. Current standard-of-care comprises a stepped-care algorithm starting with conservative non-pharmacological interventions, escalating to pharmacotherapy (NSAIDs → tricyclic antidepressants → opioids), and reserving interventional approaches including implantable neural stimulation for refractory cases [5].
+
+Recent clinical practice guidelines from the European Society of Pain Medicine (2024) and analogous national bodies recommend implantable neural stimulation as an established treatment option for selected patients failing conservative therapy [5,10].
+
+**Unmet medical needs** in this clinical space include:
+- Variable response rates to first-line conservative therapy (40-55%)
+- Limited durability of effect beyond 12 months with conservative approaches
+- Significant safety concerns associated with prolonged opioid use
+- High healthcare resource utilization in untreated/undertreated patients
+
+Device-based interventions such as ${DEVICE.name} are positioned as alternatives that address these limitations through sustained efficacy with reduced reliance on systemic pharmacotherapy [1,4].`,
+
+    '4.2': `## State-of-the-Art
+
+The state-of-the-art benchmark for ${DEVICE.ta} devices in the same regulatory class, based on a systematic literature review (n=47 included studies, 2018-2024), comprises:
+
+- **Efficacy benchmark:** Primary endpoint response rate of **72-85%** across published Class IIb device studies [1,4]
+- **Safety benchmark:** Device-related serious adverse event rate **<1%** in pooled analyses [6]
+- **Durability benchmark:** Sustained effect at 12 months reported in **60-75%** of patients [1,4]
+- **Long-term durability:** Limited published data beyond 24 months; available evidence suggests sustained effect at 60 months in approximately 60-65% [1]
+
+${DEVICE.name} ${DEVICE.version} performance (response rate 84.6%, no device-related SAEs, 12-month sustained effect 71%) is **within or above state-of-the-art** across all three benchmarks. The favourable position is consistent with the most recent generation device features (closed-loop adaptive stimulation, improved patient programmer).`,
+
+    '5.3': `## Demonstration of Equivalence (MDCG 2020-5)
+
+Equivalence is claimed between **${DEVICE.name} ${DEVICE.version}** (subject device) and **${DEVICE.equiv}** (a CE-marked ${DEVICE.class} device with the same intended purpose) in support of selected literature data leveraged within this CER. The assessment is conducted per the three-pillar test of MDCG 2020-5: clinical, technical, and biological characteristics must **all** match for equivalence to be established.
+
+**Equivalence Assessment Matrix:**
+
+### Clinical characteristics
+| Characteristic | Subject device | Equivalent device | Verdict |
+|---|---|---|---|
+| Intended purpose | Symptomatic relief, primary indication | Symptomatic relief, primary indication | **Match** |
+| Patient population | Adult ≥18 yrs | Adult ≥18 yrs | **Match** |
+| Anatomy / physiology | Same target neural structure | Same target neural structure | **Match** |
+| Severity / disease stage | Refractory after ≥6 months conservative care | Refractory after ≥6 months conservative care | **Match** |
+
+### Technical characteristics
+| Characteristic | Subject device | Equivalent device | Verdict |
+|---|---|---|---|
+| Design principle | Implantable pulse generator + lead array | Implantable pulse generator + lead array | **Match** |
+| Specifications | Within ±5% across measured parameters | Reference | **Match** |
+| Method of use | Software-assisted parameter setting | Manual parameter setting | **Justified*** |
+| Conditions of use | Hospital + supervised outpatient | Hospital + supervised outpatient | **Match** |
+
+### Biological characteristics
+| Characteristic | Subject device | Equivalent device | Verdict |
+|---|---|---|---|
+| Contact materials | Titanium Ti-6Al-4V + medical silicone + Pt-Ir | Titanium Ti-6Al-4V + medical silicone + Pt-Ir | **Match** |
+| Duration of contact | Long-term implant | Long-term implant | **Match** |
+| Body site contact | Sub-cutaneous + neural | Sub-cutaneous + neural | **Match** |
+
+**\*** Software-assisted parameter setting is a non-clinically-relevant difference: parameter ranges are bounded identically; software validation per IEC 62304 is documented in DHF §6.3. Justification accepted per MDCG 2020-5 §A.4.
+
+**Conclusion:** Equivalence is established between ${DEVICE.name} ${DEVICE.version} and ${DEVICE.equiv} across all three pillars. ${DEVICE.manufacturer} confirms it has sufficient access to the technical documentation of ${DEVICE.equiv} through a contractual agreement (Appendix C), satisfying MDR Article 61(5) requirements.`,
+
+    '5.4.2': `## Clinical Investigations (CSRs)
+
+The pivotal multi-centre randomised controlled trial (Study NS-PIV-001, n=312, conducted across 14 European sites, 2022-2023) compared ${DEVICE.name} ${DEVICE.version} against the standard-of-care comparator. Key design parameters:
+
+- **Design:** Prospective, multi-centre, randomised 1:1, single-blind, controlled
+- **Primary endpoint:** Treatment response at 12 weeks (≥50% improvement in NRS pain score)
+- **Sample size:** 312 randomised (156 ${DEVICE.name}; 156 comparator)
+- **Compliance:** ISO 14155:2020 and ICH-GCP compliant, independent DSMB-monitored
+
+**Primary results:** Primary endpoint achieved in **84.6% (132/156)** of ${DEVICE.name} arm vs. 67.3% (105/156) of comparator arm (Δ +17.3%, p<0.001, 95% CI 7.2-27.4%).
+
+**Secondary results:**
+- Mean NRS pain reduction at 12 weeks: -4.2 (${DEVICE.name}) vs -2.6 (comparator), p<0.001
+- Opioid reduction (MME) at 12 weeks: -41% (${DEVICE.name}) vs -18% (comparator)
+- EQ-5D quality-of-life index improvement: +0.18 (${DEVICE.name}) vs +0.07 (comparator)
+- Patient-reported satisfaction: 84% (${DEVICE.name}) vs 56% (comparator)
+
+**Safety:** No device-related serious adverse events. Five non-serious device-related events (3.2%, all transient).`,
+
+    '5.4.3': `## PMCF Data
+
+PMCF Plan v2.0 (2024) defines longitudinal data capture through a multi-centre registry. Current status (2024-Q3 report):
+
+- **Enrollment:** 847 patients across 23 European centres
+- **Follow-up:** Median 18 months (range 6-36 months)
+
+**Longitudinal outcomes:**
+
+| Metric | Value (95% CI) | Benchmark (SoTA) | Verdict |
+|---|---|---|---|
+| Sustained response at 12 months | 71% (67.4-74.4%) | 60-75% | Within range |
+| Sustained response at 24 months | 66% (61.8-70.0%) | Limited literature | Reported |
+| Cumulative device-related AE rate | 3.2 / 1,000 device-uses | <5 / 1,000 (target) | Met |
+| Device-related SAE rate | 0.0% | <1.0% (SoTA) | Met |
+| Patient satisfaction (EQ-5D) | 0.78 (0.74-0.82) | n/a | Reported |
+
+**Subgroup analyses:** Elderly (≥75 years, n=84) response rate 68% — non-inferior to overall cohort. FBSS subgroup (n=204) response rate 76% — at the upper end of literature benchmark.
+
+**Evidence gaps identified:** (1) Long-term ≥5-year durability — current PMCF median follow-up insufficient. (2) Pediatric population — no data; remains contraindicated. (3) Pregnancy/lactation — no data; remains contraindicated. Mitigations documented in §5.7.4.`,
+
+    '5.5.2': `## Search Results · PRISMA Flow
+
+A systematic literature search was conducted through medical literature databases (Embase, Cochrane Library, Scopus, ClinicalTrials.gov) per the methodology in §5.5.1. Search date range: 1 January 2018 - 31 March 2025.
+
+**PRISMA flow:**
+- Records identified (after de-duplication): **412**
+- Excluded at title/abstract screening (off-topic / non-clinical): 298
+- Excluded at full-text review (PICO mismatch): 67
+- **Included for appraisal: 47**
+
+**Distribution by evidence level (Oxford CEBM):**
+- Level 1a (systematic reviews / meta-analyses): 5 articles
+- Level 1b (individual RCTs): 18 articles
+- Level 2b-4 (cohort, case-control, case series): 24 articles
+
+Included articles were appraised against the Oxford CEBM Levels of Evidence and a study-quality checklist adapted from MEDDEV 2.7/1 Rev 4 Appendix A6. Weighting reflects evidence level and methodological quality. Appraised data is summarised in §5.6 and synthesised against state-of-the-art in §4.2.`,
+
+    '5.6': `## Summary and Appraisal of Clinical Data
+
+Across the integrated body of evidence — manufacturer pivotal RCT (n=312), PMCF cohort (n=847), and 47 appraised literature publications — ${DEVICE.name} ${DEVICE.version} consistently meets or exceeds the performance acceptance criteria pre-specified in the Clinical Evaluation Plan.
+
+**Performance synthesis:** Primary endpoint achievement (84.6% in pivotal RCT; 71% sustained at 12 months in PMCF) sits at the upper end of state-of-the-art benchmarks (72-85% reported across comparator devices) [1,4].
+
+**Safety synthesis:** Across ~4,580 cumulative patient-exposures: **zero device-related serious adverse events**; **3.2 device-related non-serious events per 1,000 device-uses** — all transient, resolved without sequelae, and below the pre-specified 5/1,000 threshold. Safety findings are consistent with published literature on equivalent devices [6].
+
+**Clinical benefits demonstrated:**
+- Symptomatic improvement: ≥50% pain reduction achieved in 84.6% of patients (RCT) and sustained in 71% at 12 months (PMCF)
+- Functional restoration: mean EQ-5D index improvement +0.18 (p<0.001)
+- Reduced reliance on pharmacotherapy: 41% reduction in opioid MME at 6 months vs. comparator
+- Acceptable patient experience: satisfaction score 0.78
+
+The integrated evidence body is **sufficient to support GSPR conformity** for the labelled indications, with two identified gaps addressed via PMCF (see §5.7.4).`,
+
+    '5.7.4': `## Evidence Gaps and PMCF Mitigations
+
+Two evidence gaps have been identified through this clinical evaluation:
+
+### Gap G-01 · Long-term durability beyond 24 months
+
+Long-term durability beyond 24 months is not yet supported by manufacturer-generated data. PMCF Report 2024-Q3 covers a median 18-month follow-up. Literature reports beyond 24 months are limited to two observational studies of modest sample size [1].
+
+**Mitigation:** PMCF protocol extended to 60-month minimum follow-up per PMCF Plan v2.0 §3.2. Re-evaluation of long-term performance at next CER update (planned 2025-Q4).
+
+### Gap G-02 · Pregnant / lactating populations; pediatric patients
+
+No clinical data are available in pregnant or lactating populations, or in pediatric patients (<18 years). These populations are **contraindicated** in the current IFU (§3).
+
+**Mitigation:** Contraindication retained. No PMCF activity required for excluded populations. Re-assessment only if labelling expansion is proposed.
+
+Both gaps are tracked in the manufacturer's Post-Market Surveillance Plan and reviewed annually as part of the PSUR cycle.`,
+
+    '7': `## Conclusions
+
+Based on the totality of clinical evidence — pivotal RCT (n=312), 18-month PMCF cohort (n=847), PSUR data covering ~3,420 patient-exposures in 2024, and 47 appraised peer-reviewed publications — the following conclusions are reached for **${DEVICE.name} ${DEVICE.version}**:
+
+1. **Conformity with relevant GSPRs of EU MDR Annex I is established** (GSPR 1, 2, 6, 8, 23.4(c), 23.4(g)).
+
+2. **Clinical safety:** ${DEVICE.name} ${DEVICE.version} does not compromise patient or user safety when used per the IFU. Residual risks are quantified, communicated, and acceptable.
+
+3. **Clinical performance:** ${DEVICE.name} ${DEVICE.version} achieves its intended performance with primary endpoint response in 84.6% of treated patients (RCT) and sustained effect in 71% at 12 months (PMCF) — at or above state-of-the-art benchmarks.
+
+4. **Benefit-risk profile is positive.** Clinical benefits substantially outweigh residual risks.
+
+5. **Two identified evidence gaps** (long-term durability beyond 24 months; elderly subgroup) are addressed through committed PMCF activities. Corresponding labelling claims have been moderated pending further evidence.
+
+6. **CER update frequency:** Annual, per MDR Article 61 and the manufacturer's ${DEVICE.class} monitoring cycle.
+
+**Overall conclusion:** The clinical evidence supports the conclusion that **${DEVICE.name} ${DEVICE.version} is safe, performs as intended, and presents a positive benefit-risk profile** when used in accordance with the Instructions for Use, in the labelled patient population, by trained healthcare professionals.`
+  };
+  
+  // Default generic content for sections without specific demo
+  return demoMap[S.num] || generateGenericDemo(S);
+}
+
+function generateGenericDemo(S) {
+  return `## ${S.title}
+
+This section addresses the requirements of MEDDEV 2.7/1 Rev 4 §${S.num} for the medical device **${DEVICE.name} ${DEVICE.version}**, manufactured by ${DEVICE.manufacturer}.
+
+${S.expects && S.expects.length > 0 ? `This section is informed by the following source document types: ${S.expects.join(', ')}.` : ''}
+
+Content for this subsection has been drafted based on the available source documentation and is subject to clinical evaluator review before approval.
+
+*Note: This is a demo output. With the Claude API enabled and your real source documents uploaded, this section would be drafted from your actual content with full source citations.*`;
+}
+
+// Get sources that should inform this section
+function getSourcesForSection(S) {
+  if (!S.expects) return [];
+  const classMap = {
+    'CSR': ['CSR'],
+    'PMCF': ['PMCF', 'PMS'],
+    'PSUR': ['PSUR'],
+    'IFU': ['IFU'],
+    'DHF': ['DHF'],
+    'Risk': ['Risk Mgmt'],
+    'Lit': ['Lit']
+  };
+  const expected = new Set();
+  S.expects.forEach(e => (classMap[e] || [e]).forEach(c => expected.add(c)));
+  return SOURCES.filter(s => expected.has(s.classification));
+}
+
+// Generate one section
+async function generateSection(num) {
+  const S = getSection(num);
+  if (!S) return;
+
+  // Loading state in main panel
+  const main = $('mainInner');
+  const oldContent = main.innerHTML;
+  main.innerHTML = `
+    <div class="breadcrumb"><span>${DEVICE.name} ${DEVICE.version}</span><span class="sep">›</span><span>Drafting §${S.num}…</span></div>
+    <h1 class="section-title"><span class="num">§${S.num}</span>${S.title.replace(/&amp;/g, '&')}</h1>
+    <div class="loading-block">
+      <h4>Drafting <span class="dots"><span></span><span></span><span></span></span></h4>
+      <p>${CONFIG.useLiveAI && CONFIG.apiKey ? `Calling Claude (${CONFIG.model}) with section context, source documents, and literature…` : 'Generating demo draft from sample content…'}</p>
+      <p style="font-family: var(--font-mono); font-size: 11px;">→ Sources matched: ${getSourcesForSection(S).length}<br>→ Literature available: ${LITERATURE.length}</p>
+    </div>
+  `;
+
+  const start = Date.now();
+  const matchedSources = getSourcesForSection(S);
+  const sourceTexts = matchedSources.slice(0, 4); // cap to avoid huge prompts
+  const litToCite = LITERATURE.filter(l => S.expects && S.expects.includes('Lit')).slice(0, 8);
+
+  try {
+    let content, tokensIn, tokensOut, isLive = false;
+
+    if (CONFIG.useLiveAI && CONFIG.apiKey) {
+      const prompt = buildSectionPrompt(S, sourceTexts, litToCite);
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': CONFIG.apiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: CONFIG.model,
+          max_tokens: CONFIG.maxTokens,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      if (!response.ok) throw new Error(`API ${response.status}: ${await response.text()}`);
+      const data = await response.json();
+      content = data.content[0].text;
+      tokensIn = data.usage?.input_tokens;
+      tokensOut = data.usage?.output_tokens;
+      isLive = true;
+    } else {
+      // Demo content
+      await new Promise(r => setTimeout(r, 1200)); // simulate latency
+      content = getDemoContent(S);
+    }
+
+    const duration = ((Date.now() - start) / 1000).toFixed(1) + 's';
+    DRAFTS[S.num] = {
+      content,
+      status: S.expects && S.expects.includes('Lit') && S.num === '5.7.4' ? 'gap' : 'review',
+      sourcesUsed: sourceTexts.map(s => s.name).concat(litToCite.length ? [`Literature (${litToCite.length} refs)`] : []),
+      tokensIn,
+      tokensOut,
+      duration,
+      isLive,
+      generatedAt: new Date().toISOString()
+    };
+    refreshSidebar();
+    renderMain();
+  } catch (e) {
+    main.innerHTML = oldContent;
+    alert(`Generation failed: ${e.message}\n\nCommon causes:\n- Invalid Anthropic API key\n- CORS issue (try with a real key from console.anthropic.com)\n- Network problem\n\nSwitch to Demo Mode in Settings to use pre-generated content.`);
+  }
+}
+
+// Generate all sections in sequence
+async function runFullGeneration() {
+  openModal('genModal');
+  $('genFootNote').textContent = 'Generating…';
+  $('genDoneBtn').disabled = true;
+  $('genModeText').textContent = CONFIG.useLiveAI && CONFIG.apiKey
+    ? `Live mode active: each section drafted via Claude API (${CONFIG.model}). This may take 2-3 minutes for all sections.`
+    : `Demo mode: pre-generated content shown. Toggle Live AI in Settings to use real Claude API.`;
+  
+  const log = $('genLog');
+  const fill = $('genFill');
+  log.innerHTML = '';
+  
+  const priorityOrder = ['1','2.1','2.4','3.1','3.2','3.3','3.4.1','3.4.2','3.4.9','3.4.10','3.4.11','3.4.13','3.4.14','3.4.16','4.1','4.2','4.3','5.1','5.2','5.3','5.4.1','5.4.2','5.4.3','5.4.4','5.5.1','5.5.2','5.6','5.7.1','5.7.2','5.7.3','5.7.4','6.1','6.2','6.3','7','8'];
+  
+  let completed = 0;
+  for (const num of priorityOrder) {
+    const S = getSection(num);
+    if (!S) continue;
+    
+    const row = document.createElement('div');
+    row.className = 'row';
+    const t = new Date().toLocaleTimeString();
+    row.innerHTML = `<span class="time">${t}</span><span>§${num} ${S.title}</span><span>generating…</span>`;
+    log.appendChild(row);
+    log.scrollTop = log.scrollHeight;
+    
+    try {
+      await generateSectionForBatch(S);
+      row.className = 'row ok';
+      row.innerHTML = `<span class="time">${t}</span><span>§${num} ${S.title}</span><span>✓ done</span>`;
+    } catch (e) {
+      row.className = 'row err';
+      row.innerHTML = `<span class="time">${t}</span><span>§${num}</span><span>✗ ${e.message.slice(0, 40)}</span>`;
+    }
+    
+    completed++;
+    fill.style.width = `${(completed / priorityOrder.length) * 100}%`;
+    $('genFootNote').textContent = `${completed} / ${priorityOrder.length} sections drafted`;
+  }
+  
+  $('genFootNote').textContent = `Complete · ${completed} sections drafted`;
+  $('genDoneBtn').disabled = false;
+  $('stage-3').classList.add('done');
+  $('stage-3').classList.remove('active');
+  $('stage-4').classList.add('active');
+  refreshSidebar();
+  renderMain();
+}
+
+async function generateSectionForBatch(S) {
+  const start = Date.now();
+  const matchedSources = getSourcesForSection(S);
+  const sourceTexts = matchedSources.slice(0, 4);
+  const litToCite = LITERATURE.filter(l => S.expects && S.expects.includes('Lit')).slice(0, 8);
+  
+  let content, tokensIn, tokensOut, isLive = false;
+  
+  if (CONFIG.useLiveAI && CONFIG.apiKey) {
+    const prompt = buildSectionPrompt(S, sourceTexts, litToCite);
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CONFIG.apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: CONFIG.model,
+        max_tokens: CONFIG.maxTokens,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if (!response.ok) throw new Error(`API ${response.status}`);
+    const data = await response.json();
+    content = data.content[0].text;
+    tokensIn = data.usage?.input_tokens;
+    tokensOut = data.usage?.output_tokens;
+    isLive = true;
+  } else {
+    await new Promise(r => setTimeout(r, 250 + Math.random() * 200));
+    content = getDemoContent(S);
+  }
+  
+  const duration = ((Date.now() - start) / 1000).toFixed(1) + 's';
+  DRAFTS[S.num] = {
+    content,
+    status: S.num === '5.7.4' ? 'gap' : 'review',
+    sourcesUsed: sourceTexts.map(s => s.name).concat(litToCite.length ? [`Literature (${litToCite.length} refs)`] : []),
+    tokensIn,
+    tokensOut,
+    duration,
+    isLive,
+    generatedAt: new Date().toISOString()
+  };
+}
+
+// Section actions
+function approveSection(num) {
+  if (DRAFTS[num]) {
+    DRAFTS[num].status = 'approved';
+    refreshSidebar();
+    renderMain();
+  }
+}
+
+function flagSection(num) {
+  if (DRAFTS[num]) {
+    DRAFTS[num].status = 'review';
+    refreshSidebar();
+    renderMain();
+  }
+}
+
+function editSectionInline(num) {
+  const draft = DRAFTS[num];
+  if (!draft) return;
+  // Replace main panel with editable textarea
+  const main = $('mainInner');
+  const S = getSection(num);
+  main.innerHTML = `
+    <div class="breadcrumb"><span>${DEVICE.name} ${DEVICE.version}</span><span class="sep">›</span><span>Editing §${num}</span></div>
+    <h1 class="section-title"><span class="num">§${S.num}</span>${S.title.replace(/&amp;/g, '&')}</h1>
+    <div class="section-editor">
+      <div class="editor-toolbar">
+        <button class="ai-btn primary" onclick="saveSectionEdit('${num}')">✓ Save</button>
+        <button class="ai-btn" onclick="renderMain()">Cancel</button>
+      </div>
+      <textarea id="sectionEditTextarea">${htmlEscape(draft.content)}</textarea>
+      <p style="font-size: 11.5px; color: var(--ink-mute);">Edit the section content. Markdown formatting supported (##, **bold**, lists, [n] citations).</p>
+    </div>
+  `;
+}
+
+function saveSectionEdit(num) {
+  const text = $('sectionEditTextarea').value;
+  if (DRAFTS[num]) {
+    DRAFTS[num].content = text;
+    DRAFTS[num].status = 'review';
+  }
+  refreshSidebar();
+  renderMain();
+}
+
+// ============ RIGHT PANEL ============
+
+function renderRightPanel() {
+  const body = $('rightBody');
+  if (currentRightTab === 'sources') {
+    body.innerHTML = renderSourcesPanel();
+  } else if (currentRightTab === 'literature') {
+    body.innerHTML = renderLiteraturePanel();
+  } else if (currentRightTab === 'trace') {
+    body.innerHTML = renderTracePanel();
+  } else if (currentRightTab === 'settings') {
+    body.innerHTML = renderSettingsPanel();
+  }
+}
+
+function renderSourcesPanel() {
+  const S = getSection(currentSec);
+  const matched = matchingSources(S);
+  
+  return `
+    <div class="right-label">Mapped to this section · ${matched.length}</div>
+    ${matched.length === 0 ? '<div style="font-size: 11.5px; color: var(--ink-faint); padding: 10px 0;">No sources mapped to §' + currentSec + '. Upload documents or check classifications.</div>' : matched.map(s => `
+      <div class="src-item" onclick="previewDoc('${s.id}')">
+        <div class="src-row">
+          <span class="src-name">${htmlEscape(s.name)}</span>
+        </div>
+        <div class="src-meta">
+          <span class="src-tag ${s.isDemo ? 'demo' : 'real'}">${s.isDemo ? 'DEMO' : 'REAL'}</span>
+          <span class="src-tag" style="margin-left: 4px;">${s.classification}</span>
+          <span style="margin-left: 4px;">${typeof s.size === 'number' ? fmtBytes(s.size) : s.size}</span>
+        </div>
+      </div>
+    `).join('')}
+    
+    <div class="right-label" style="margin-top: 18px;">All sources · ${SOURCES.length}</div>
+    ${SOURCES.length === 0 ? `
+      <div class="mini-drop" onclick="openModal('uploadModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        <div>Click to upload sources</div>
+      </div>
+    ` : SOURCES.map(s => `
+      <div class="src-item" onclick="previewDoc('${s.id}')">
+        <div class="src-row">
+          <span class="src-name">${htmlEscape(s.name)}</span>
+        </div>
+        <div class="src-meta">
+          <span class="src-tag ${s.isDemo ? 'demo' : 'real'}">${s.isDemo ? 'DEMO' : 'REAL'}</span>
+          <span class="src-tag" style="margin-left: 4px;">${s.classification}</span>
+          <span style="margin-left: 4px;">${typeof s.size === 'number' ? fmtBytes(s.size) : s.size}</span>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function renderLiteraturePanel() {
+  return `
+    <div class="right-label">Literature library · ${LITERATURE.length} items</div>
+    ${LITERATURE.length === 0 ? '<div style="font-size: 11.5px; color: var(--ink-faint); padding: 10px 0;">No literature loaded yet. Upload a RIS/NBIB export from any medical literature database (Embase, Cochrane, Scopus, CT.gov) or load samples.</div>' : LITERATURE.map(l => `
+      <div class="src-item" title="${htmlEscape(l.abstract || '')}">
+        <div class="src-row">
+          <span class="src-name" style="font-size: 11px; line-height: 1.4; white-space: normal;">[${l.id}] ${htmlEscape(l.citation.split('.')[0])}</span>
+        </div>
+        <div class="src-meta">
+          <span class="src-tag">L${l.level}</span>
+          <span style="margin-left: 4px;">${l.journal} · ${l.year}</span>
+          <span style="margin-left: 4px; color: var(--sage);">rel ${l.relevance}</span>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function renderTracePanel() {
+  const S = getSection(currentSec);
+  const draft = DRAFTS[S.num];
+  return `
+    <div class="right-label">Section trace · §${currentSec}</div>
+    ${draft ? `
+      <div style="background: var(--paper); padding: 12px; border-radius: var(--r-md); font-size: 11.5px; line-height: 1.65; color: var(--ink-soft);">
+        <div style="margin-bottom: 6px;"><b style="color: var(--primary);">Generated:</b> ${new Date(draft.generatedAt).toLocaleString()}</div>
+        <div style="margin-bottom: 6px;"><b style="color: var(--primary);">Mode:</b> ${draft.isLive ? 'Live Claude API' : 'Demo mode'}</div>
+        <div style="margin-bottom: 6px;"><b style="color: var(--primary);">Model:</b> ${draft.isLive ? CONFIG.model : '—'}</div>
+        <div style="margin-bottom: 6px;"><b style="color: var(--primary);">Duration:</b> ${draft.duration}</div>
+        ${draft.tokensIn ? `<div style="margin-bottom: 6px;"><b style="color: var(--primary);">Tokens in / out:</b> ${draft.tokensIn} / ${draft.tokensOut}</div>` : ''}
+        <div><b style="color: var(--primary);">Status:</b> ${draft.status}</div>
+      </div>
+      <div class="right-label" style="margin-top: 16px;">Source evidence used</div>
+      ${(draft.sourcesUsed || []).map(s => `<div style="font-size: 11.5px; padding: 4px 8px; background: var(--paper); border-radius: 4px; margin-bottom: 4px; font-family: var(--font-mono); color: var(--ink-mute);">📄 ${htmlEscape(s)}</div>`).join('')}
+    ` : '<div style="font-size: 11.5px; color: var(--ink-faint); padding: 10px 0;">Section §' + currentSec + ' not yet drafted. Generate to see trace.</div>'}
+    
+    <div class="right-label" style="margin-top: 18px;">Audit log</div>
+    <div style="font-family: var(--font-mono); font-size: 10.5px; line-height: 1.7; color: var(--ink-mute); background: var(--paper); padding: 10px 12px; border-radius: var(--r-md);">
+      ${SOURCES.length > 0 ? SOURCES.length + ' source documents ingested<br>' : ''}
+      ${LITERATURE.length > 0 ? LITERATURE.length + ' literature references loaded<br>' : ''}
+      ${Object.keys(DRAFTS).length} sections drafted<br>
+      Approved: ${Object.values(DRAFTS).filter(d => d.status === 'approved').length}<br>
+      In review: ${Object.values(DRAFTS).filter(d => d.status === 'review').length}<br>
+      Gaps flagged: ${Object.values(DRAFTS).filter(d => d.status === 'gap').length}
+    </div>
+  `;
+}
+
+function renderSettingsPanel() {
+  const liveOn = CONFIG.useLiveAI && CONFIG.apiKey;
+  const keyMasked = CONFIG.apiKey ? CONFIG.apiKey.slice(0, 8) + '••••' + CONFIG.apiKey.slice(-4) : '';
+  return `
+    <div class="right-label">AI Configuration</div>
+    
+    <div class="setting-row" style="grid-template-columns: 1fr; gap: 8px;">
+      <div>
+        <div class="sr-label">Live Claude API</div>
+        <div class="sr-sub">When enabled, section drafts come from your real Anthropic API. Otherwise: demo content.</div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <div class="toggle ${liveOn ? 'on' : ''}" onclick="toggleLiveAI()"></div>
+        <span style="font-size: 11.5px; font-family: var(--font-mono); color: ${liveOn ? 'var(--sage)' : 'var(--ink-mute)'};">${liveOn ? 'LIVE' : 'DEMO'}</span>
+      </div>
+    </div>
+
+    <div class="setting-row" style="grid-template-columns: 1fr; gap: 6px;">
+      <div>
+        <div class="sr-label">Anthropic API Key</div>
+        <div class="sr-sub">Stored in browser <code>localStorage</code> only. Never transmitted to any server other than api.anthropic.com.</div>
+      </div>
+      <div>
+        <input type="password" id="apiKeyInput" placeholder="${keyMasked || 'sk-ant-api03-...'}" style="width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); font-family: var(--font-mono); font-size: 11px;">
+        <button class="ai-btn primary" style="margin-top: 6px; width: 100%;" onclick="saveApiKey()">Save Key</button>
+        ${CONFIG.apiKey ? `<button class="ai-btn" style="margin-top: 4px; width: 100%;" onclick="clearApiKey()">Clear stored key</button>` : ''}
+      </div>
+    </div>
+
+    <div class="setting-row" style="grid-template-columns: 1fr; gap: 6px;">
+      <div>
+        <div class="sr-label">Model</div>
+        <div class="sr-sub">Claude model used for generation. Lower-temp prompting (server-side) recommended for regulatory output.</div>
+      </div>
+      <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--ink);">${CONFIG.model}</div>
+    </div>
+
+    <div class="setting-row" style="grid-template-columns: 1fr; gap: 6px;">
+      <div>
+        <div class="sr-label">Standards applied</div>
+      </div>
+      <div style="font-size: 11.5px; line-height: 1.6;">
+        ☑ EU MDR 2017/745<br>
+        ☑ MEDDEV 2.7/1 Rev 4<br>
+        ☑ MDCG 2020-5 · 2020-6 · 2020-13<br>
+        ☑ ISO 14155:2020<br>
+        ☑ ISO 14971:2019 + A11:2021<br>
+        ☑ ISO 13485:2016
+      </div>
+    </div>
+
+    <div class="footer-note" style="margin-top: 16px;">
+      <b>About this tool:</b> Built for clinical evaluators, regulatory affairs professionals, and medical writers working under EU MDR. All file parsing happens in your browser. AI generation calls Claude with your sources as context — no data is stored anywhere outside your session.
+    </div>
+  `;
+}
+
+// Right tab switching
+document.querySelectorAll('.right-tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.right-tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    currentRightTab = t.dataset.tab;
+    renderRightPanel();
+  });
+});
+
+// ============ SETTINGS ACTIONS ============
+
+function toggleLiveAI() {
+  if (!CONFIG.apiKey && !CONFIG.useLiveAI) {
+    alert('Add an Anthropic API key first.');
+    return;
+  }
+  CONFIG.useLiveAI = !CONFIG.useLiveAI;
+  localStorage.setItem('use_live_ai', CONFIG.useLiveAI);
+  updateConnPill();
+  renderRightPanel();
+}
+
+function saveApiKey() {
+  const key = $('apiKeyInput').value.trim();
+  if (!key) { alert('Paste your Anthropic API key first.'); return; }
+  if (!key.startsWith('sk-ant-')) {
+    if (!confirm('Key does not start with sk-ant-. Save anyway?')) return;
+  }
+  CONFIG.apiKey = key;
+  localStorage.setItem('claude_api_key', key);
+  CONFIG.useLiveAI = true;
+  localStorage.setItem('use_live_ai', 'true');
+  updateConnPill();
+  renderRightPanel();
+  alert('API key saved (browser-local only) and Live mode enabled.');
+}
+
+function clearApiKey() {
+  if (!confirm('Remove the stored API key?')) return;
+  CONFIG.apiKey = '';
+  CONFIG.useLiveAI = false;
+  localStorage.removeItem('claude_api_key');
+  localStorage.removeItem('use_live_ai');
+  updateConnPill();
+  renderRightPanel();
+}
+
+function updateConnPill() {
+  const pill = $('connPill');
+  const text = $('connText');
+  if (CONFIG.useLiveAI && CONFIG.apiKey) {
+    pill.classList.remove('demo');
+    text.textContent = 'Live';
+  } else {
+    pill.classList.add('demo');
+    text.textContent = 'Demo';
+  }
+}
+
+// ============ SETUP ============
+
+function saveDeviceProfile() {
+  DEVICE.name = $('f-name').value || DEVICE.name;
+  DEVICE.version = $('f-version').value || DEVICE.version;
+  DEVICE.manufacturer = $('f-manu').value || DEVICE.manufacturer;
+  DEVICE.class = $('f-class').value;
+  DEVICE.type = $('f-type').value;
+  DEVICE.cerType = $('f-certype').value;
+  DEVICE.ta = $('f-ta').value;
+  DEVICE.equiv = $('f-equiv').value || DEVICE.equiv;
+  DEVICE.purpose = $('f-purpose').value || DEVICE.purpose;
+  closeModal('setupModal');
+  refreshSidebar();
+  renderMain();
+}
+
+// ============ EXPORT ============
+
+function exportCER(format) {
+  const sections = SECTIONS.filter(s => DRAFTS[s.num]);
+  if (sections.length === 0) {
+    alert('No sections drafted yet. Generate sections first.');
+    return;
+  }
+  let content = '';
+  let filename = `CER_${DEVICE.name.replace(/\s/g, '_')}_${DEVICE.version}_Draft.${format}`;
+  let mime = 'text/plain';
+  
+  if (format === 'md') {
+    content = `# Clinical Evaluation Report\n\n**Device:** ${DEVICE.name} ${DEVICE.version}\n**Manufacturer:** ${DEVICE.manufacturer}\n**Class:** ${DEVICE.class}\n**CER Type:** ${DEVICE.cerType}\n**Generated:** ${new Date().toISOString()}\n\nPer **EU MDR 2017/745** and **MEDDEV 2.7/1 Rev 4**.\n\n---\n\n`;
+    SECTIONS.forEach(s => {
+      const draft = DRAFTS[s.num];
+      if (draft) {
+        content += `\n\n# §${s.num} ${s.title.replace(/&amp;/g, '&')}\n\n${draft.content}\n\n_[Source: ${(draft.sourcesUsed || []).join(', ')} · ${draft.isLive ? 'Live Claude' : 'Demo'} · ${draft.status}]_\n`;
+      }
+    });
+    mime = 'text/markdown';
+  } else if (format === 'html') {
+    content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>CER · ${DEVICE.name} ${DEVICE.version}</title>
+<style>body{font-family:Georgia,serif;max-width:780px;margin:40px auto;padding:0 20px;color:#222;line-height:1.6;}h1,h2,h3,h4{color:#0e3e58;}h1{border-bottom:2px solid #ccc;padding-bottom:6px;}table{border-collapse:collapse;width:100%;margin:10px 0;}th,td{border:1px solid #ccc;padding:6px 10px;text-align:left;}th{background:#f3f5f8;}.cite{color:#1f5d7e;font-size:0.75em;vertical-align:super;}.meta{color:#888;font-size:0.9em;border-top:1px dashed #ccc;padding-top:6px;margin-top:10px;}</style></head><body>
+<h1>Clinical Evaluation Report</h1>
+<p><strong>Device:</strong> ${DEVICE.name} ${DEVICE.version}<br><strong>Manufacturer:</strong> ${DEVICE.manufacturer}<br><strong>Class:</strong> ${DEVICE.class}<br><strong>CER Type:</strong> ${DEVICE.cerType}<br><strong>Generated:</strong> ${new Date().toISOString()}</p>
+<p>Per <strong>EU MDR 2017/745</strong> and <strong>MEDDEV 2.7/1 Rev 4</strong>.</p>
+<hr>`;
+    SECTIONS.forEach(s => {
+      const draft = DRAFTS[s.num];
+      if (draft) {
+        content += `\n<h2>§${s.num} ${s.title.replace(/&amp;/g, '&')}</h2>\n${formatContent(draft.content)}\n<div class="meta">Source: ${(draft.sourcesUsed || []).join(', ')} · ${draft.isLive ? 'Live Claude' : 'Demo'} · Status: ${draft.status}</div>\n`;
+      }
+    });
+    content += `</body></html>`;
+    mime = 'text/html';
+  } else if (format === 'json') {
+    content = JSON.stringify({
+      device: DEVICE,
+      generated: new Date().toISOString(),
+      regulations: ['EU MDR 2017/745', 'MEDDEV 2.7/1 Rev 4', 'ISO 14155:2020', 'ISO 14971:2019'],
+      sources: SOURCES.map(s => ({ name: s.name, classification: s.classification, size: s.size, isDemo: s.isDemo, charsExtracted: s.text.length })),
+      literature: LITERATURE,
+      sections: SECTIONS.map(s => ({ ...s, draft: DRAFTS[s.num] || null }))
+    }, null, 2);
+    mime = 'application/json';
+  }
+  
+  const blob = new Blob([content], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ============ DRAG-DROP & FILE INPUT ============
+
+const dz = $('dropzone');
+if (dz) {
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+  dz.addEventListener('drop', async e => {
+    e.preventDefault();
+    dz.classList.remove('over');
+    if (e.dataTransfer.files.length > 0) {
+      await handleFileUpload(e.dataTransfer.files);
+    }
+  });
+}
+
+const fi = $('fileInput');
+if (fi) {
+  fi.addEventListener('change', async e => {
+    if (e.target.files.length > 0) {
+      await handleFileUpload(e.target.files);
+    }
+    e.target.value = ''; // reset for re-upload
+  });
+}
+
+// ============ INIT ============
+updateConnPill();
+refreshSidebar();
+renderMain();
+renderRightPanel();
+</script>
+</body>
+</html>
