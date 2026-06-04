@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LITAI — End-to-End SLR Automation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#0A0E16; --panel:#111722; --border:#1C2436; --teal:#19E3B1;
+    --blue:#4D8DFF; --amber:#FFB13D; --red:#FF5E62; --text:#E6EAF2;
+    --dim:#7A8699; --purple:#B388FF;
+  }
+  body { font-family:'IBM Plex Mono',monospace; background:var(--bg); color:var(--text); }
+  .topbar { display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-bottom:1px solid var(--border); background:var(--panel); }
+  .logo { width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--blue));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#000; }
+  .wrap { display:flex; }
+  .sidebar { width:300px; border-right:1px solid var(--border); padding:18px; min-height:calc(100vh - 73px); background:var(--panel); }
+  .main { flex:1; padding:20px 24px; }
+  .label { font-size:9px; letter-spacing:1.5px; margin-bottom:6px; }
+  select, input, textarea { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:8px 10px; font-size:11px; font-family:inherit; margin-bottom:12px; }
+  textarea { min-height:120px; }
+  .src { display:flex; align-items:center; justify-content:space-between; padding:7px 10px; margin-bottom:4px; border-radius:6px; cursor:pointer; background:var(--bg); border:1px solid var(--border); }
+  .src.on { background:rgba(25,227,177,0.09); border-color:rgba(25,227,177,0.33); }
+  .badge { font-size:8px; padding:2px 5px; border-radius:4px; }
+  .free { color:var(--teal); border:1px solid rgba(25,227,177,0.33); }
+  .key { color:var(--amber); border:1px solid rgba(255,177,61,0.33); }
+  .steps { display:flex; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
+  .step { padding:8px 12px; border-radius:8px; cursor:pointer; font-size:10px; border:1px solid var(--border); background:var(--panel); color:var(--dim); }
+  .step.on { border-color:var(--teal); background:rgba(25,227,177,0.1); color:var(--teal); }
+  .card { background:var(--panel); border-radius:12px; border:1px solid var(--border); padding:20px; }
+  .btn { border-radius:8px; padding:8px 14px; font-size:11px; cursor:pointer; font-family:inherit; font-weight:600; }
+  .btn-teal { background:rgba(25,227,177,0.1); color:var(--teal); border:1px solid rgba(25,227,177,0.33); }
+  .btn-blue { background:rgba(77,141,255,0.1); color:var(--blue); border:1px solid rgba(77,141,255,0.33); }
+  .btn-amber { background:rgba(255,177,61,0.1); color:var(--amber); border:1px solid rgba(255,177,61,0.33); }
+  .btn-red { background:rgba(255,94,98,0.1); color:var(--red); border:1px solid rgba(255,94,98,0.33); }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .out { margin-top:14px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px; font-size:12px; line-height:1.6; white-space:pre-wrap; }
+  .toggle { cursor:pointer; padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-size:10px; color:var(--dim); }
+  .toggle.on { border-color:var(--amber); background:rgba(255,177,61,0.1); color:var(--amber); }
+  .hil { margin-top:14px; background:rgba(255,177,61,0.07); border:1px solid rgba(255,177,61,0.27); border-radius:8px; padding:12px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ===========================================================================
+   LITAI — Standalone HTML build for GitHub Pages
+   Vanilla JS, no framework needed. AI step uses Claude API (demo).
+   For production: replace callAI() URL with your own model server.
+   =========================================================================== */
+
+const DATA_SOURCES = [
+  { id:"pubmed", name:"PubMed", free:true, note:"Free · NCBI E-utilities" },
+  { id:"clintrials", name:"ClinicalTrials.gov", free:true, note:"Free · CTG API v2" },
+  { id:"euctr", name:"EU Clinical Trials Register", free:true, note:"Free · EUCTR/CTIS" },
+  { id:"dailymed", name:"DailyMed / FDA Label", free:true, note:"Free · DailyMed REST" },
+  { id:"europepmc", name:"Europe PMC", free:true, note:"Free · covers Embase overlap" },
+  { id:"scholar", name:"Google Scholar", free:false, note:"SerpAPI key needed" },
+  { id:"embase", name:"Embase", free:false, note:"Elsevier API key" },
+  { id:"cochrane", name:"Cochrane Library", free:false, note:"Wiley API key" },
+  { id:"wos", name:"Web of Science / BIOSIS", free:false, note:"Clarivate API key" },
+];
+
+const USE_CASES = [
+  { id:"cer", label:"CER — Clinical Evaluation Report", domain:"Medical Device", reg:"EU MDR · MDCG 2020-13",
+    appraisal:["MEDDEV 2.7/1 Rev4","Oxford CEBM Levels","MDCG 2020-6 sufficiency"],
+    stats:["Descriptive synthesis","Proportion meta-analysis","Narrative SoTA","Random-effects pooling"],
+    output:"CER Section 6 + evidence table + PRISMA + SoTA" },
+  { id:"pmcf", label:"PMCF — Post-Market Clinical Follow-Up", domain:"Medical Device", reg:"EU MDR Annex XIV-B",
+    appraisal:["MEDDEV 2.7/1 Rev4","Survey quality (Level 4)","Registry appraisal"],
+    stats:["Trend analysis","Proportion meta-analysis","Survival (time-to-event)"],
+    output:"PMCF Plan + Report + CER-update triggers" },
+  { id:"pbrer", label:"PBRER / PSUR", domain:"Drug", reg:"ICH E2C(R2)",
+    appraisal:["Causality (WHO-UMC)","Naranjo scale","Signal grading"],
+    stats:["Disproportionality (PRR, ROR)","Bayesian (BCPNN, MGPS)","O/E ratio"],
+    output:"Benefit-risk narrative + signal evaluation" },
+  { id:"csr", label:"CSR — Clinical Study Report", domain:"Drug", reg:"ICH E3",
+    appraisal:["RoB 2 (Cochrane)","Jadad scale","GRADE"],
+    stats:["Meta-analysis (RR/OR/MD)","Forest plot","Heterogeneity I²","P-value reporting"],
+    output:"CSR Sections 9–14 support + pooled analysis" },
+  { id:"hta", label:"HTA / HEOR Dossier", domain:"Device + Drug", reg:"NICE · G-BA · CADTH",
+    appraisal:["GRADE","AMSTAR-2","ROBIS","CHEERS"],
+    stats:["Network meta-analysis (NMA)","Indirect comparison","Meta-regression","Cost-effectiveness"],
+    output:"NMA + GRADE summary + economic inputs" },
+  { id:"ectd", label:"eCTD Module 2 — Clinical Overview", domain:"Drug", reg:"ICH M4E",
+    appraisal:["GRADE","RoB 2","Cross-study consistency"],
+    stats:["Pooled efficacy (ISE)","Pooled safety (ISS)","Forest plot"],
+    output:"Module 2.5 + 2.7 Clinical Summary" },
+  { id:"rmp", label:"RMP / Signal Detection", domain:"Drug", reg:"EMA GVP Module V",
+    appraisal:["Causality (WHO-UMC)","Bradford Hill","Signal validation"],
+    stats:["Disproportionality (PRR,ROR,IC)","Bayesian shrinkage","Time-to-onset"],
+    output:"Signal assessment + RMP update" },
+  { id:"generic", label:"Generic / Hybrid Application SLR", domain:"Drug", reg:"FDA ANDA · EMA 10(3)",
+    appraisal:["Reference evidence grading","Bridging appraisal"],
+    stats:["Bioequivalence summary","Comparative safety tabulation"],
+    output:"Published-literature package for hybrid app" },
+  { id:"scoping", label:"Scoping / Standard SLR (Academic)", domain:"Device + Drug", reg:"PRISMA 2020",
+    appraisal:["RoB 2","ROBINS-I","Newcastle-Ottawa","AMSTAR-2","GRADE"],
+    stats:["Meta-analysis (all)","Forest plot","Funnel plot","Egger's test","P-value"],
+    output:"PRISMA-compliant SLR manuscript draft" },
+];
+
+const STEPS = [
+  {id:1,name:"Protocol & PICO",ai:true},{id:2,name:"Search Strategy",ai:true},
+  {id:3,name:"Database Search",ai:false},{id:4,name:"L1 Screening",ai:true},
+  {id:5,name:"L2 Screening",ai:true},{id:6,name:"Critical Appraisal",ai:true},
+  {id:7,name:"Data Extraction",ai:true},{id:8,name:"Statistics",ai:true},
+  {id:9,name:"Report Generation",ai:true},{id:10,name:"Audit & Export",ai:false},
+];
+
+let state = {
+  useCase: USE_CASES[0], sources:["pubmed","clintrials"], step:1,
+  manual:{}, appraisal:USE_CASES[0].appraisal[0], stats:USE_CASES[0].stats[0],
+  pico:{p:"",i:"",c:"",o:""}, searchString:"", aiOut:"", busy:false,
+};
+
+// AI call — Claude API (demo). Swap URL for your own server in production.
+async function callAI(sys, usr) {
+  try {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1000,
+        messages:[{role:"user",content: sys+"\n\n"+usr}] }),
+    });
+    const d = await r.json();
+    return d.content.filter(b=>b.type==="text").map(b=>b.text).join("\n");
+  } catch(e){ return "[AI error: "+e.message+"] — On GitHub Pages, the Claude API call needs a backend proxy. This is expected; the UI/workflow still works for demo."; }
+}
+
+function render() {
+  const uc = state.useCase, sc = STEPS.find(s=>s.id===state.step);
+  document.getElementById("app").innerHTML = `
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="logo">L</div>
+      <div>
+        <div style="font-size:18px;font-weight:800;letter-spacing:3px">LITAI</div>
+        <div style="font-size:9px;color:var(--dim);letter-spacing:2px">END-TO-END SLR AUTOMATION · DEVICE + DRUG</div>
+      </div>
+    </div>
+    <span style="font-size:10px;color:var(--teal);border:1px solid rgba(25,227,177,0.27);padding:4px 10px;border-radius:20px">● Demo build · GitHub Pages</span>
+  </div>
+  <div class="wrap">
+    <div class="sidebar">
+      <div class="label" style="color:var(--teal)">USE CASE</div>
+      <select onchange="pickUC(this.value)">
+        ${USE_CASES.map(u=>`<option value="${u.id}" ${u.id===uc.id?"selected":""}>${u.label}</option>`).join("")}
+      </select>
+      <div style="font-size:10px;color:var(--dim);margin:-6px 0 4px">${uc.reg}</div>
+      <div style="font-size:10px;color:var(--blue);margin-bottom:16px">Domain: ${uc.domain}</div>
+
+      <div class="label" style="color:var(--teal)">DATA SOURCES</div>
+      ${DATA_SOURCES.map(s=>`
+        <div class="src ${state.sources.includes(s.id)?"on":""}" onclick="toggleSrc('${s.id}')">
+          <div><div style="font-size:11px;color:${state.sources.includes(s.id)?"var(--teal)":"var(--text)"}">${s.name}</div>
+          <div style="font-size:8px;color:var(--dim)">${s.note}</div></div>
+          <span class="badge ${s.free?"free":"key"}">${s.free?"FREE":"KEY"}</span>
+        </div>`).join("")}
+
+      <div class="label" style="color:var(--purple);margin-top:16px">APPRAISAL METHOD</div>
+      <select onchange="state.appraisal=this.value">
+        ${uc.appraisal.map(a=>`<option ${a===state.appraisal?"selected":""}>${a}</option>`).join("")}
+      </select>
+
+      <div class="label" style="color:var(--amber)">STATISTICS / SYNTHESIS</div>
+      <select onchange="state.stats=this.value">
+        ${uc.stats.map(s=>`<option ${s===state.stats?"selected":""}>${s}</option>`).join("")}
+      </select>
+    </div>
+
+    <div class="main">
+      <div class="steps">
+        ${STEPS.map(s=>`<div class="step ${s.id===state.step?"on":""}" onclick="setStep(${s.id})">${s.id}. ${s.name}</div>`).join("")}
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+          <div style="font-size:16px;font-weight:700">Step ${sc.id}: ${sc.name}</div>
+          <div class="toggle ${state.manual[sc.id]?"on":""}" onclick="toggleManual(${sc.id})">
+            ${state.manual[sc.id]?"● MANUAL REVIEW ON":"○ AUTO (toggle for human review)"}
+          </div>
+        </div>
+        ${renderStep(sc, uc)}
+        <div style="display:flex;justify-content:space-between;margin-top:20px;border-top:1px solid var(--border);padding-top:14px">
+          <button class="btn btn-blue" onclick="setStep(${Math.max(1,state.step-1)})">← Previous</button>
+          <button class="btn btn-blue" onclick="setStep(${Math.min(10,state.step+1)})">Next Step →</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderStep(sc, uc) {
+  if (sc.id===1) {
+    return `<div class="grid2">
+      ${[["p","Population"],["i","Intervention / Device"],["c","Comparator"],["o","Outcomes"]].map(([k,l])=>`
+        <div><div class="label" style="color:var(--blue)">${l}</div>
+        <input value="${state.pico[k]}" oninput="state.pico.${k}=this.value" placeholder="Enter ${l}…"/></div>`).join("")}
+    </div>`;
+  }
+  if (sc.id===2) {
+    return `<button class="btn btn-teal" onclick="genSearch()">${state.busy?"Generating…":"⚡ Auto-Generate Search String (AI)"}</button>
+      <textarea oninput="state.searchString=this.value" placeholder="Boolean string appears here — fully editable…">${state.searchString}</textarea>
+      <div style="font-size:10px;color:var(--dim)">Editable. Generates per database: PubMed (MeSH), Embase (Emtree), Cochrane.</div>`;
+  }
+  let extra = "";
+  if (sc.id===6) extra = `<div style="margin-bottom:10px;font-size:11px;color:var(--purple)">Active appraisal: <b>${state.appraisal}</b></div>`;
+  if (sc.id===8) extra = `<div style="margin-bottom:10px;font-size:11px;color:var(--amber)">Active statistics: <b>${state.stats}</b></div>`;
+  if (sc.id===9) extra = `<div style="margin-bottom:10px;font-size:11px;color:var(--teal)">Generating: <b>${uc.output}</b></div>`;
+  const runner = sc.ai
+    ? `<button class="btn btn-teal" onclick="runStep('${sc.name}')">${state.busy?"Running…":"⚡ Run "+sc.name+" (AI)"}</button>`
+    : `<div style="font-size:11px;color:var(--dim);padding:10px 0">${sc.id===3?"Will query: "+state.sources.join(", ")+". Dedup via DOI + fuzzy title.":"Audit trail auto-generated. PRISMA counts locked to logs."}</div>`;
+  const out = state.aiOut ? `<div class="out">${state.aiOut}</div>` : "";
+  const hil = state.manual[sc.id] ? `<div class="hil">
+    <div style="font-size:11px;color:var(--amber);margin-bottom:8px">👤 HUMAN VERIFICATION REQUIRED</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-teal">✓ Approve</button>
+      <button class="btn btn-amber">✎ Edit</button>
+      <button class="btn btn-red">✕ Reject</button></div>
+    <div style="font-size:9px;color:var(--dim);margin-top:8px">Every decision logged with reviewer ID + timestamp for audit.</div>
+  </div>` : "";
+  return extra + runner + out + hil;
+}
+
+window.pickUC = (id)=>{ state.useCase=USE_CASES.find(u=>u.id===id); state.appraisal=state.useCase.appraisal[0]; state.stats=state.useCase.stats[0]; render(); };
+window.toggleSrc = (id)=>{ state.sources = state.sources.includes(id)?state.sources.filter(x=>x!==id):[...state.sources,id]; render(); };
+window.setStep = (n)=>{ state.step=n; state.aiOut=""; render(); };
+window.toggleManual = (id)=>{ state.manual[id]=!state.manual[id]; render(); };
+window.genSearch = async ()=>{ state.busy=true; render();
+  const out = await callAI("You are a medical librarian. Build a PubMed Boolean string with MeSH terms. Return only the string.",
+    `P:${state.pico.p} I:${state.pico.i} C:${state.pico.c} O:${state.pico.o}`);
+  state.searchString=out; state.busy=false; render(); };
+window.runStep = async (name)=>{ state.busy=true; render();
+  const out = await callAI(`You are LITAI, regulatory SLR assistant. Step: ${name}. Use case: ${state.useCase.label} (${state.useCase.reg}).`,
+    `PICO P:${state.pico.p} I:${state.pico.i} C:${state.pico.c} O:${state.pico.o}. Appraisal: ${state.appraisal}. Stats: ${state.stats}. Demonstrate this step concisely.`);
+  state.aiOut=out; state.busy=false; render(); };
+
+render();
+</script>
+</body>
+</html>
