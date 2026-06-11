@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PV-Sentinel — AI-Augmented ICSR &amp; Device Vigilance</title>
+<style>
+/* ============================================================
+   PV-Sentinel — enterprise clinical theme
+   ============================================================ */
+:root{
+  --navy:#0b2f47; --navy-2:#0f3a57; --navy-3:#13405f;
+  --teal:#0e7c86; --teal-2:#13a3ad; --teal-ink:#e8fbfb;
+  --ink:#16242e; --ink-2:#42586a; --muted:#76879a;
+  --line:#dde5ed; --line-2:#e8eef4;
+  --bg:#eef2f6; --card:#ffffff;
+  --red:#b91c1c; --red-bg:#fdecec;
+  --amber:#b45309; --amber-bg:#fdf3e3;
+  --green:#067a52; --green-bg:#e7f6ef;
+  --blue:#1d4ed8; --blue-bg:#eaf0fe;
+  --p1:#b91c1c; --p2:#b45309; --p3:#0e7c86;
+  --mono:ui-monospace,"Cascadia Code","SFMono-Regular",Consolas,monospace;
+  --shadow:0 1px 2px rgba(16,40,60,.06),0 6px 18px rgba(16,40,60,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink); background:var(--bg); font-size:14px; line-height:1.45;
+}
+h2{font-size:15px;margin:0;font-weight:700;letter-spacing:.2px}
+.muted{color:var(--muted);font-size:12.5px}
+b{font-weight:600}
+
+/* ---------- top bar ---------- */
+.topbar{
+  height:60px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;background:linear-gradient(100deg,var(--navy),var(--navy-3));
+  color:#eaf3f7;position:sticky;top:0;z-index:30;box-shadow:0 2px 10px rgba(8,30,46,.25);
+}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:38px;height:38px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25))}
+.brand-name{font-size:18px;font-weight:800;letter-spacing:.3px}
+.brand-sub{font-size:11.5px;color:#a9c6d4;margin-top:-2px}
+.topbar-right{display:flex;align-items:center;gap:14px}
+.env-chip{font-size:10.5px;font-weight:700;letter-spacing:.6px;color:#bfe0e6;
+  border:1px solid #2c5f78;border-radius:5px;padding:3px 8px}
+.mode-chip{font-size:11.5px;font-weight:700;border-radius:20px;padding:5px 11px;letter-spacing:.2px}
+.mode-live{background:#0c5f3d;color:#c9f7e3;border:1px solid #1c8a60}
+.mode-simulation{background:#7a4a12;color:#ffe6c2;border:1px solid #a9711f}
+.mode-unknown{background:#274a60;color:#bcd6e2}
+.reviewer{display:flex;align-items:center;gap:9px;padding-left:6px;border-left:1px solid #2c5f78}
+.reviewer-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--teal-2),var(--teal));
+  display:flex;align-items:center;justify-content:center;font-weight:700;color:#04323a;font-size:13px}
+.reviewer-name{font-size:13px;font-weight:700}
+.reviewer-role{font-size:10.5px;color:#a9c6d4}
+
+/* ---------- layout ---------- */
+.layout{display:flex;min-height:calc(100vh - 60px)}
+.sidebar{width:248px;flex:none;background:#fff;border-right:1px solid var(--line);
+  padding:14px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:60px;
+  height:calc(100vh - 60px);overflow:auto}
+.nav-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;
+  background:transparent;padding:10px 12px;border-radius:9px;font-size:13.5px;font-weight:600;
+  color:var(--ink-2);cursor:pointer}
+.nav-item:hover{background:#f1f5f9}
+.nav-item.active{background:linear-gradient(100deg,var(--navy),var(--navy-3));color:#fff}
+.nav-ico{font-size:14px;opacity:.9;width:16px;text-align:center}
+.sidebar-foot{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+.sf-title{font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+  margin:2px 6px 10px}
+.pipeline{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.pipeline li{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--ink-2);
+  padding:6px 6px;border-radius:7px}
+.pipeline .dot{width:9px;height:9px;border-radius:50%;background:#cdd8e2;flex:none;
+  box-shadow:0 0 0 3px #eef2f6}
+.pipeline li.active{color:var(--ink);font-weight:600}
+.pipeline li.active .dot{background:var(--teal-2);animation:pulse 1s infinite}
+.pipeline li.done .dot{background:var(--green)}
+.pipeline li.done{color:var(--ink)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(19,163,173,.5)}70%{box-shadow:0 0 0 6px rgba(19,163,173,0)}100%{box-shadow:0 0 0 0 rgba(19,163,173,0)}}
+
+.main{flex:1;padding:20px 24px;min-width:0}
+.view{display:none}
+.view.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ---------- panels ---------- */
+.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--shadow);padding:16px;margin-bottom:16px}
+.panel-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:12px}
+.panel-head.big{margin:2px 0 16px}
+.field-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;
+  color:var(--muted);font-weight:700;margin:10px 0 5px}
+
+.intake-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:16px}
+.select,.source-text{width:100%;border:1px solid var(--line);border-radius:9px;
+  padding:9px 11px;font-size:13px;color:var(--ink);background:#fbfdff;font-family:inherit}
+.source-text{min-height:188px;resize:vertical;line-height:1.5;font-size:12.5px}
+.select:focus,.source-text:focus{outline:none;border-color:var(--teal-2);
+  box-shadow:0 0 0 3px rgba(19,163,173,.15)}
+.intake-actions{display:flex;gap:10px;margin-top:14px}
+.btn{border:0;border-radius:9px;padding:10px 16px;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:inherit;transition:transform .05s,box-shadow .15s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:linear-gradient(100deg,var(--teal),var(--teal-2));color:#fff;
+  box-shadow:0 2px 8px rgba(14,124,134,.35)}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed}
+.btn-ghost{background:#eef3f7;color:var(--ink-2)}
+.btn-sm{padding:5px 10px;font-size:11.5px;border-radius:7px}
+.intake-hint{margin-top:10px;font-size:12px;color:var(--muted);min-height:16px}
+
+/* case header */
+.case-header{display:flex;flex-direction:column;gap:2px}
+.ch-row{display:flex;justify-content:space-between;padding:7px 2px;border-bottom:1px dashed var(--line-2);font-size:12.5px}
+.ch-row span{color:var(--muted)}
+.ch-row b{font-family:var(--mono);font-size:12px}
+.reportclock{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.clock-row{display:flex;align-items:center;gap:8px;font-size:11.5px;background:#f7fafc;
+  border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+.clock-row .auth{font-weight:700;flex:1}
+.clock-row .due{font-family:var(--mono);font-weight:700}
+
+/* ---------- stage cards ---------- */
+.stage-stream{display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);
+  overflow:hidden;animation:slidein .3s ease}
+@keyframes slidein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line-2);
+  background:linear-gradient(180deg,#fbfdfe,#f6f9fc)}
+.card-head h3{margin:0;font-size:13.5px;font-weight:800;color:var(--navy);flex:1;letter-spacing:.2px}
+.card-num{width:22px;height:22px;border-radius:6px;background:var(--navy);color:#fff;font-size:11px;
+  font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.card-body{padding:14px 16px}
+.ai-badge{font-size:9.5px;font-weight:800;letter-spacing:.6px;color:#0a5a64;background:#d7f4f5;
+  border:1px solid #a9e3e6;border-radius:5px;padding:2px 7px}
+.conf{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-2);font-weight:700}
+.conf-bar{width:60px;height:6px;border-radius:4px;background:#e3eaf0;overflow:hidden}
+.conf-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-2))}
+
+/* HITL controls */
+.hitl{display:flex;align-items:center;gap:7px;padding:10px 16px;border-top:1px solid var(--line-2);
+  background:#fafcfe}
+.hitl .spacer{flex:1}
+.hitl-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700}
+.btn-appr{background:var(--green-bg);color:var(--green);border:1px solid #b6e3cf}
+.btn-edit{background:var(--blue-bg);color:var(--blue);border:1px solid #c3d6fb}
+.btn-flag{background:var(--amber-bg);color:var(--amber);border:1px solid #f0d7a8}
+.stamp{font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;display:none}
+.stamp.show{display:inline-block}
+.stamp.approved{background:var(--green-bg);color:var(--green)}
+.stamp.flagged{background:var(--amber-bg);color:var(--amber)}
+
+/* generic bits */
+.pill{display:inline-block;font-size:11px;font-weight:700;border-radius:20px;padding:3px 9px;margin:2px 4px 2px 0}
+.pill-red{background:var(--red-bg);color:var(--red)}
+.pill-amber{background:var(--amber-bg);color:var(--amber)}
+.pill-green{background:var(--green-bg);color:var(--green)}
+.pill-blue{background:var(--blue-bg);color:var(--blue)}
+.pill-grey{background:#eef2f6;color:var(--ink-2)}
+.pill-teal{background:#d7f4f5;color:#0a5a64}
+.kv{display:grid;grid-template-columns:160px 1fr;gap:4px 14px;font-size:12.5px}
+.kv .k{color:var(--muted)}
+.kv .v{color:var(--ink)}
+.subhead{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
+  font-weight:800;margin:14px 0 7px}
+.mono{font-family:var(--mono);font-size:12px}
+.rationale{background:#f6f9fb;border-left:3px solid var(--teal-2);border-radius:0 8px 8px 0;
+  padding:9px 12px;font-size:12.5px;color:var(--ink-2);margin-top:8px}
+.rationale b{color:var(--ink)}
+
+/* data tables */
+.data-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.data-table th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;
+  color:var(--muted);font-weight:800;padding:8px 10px;border-bottom:2px solid var(--line);background:#f8fafc}
+.data-table td{padding:8px 10px;border-bottom:1px solid var(--line-2);vertical-align:top}
+.data-table tr:last-child td{border-bottom:0}
+.data-table .code{font-family:var(--mono);color:var(--navy);font-weight:600}
+
+/* device card emphasis */
+.device-flag{border:1px solid #f0d7a8;background:var(--amber-bg);border-radius:10px;padding:12px;margin-top:6px}
+.device-ok{border:1px solid var(--line);background:#f8fafc;border-radius:10px;padding:12px;margin-top:6px}
+.mdr-tag{font-size:11px;font-weight:800;color:#fff;background:var(--amber);border-radius:6px;padding:3px 9px}
+
+/* narrative */
+.narrative-text{width:100%;min-height:150px;border:1px solid var(--line);border-radius:9px;
+  padding:12px 13px;font-size:13px;line-height:1.6;color:var(--ink);background:#fcfdff;
+  font-family:"Georgia",serif;resize:vertical}
+.narrative-text:focus{outline:none;border-color:var(--teal-2);box-shadow:0 0 0 3px rgba(19,163,173,.15)}
+
+/* E2B */
+.e2b{font-family:var(--mono);font-size:11.5px;background:#0c2031;color:#cfe6ef;border-radius:10px;
+  padding:14px 16px;overflow:auto;line-height:1.55}
+.e2b .ek{color:#79c6d6}
+.e2b .ev{color:#eaf6fb}
+.e2b .ec{color:#6f8aa0}
+
+/* dedup */
+.dedup-row{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:10px;
+  padding:10px 12px;margin-bottom:8px}
+.dedup-score{width:54px;height:54px;border-radius:10px;flex:none;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;color:#fff;font-weight:800}
+.dedup-score small{font-size:9px;font-weight:700;opacity:.85}
+.dedup-main{flex:1;min-width:0}
+.dedup-main .cid{font-family:var(--mono);font-weight:700;font-size:12.5px}
+
+/* dashboard */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:14px 16px}
+.kpi .kpi-val{font-size:26px;font-weight:800;color:var(--navy);line-height:1.1}
+.kpi .kpi-lab{font-size:11.5px;color:var(--muted);margin-top:4px;font-weight:600}
+.kpi .kpi-sub{font-size:11px;margin-top:6px;font-weight:700}
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.bars{display:flex;flex-direction:column;gap:10px;padding:4px 2px}
+.bar-row{display:grid;grid-template-columns:130px 1fr 42px;align-items:center;gap:10px;font-size:12px}
+.bar-track{height:14px;background:#eef2f6;border-radius:8px;overflow:hidden}
+.bar-fill{height:100%;border-radius:8px}
+.bar-val{font-family:var(--mono);font-weight:700;text-align:right;font-size:11.5px}
+
+/* audit */
+.empty-note{padding:18px;text-align:center;color:var(--muted);font-size:12.5px}
+
+/* about */
+.about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.about-card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px}
+.about-card h3{margin:0 0 10px;font-size:13.5px;color:var(--navy)}
+.about-card ul{margin:0;padding-left:18px;font-size:12.5px;color:var(--ink-2)}
+.about-card li{margin:5px 0}
+.about-card .tag{font-size:10.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--teal);margin-bottom:8px;display:block}
+.disclaimer{background:var(--amber-bg);border:1px solid #f0d7a8;color:#7a4a12;border-radius:12px;
+  padding:14px 16px;font-size:12.5px;line-height:1.55;grid-column:1/-1}
+
+/* toast */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--navy);color:#eaf6fb;padding:11px 18px;border-radius:10px;font-size:13px;font-weight:600;
+  box-shadow:0 8px 24px rgba(8,30,46,.3);opacity:0;pointer-events:none;transition:.25s;z-index:50}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media(max-width:1080px){.intake-grid{grid-template-columns:1fr}.chart-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.sidebar{display:none}}
+
+</style>
+</head>
+<body>
+
+<!-- ===================== TOP BAR ===================== -->
+<header class="topbar">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+      <path d="M24 3 6 10v12c0 11 7.6 19.5 18 23 10.4-3.5 18-12 18-23V10L24 3Z"
+            fill="url(#g)" stroke="#0b3a52" stroke-width="1.2"/>
+      <path d="M11 25h7l3-8 4 14 3-9 2 3h7" fill="none" stroke="#eafdfb"
+            stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#10788a"/><stop offset="1" stop-color="#0b3a52"/>
+      </linearGradient></defs>
+    </svg>
+    <div class="brand-text">
+      <div class="brand-name">PV-Sentinel</div>
+      <div class="brand-sub">AI-Augmented ICSR &amp; Device Vigilance Platform</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="env-chip">DEMO ENV</div>
+    <div id="modeChip" class="mode-chip mode-unknown">● connecting…</div>
+    <div class="reviewer">
+      <div class="reviewer-avatar">AR</div>
+      <div class="reviewer-meta">
+        <div class="reviewer-name">Dr. A. Rao</div>
+        <div class="reviewer-role">Drug Safety Physician · HITL Reviewer</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- ===================== SIDEBAR ===================== -->
+  <nav class="sidebar">
+    <button class="nav-item active" data-view="process">
+      <span class="nav-ico">▦</span> Case Processing
+    </button>
+    <button class="nav-item" data-view="dashboard">
+      <span class="nav-ico">▤</span> Operations Dashboard
+    </button>
+    <button class="nav-item" data-view="audit">
+      <span class="nav-ico">☰</span> Audit Trail
+    </button>
+    <button class="nav-item" data-view="about">
+      <span class="nav-ico">ⓘ</span> About &amp; Compliance
+    </button>
+
+    <div class="sidebar-foot">
+      <div class="sf-title">Pipeline</div>
+      <ol id="pipeline" class="pipeline">
+        <li data-step="intake"><span class="dot"></span>Case intake &amp; extraction</li>
+        <li data-step="triage"><span class="dot"></span>Triage &amp; seriousness</li>
+        <li data-step="coding"><span class="dot"></span>MedDRA coding</li>
+        <li data-step="causality"><span class="dot"></span>Causality (WHO-UMC)</li>
+        <li data-step="device"><span class="dot"></span>Device / MDR assessment</li>
+        <li data-step="reportability"><span class="dot"></span>Regulatory reportability</li>
+        <li data-step="narrative"><span class="dot"></span>Narrative generation</li>
+        <li data-step="dedup"><span class="dot"></span>Duplicate detection</li>
+      </ol>
+    </div>
+  </nav>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+
+    <!-- ---------- PROCESS VIEW ---------- -->
+    <section id="view-process" class="view active">
+      <div class="intake-grid">
+        <div class="panel intake-panel">
+          <div class="panel-head">
+            <h2>Case Intake</h2>
+            <span class="muted">Unstructured source → structured ICSR</span>
+          </div>
+          <label class="field-label" for="sampleSelect">Sample source (synthetic)</label>
+          <select id="sampleSelect" class="select"></select>
+
+          <label class="field-label" for="sourceText">Source document</label>
+          <textarea id="sourceText" class="source-text" spellcheck="false"
+            placeholder="Paste an email, literature abstract, call-center note, or product complaint…"></textarea>
+
+          <div class="intake-actions">
+            <button id="processBtn" class="btn btn-primary">⚡ Process with AI</button>
+            <button id="resetBtn" class="btn btn-ghost">Reset</button>
+          </div>
+          <div class="intake-hint" id="intakeHint"></div>
+        </div>
+
+        <div class="panel meta-panel">
+          <div class="panel-head"><h2>Case Header</h2></div>
+          <div id="caseHeader" class="case-header">
+            <div class="ch-row"><span>Case ID</span><b id="hdrCaseId">—</b></div>
+            <div class="ch-row"><span>Channel</span><b id="hdrChannel">—</b></div>
+            <div class="ch-row"><span>Country</span><b id="hdrCountry">—</b></div>
+            <div class="ch-row"><span>Received</span><b id="hdrReceived">—</b></div>
+            <div class="ch-row"><span>Seriousness</span><b id="hdrSerious">—</b></div>
+            <div class="ch-row"><span>Priority</span><b id="hdrPriority">—</b></div>
+          </div>
+          <div class="reportclock" id="reportClock"></div>
+        </div>
+      </div>
+
+      <div id="stageStream" class="stage-stream"></div>
+    </section>
+
+    <!-- ---------- DASHBOARD VIEW ---------- -->
+    <section id="view-dashboard" class="view">
+      <div class="panel-head big"><h2>Operations Dashboard</h2>
+        <span class="muted">Session + baseline metrics (illustrative)</span></div>
+      <div id="kpiGrid" class="kpi-grid"></div>
+      <div class="chart-grid">
+        <div class="panel">
+          <div class="panel-head"><h2>Cases by priority</h2></div>
+          <div id="chartPriority" class="bars"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h2>Reportability mix</h2></div>
+          <div id="chartReport" class="bars"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- AUDIT VIEW ---------- -->
+    <section id="view-audit" class="view">
+      <div class="panel-head big"><h2>Audit Trail</h2>
+        <span class="muted">Every AI output is subject to human-in-the-loop review (21 CFR Part 11 style)</span></div>
+      <div class="panel">
+        <table class="data-table" id="auditTable">
+          <thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Item</th>
+            <th>AI&nbsp;conf.</th><th>Detail</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <div id="auditEmpty" class="empty-note">No activity yet — process a case to populate the trail.</div>
+      </div>
+    </section>
+
+    <!-- ---------- ABOUT VIEW ---------- -->
+    <section id="view-about" class="view">
+      <div class="panel-head big"><h2>About &amp; Compliance</h2></div>
+      <div class="about-grid" id="aboutGrid"></div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<script>
+window.PV_DATA = {"samples": [{"id": "S1", "label": "PSP adherence call — Eliquis (apixaban) GI bleed", "channel": "Patient Support Program", "country": "United States", "received": "2026-06-02", "seriousness_hint": "Serious", "text": "From: BMS Access Support - Patient Services\nTo: Global Drug Safety Intake\nSubject: AE report - CardioAssist program - patient ref 4471\nDate: 02-Jun-2026\n\nAdverse event reported during a routine PSP adherence call.\n\nPatient: 72-year-old male (initials J.D.), weight ~178 lb. History of atrial fibrillation, hypertension and type 2 diabetes. Taking Eliquis (apixaban) 5 mg twice daily since November 2025 for stroke prevention in non-valvular AFib. Concomitant metformin and lisinopril.\n\nThe patient's wife reported that for the past 4-5 days he has had black, tarry stools and increasing fatigue. He was seen in the emergency department on 30-May-2026 and admitted overnight; hemoglobin was 7.9 g/dL and he received 2 units of packed red blood cells. An upper GI bleed was suspected and apixaban was held. He is now recovering. Reporter is the program nurse (registered nurse). Patient consented to follow-up contact."}, {"id": "S2", "label": "Published literature — Opdivo (nivolumab) immune pneumonitis", "channel": "Literature", "country": "France", "received": "2026-06-05", "seriousness_hint": "Serious", "text": "Source: J Thorac Oncol. 2026;21(5):e44-e46. Letter to the Editor.\nTitle: Grade 3 immune-mediated pneumonitis following nivolumab in metastatic NSCLC.\n\nA 64-year-old woman with stage IV non-small cell lung carcinoma received nivolumab (OPDIVO) 240 mg IV every 2 weeks. After the 6th cycle she developed progressive dyspnea and a dry cough. CT of the chest showed bilateral ground-glass opacities; bronchoscopy excluded infection. Immune-mediated pneumonitis (CTCAE Grade 3) was diagnosed. Nivolumab was permanently discontinued and high-dose corticosteroids were initiated, with gradual clinical improvement over three weeks. The authors consider the event probably related to nivolumab. No rechallenge was attempted.\n\nCountry of occurrence: France. Authors: Moreau C, et al."}, {"id": "S3", "label": "Medical information call — Sotyktu (deucravacitinib), non-serious", "channel": "Call center (consumer)", "country": "United States", "received": "2026-06-09", "seriousness_hint": "Non-serious", "text": "Call center intake - consumer call, 09-Jun-2026.\n\nA 34-year-old woman called the medical information line. She started SOTYKTU (deucravacitinib) 6 mg once daily about three weeks ago for moderate-to-severe plaque psoriasis. Since then she has had mild nausea and occasional headaches, usually in the morning. No vomiting, no fever. She has not stopped the medication and the symptoms are tolerable. She takes no other regular medicines except an oral contraceptive. She wanted to know whether this is normal. No hospitalization, not pregnant. Reporter is the patient (consumer)."}, {"id": "S4", "label": "Product complaint — Orencia ClickJect autoinjector malfunction (combination product)", "channel": "Product technical complaint", "country": "United States", "received": "2026-06-06", "seriousness_hint": "Non-serious (device malfunction)", "text": "Product Technical Complaint + Adverse Event - 06-Jun-2026\n\nA rheumatology nurse reported that while administering ORENCIA (abatacept) 125 mg using the ClickJect single-dose autoinjector, the device did not fully activate. After pressing the button the nurse heard the first click but the second click never occurred and the viewing window did not turn fully yellow, suggesting an incomplete dose. The autoinjector appeared to jam. The patient (a 51-year-old female with rheumatoid arthritis, initials M.K.) subsequently developed redness and swelling at the injection site. A new autoinjector was used to complete therapy per clinic protocol. The defective device has been retained and is available to return. No hospitalization. Lot number reported as ABJ2245.\nCountry: United States."}], "existing_cases": [{"case_id": "PV-2026-098112", "suspect_product": "Eliquis (apixaban)", "patient": "72 yr, Male", "event_terms": "Gastrointestinal haemorrhage; Melaena", "onset_date": "2026-05-28", "country": "United States", "reporter": "Pharmacist (PSP)", "received": "2026-05-31", "status": "Data entry complete"}, {"case_id": "PV-2026-097540", "suspect_product": "Opdivo (nivolumab)", "patient": "70 yr, Male", "event_terms": "Immune-mediated colitis", "onset_date": "2026-04-12", "country": "Germany", "reporter": "Oncologist", "received": "2026-04-20", "status": "Submitted"}, {"case_id": "PV-2026-096003", "suspect_product": "Revlimid (lenalidomide)", "patient": "65 yr, Female", "event_terms": "Neutropenia", "onset_date": "2026-03-02", "country": "United States", "reporter": "Hematologist", "received": "2026-03-08", "status": "Closed"}, {"case_id": "PV-2026-095221", "suspect_product": "Camzyos (mavacamten)", "patient": "58 yr, Male", "event_terms": "Dizziness", "onset_date": "2026-02-15", "country": "United States", "reporter": "Cardiologist", "received": "2026-02-19", "status": "Closed"}], "sim_intake": {"S1": {"channel": "Patient Support Program", "report_type": "Spontaneous", "receipt_date": "2026-06-02", "country": "United States", "source_description": "PSP adherence call, BMS CardioAssist program (patient ref 4471)", "patient": {"initials": "J.D.", "age": 72, "age_unit": "Years", "sex": "Male", "weight_kg": 81, "medical_history": ["Atrial fibrillation", "Hypertension", "Type 2 diabetes mellitus"]}, "reporter": {"type": "Healthcare professional", "qualification": "Registered nurse", "country": "United States"}, "products": [{"name": "Eliquis", "substance": "apixaban", "role": "Suspect", "dose": "5 mg twice daily", "route": "Oral", "indication": "Stroke prophylaxis in non-valvular atrial fibrillation", "therapy_start": "2025-11-01", "therapy_end": "2026-05-30 (held)", "is_combination_product": false, "device_component": ""}, {"name": "Metformin", "substance": "metformin", "role": "Concomitant", "dose": "Not reported", "route": "Oral", "indication": "Type 2 diabetes mellitus", "therapy_start": "", "therapy_end": "", "is_combination_product": false, "device_component": ""}, {"name": "Lisinopril", "substance": "lisinopril", "role": "Concomitant", "dose": "Not reported", "route": "Oral", "indication": "Hypertension", "therapy_start": "", "therapy_end": "", "is_combination_product": false, "device_component": ""}], "events": [{"verbatim": "black, tarry stools", "onset_date": "2026-05-26", "outcome": "Recovering", "serious": true, "seriousness_criteria": ["Hospitalization"]}, {"verbatim": "increasing fatigue", "onset_date": "2026-05-26", "outcome": "Recovering", "serious": true, "seriousness_criteria": ["Hospitalization"]}, {"verbatim": "upper GI bleed", "onset_date": "2026-05-30", "outcome": "Recovering", "serious": true, "seriousness_criteria": ["Hospitalization", "Other medically important condition"]}], "minimum_criteria": {"identifiable_patient": true, "identifiable_reporter": true, "suspect_product": true, "adverse_event": true}, "source_excerpt": "black, tarry stools ... admitted overnight; hemoglobin 7.9 g/dL; received 2 units PRBC; apixaban held."}, "S2": {"channel": "Literature", "report_type": "Spontaneous", "receipt_date": "2026-06-05", "country": "France", "source_description": "J Thorac Oncol. 2026;21(5):e44-e46, Moreau C et al. (Letter to the Editor)", "patient": {"initials": "", "age": 64, "age_unit": "Years", "sex": "Female", "weight_kg": 0, "medical_history": ["Stage IV non-small cell lung carcinoma"]}, "reporter": {"type": "Healthcare professional", "qualification": "Physician (author)", "country": "France"}, "products": [{"name": "Opdivo", "substance": "nivolumab", "role": "Suspect", "dose": "240 mg every 2 weeks", "route": "Intravenous", "indication": "Metastatic non-small cell lung carcinoma", "therapy_start": "", "therapy_end": "Discontinued after event", "is_combination_product": false, "device_component": ""}], "events": [{"verbatim": "immune-mediated pneumonitis (CTCAE Grade 3)", "onset_date": "", "outcome": "Recovering", "serious": true, "seriousness_criteria": ["Other medically important condition"]}, {"verbatim": "progressive dyspnea", "onset_date": "", "outcome": "Recovering", "serious": true, "seriousness_criteria": ["Other medically important condition"]}, {"verbatim": "dry cough", "onset_date": "", "outcome": "Recovering", "serious": false, "seriousness_criteria": []}], "minimum_criteria": {"identifiable_patient": true, "identifiable_reporter": true, "suspect_product": true, "adverse_event": true}, "source_excerpt": "bilateral ground-glass opacities; bronchoscopy excluded infection; Grade 3 immune-mediated pneumonitis; high-dose corticosteroids."}, "S3": {"channel": "Call center (consumer)", "report_type": "Spontaneous", "receipt_date": "2026-06-09", "country": "United States", "source_description": "Medical information line, consumer call", "patient": {"initials": "", "age": 34, "age_unit": "Years", "sex": "Female", "weight_kg": 0, "medical_history": ["Moderate-to-severe plaque psoriasis"]}, "reporter": {"type": "Consumer", "qualification": "Patient", "country": "United States"}, "products": [{"name": "Sotyktu", "substance": "deucravacitinib", "role": "Suspect", "dose": "6 mg once daily", "route": "Oral", "indication": "Plaque psoriasis", "therapy_start": "2026-05-19", "therapy_end": "ongoing", "is_combination_product": false, "device_component": ""}, {"name": "Oral contraceptive", "substance": "Not specified", "role": "Concomitant", "dose": "Not reported", "route": "Oral", "indication": "Contraception", "therapy_start": "", "therapy_end": "", "is_combination_product": false, "device_component": ""}], "events": [{"verbatim": "mild nausea", "onset_date": "2026-05-26", "outcome": "Not recovered", "serious": false, "seriousness_criteria": []}, {"verbatim": "occasional headaches", "onset_date": "2026-05-26", "outcome": "Not recovered", "serious": false, "seriousness_criteria": []}], "minimum_criteria": {"identifiable_patient": true, "identifiable_reporter": true, "suspect_product": true, "adverse_event": true}, "source_excerpt": "mild nausea and occasional headaches ... has not stopped the medication and symptoms are tolerable."}, "S4": {"channel": "Product technical complaint", "report_type": "Spontaneous", "receipt_date": "2026-06-06", "country": "United States", "source_description": "Product technical complaint + AE, rheumatology clinic (Lot ABJ2245)", "patient": {"initials": "M.K.", "age": 51, "age_unit": "Years", "sex": "Female", "weight_kg": 0, "medical_history": ["Rheumatoid arthritis"]}, "reporter": {"type": "Healthcare professional", "qualification": "Registered nurse", "country": "United States"}, "products": [{"name": "Orencia ClickJect autoinjector", "substance": "abatacept", "role": "Suspect", "dose": "125 mg subcutaneous (single dose)", "route": "Subcutaneous", "indication": "Rheumatoid arthritis", "therapy_start": "2026-06-06", "therapy_end": "2026-06-06", "is_combination_product": true, "device_component": "ClickJect single-dose autoinjector (Lot ABJ2245)"}], "events": [{"verbatim": "device did not fully activate / autoinjector jammed (incomplete dose)", "onset_date": "2026-06-06", "outcome": "N/A (device)", "serious": false, "seriousness_criteria": []}, {"verbatim": "redness and swelling at the injection site", "onset_date": "2026-06-06", "outcome": "Recovering", "serious": false, "seriousness_criteria": []}], "minimum_criteria": {"identifiable_patient": true, "identifiable_reporter": true, "suspect_product": true, "adverse_event": true}, "source_excerpt": "first click but the second click never occurred; window did not turn fully yellow; incomplete dose; device retained."}}, "sim_assess": {"S1": {"overall_serious": true, "seriousness_rationale": "Event resulted in inpatient hospitalization and required transfusion of 2 units PRBC for a haemoglobin of 7.9 g/dL; meets ICH E2D seriousness (hospitalization; medically important).", "events_coded": [{"verbatim": "upper GI bleed", "meddra_pt": "Gastrointestinal haemorrhage", "meddra_pt_code": "10017955", "meddra_soc": "Gastrointestinal disorders", "meddra_llt": "GI bleed", "serious": true, "seriousness_criteria": ["Hospitalization", "Other medically important condition"], "expectedness": "Listed", "causality_who_umc": "Probable/Likely"}, {"verbatim": "black, tarry stools", "meddra_pt": "Melaena", "meddra_pt_code": "10027141", "meddra_soc": "Gastrointestinal disorders", "meddra_llt": "Tarry stools", "serious": true, "seriousness_criteria": ["Hospitalization"], "expectedness": "Listed", "causality_who_umc": "Probable/Likely"}, {"verbatim": "increasing fatigue", "meddra_pt": "Fatigue", "meddra_pt_code": "10016256", "meddra_soc": "General disorders and administration site conditions", "meddra_llt": "Tiredness", "serious": false, "seriousness_criteria": [], "expectedness": "Listed", "causality_who_umc": "Possible"}], "case_causality": {"assessment": "Probable/Likely", "rationale": "Apixaban is an anticoagulant with a well-characterised risk of GI haemorrhage; temporal association is plausible, dechallenge (drug held) with recovery supports causality. No alternative etiology reported."}, "device_assessment": {"is_combination_product": false, "device_involved": false, "malfunction_description": "Not applicable", "device_problem_code": "Not applicable", "patient_harm": "Not applicable", "mdr_reportable": false, "mdr_report_type": "Not reportable", "mdr_rationale": "No medical device or combination-product device constituent involved.", "imdrf_annex_a_code": "Not applicable"}, "regulatory_reportability": [{"authority": "FDA (FAERS)", "reportable": true, "report_type": "15-day expedited", "due_in_days": 15, "due_date": "", "rationale": "Serious, expedited per 21 CFR 314.80 (postmarketing 15-day report)."}, {"authority": "EMA (EudraVigilance)", "reportable": true, "report_type": "15-day expedited", "due_in_days": 15, "due_date": "", "rationale": "Serious ICSR; submit as E2B(R3) per GVP Module VI within 15 days."}, {"authority": "MHRA", "reportable": true, "report_type": "15-day expedited", "due_in_days": 15, "due_date": "", "rationale": "Serious case in a UK-relevant product; 15-day expedited reporting."}], "priority": {"level": "P1 - Critical", "rationale": "Serious, hospitalized, expedited-reportable case with active follow-up."}, "data_quality_flags": ["Exact event onset date approximate (\"4-5 days ago\")", "Concomitant doses not reported"], "ai_confidence": 0.83, "review_required": true}, "S2": {"overall_serious": true, "seriousness_rationale": "Grade 3 immune-mediated pneumonitis is a medically important event requiring permanent drug discontinuation and high-dose corticosteroids; qualifies as 'Other medically important condition' under ICH E2D.", "events_coded": [{"verbatim": "immune-mediated pneumonitis (CTCAE Grade 3)", "meddra_pt": "Immune-mediated pneumonitis", "meddra_pt_code": "10080596", "meddra_soc": "Respiratory, thoracic and mediastinal disorders", "meddra_llt": "Pneumonitis immune-mediated", "serious": true, "seriousness_criteria": ["Other medically important condition"], "expectedness": "Listed", "causality_who_umc": "Probable/Likely"}, {"verbatim": "progressive dyspnea", "meddra_pt": "Dyspnoea", "meddra_pt_code": "10013968", "meddra_soc": "Respiratory, thoracic and mediastinal disorders", "meddra_llt": "Shortness of breath", "serious": false, "seriousness_criteria": [], "expectedness": "Listed", "causality_who_umc": "Possible"}, {"verbatim": "dry cough", "meddra_pt": "Cough", "meddra_pt_code": "10011224", "meddra_soc": "Respiratory, thoracic and mediastinal disorders", "meddra_llt": "Dry cough", "serious": false, "seriousness_criteria": [], "expectedness": "Listed", "causality_who_umc": "Possible"}], "case_causality": {"assessment": "Probable/Likely", "rationale": "Immune-mediated pneumonitis is an established class effect of PD-1 inhibitors; onset after the 6th cycle, exclusion of infection, and response to corticosteroids support a probable drug relationship. Author-assessed as probably related."}, "device_assessment": {"is_combination_product": false, "device_involved": false, "malfunction_description": "Not applicable", "device_problem_code": "Not applicable", "patient_harm": "Not applicable", "mdr_reportable": false, "mdr_report_type": "Not reportable", "mdr_rationale": "No device constituent.", "imdrf_annex_a_code": "Not applicable"}, "regulatory_reportability": [{"authority": "FDA (FAERS)", "reportable": true, "report_type": "15-day expedited", "due_in_days": 15, "due_date": "", "rationale": "Serious foreign literature case for a US-marketed product; 15-day expedited."}, {"authority": "EMA (EudraVigilance)", "reportable": true, "report_type": "15-day expedited", "due_in_days": 15, "due_date": "", "rationale": "Serious EEA-occurring case; E2B(R3) within 15 days; include literature reference (GVP VI)."}, {"authority": "MHRA", "reportable": true, "report_type": "15-day expedited", "due_in_days": 15, "due_date": "", "rationale": "Serious case; 15-day expedited."}], "priority": {"level": "P2 - High", "rationale": "Serious, expedited literature case; full literature article retrieval required for completeness."}, "data_quality_flags": ["Event onset date not specified in abstract", "Patient weight unknown", "Full-text article retrieval recommended"], "ai_confidence": 0.8, "review_required": true}, "S3": {"overall_serious": false, "seriousness_rationale": "No ICH E2D seriousness criteria met: symptoms mild and tolerable, no hospitalization, no disability, not life-threatening, drug continued.", "events_coded": [{"verbatim": "mild nausea", "meddra_pt": "Nausea", "meddra_pt_code": "10028813", "meddra_soc": "Gastrointestinal disorders", "meddra_llt": "Nausea", "serious": false, "seriousness_criteria": [], "expectedness": "Listed", "causality_who_umc": "Possible"}, {"verbatim": "occasional headaches", "meddra_pt": "Headache", "meddra_pt_code": "10019211", "meddra_soc": "Nervous system disorders", "meddra_llt": "Headache", "serious": false, "seriousness_criteria": [], "expectedness": "Listed", "causality_who_umc": "Possible"}], "case_causality": {"assessment": "Possible", "rationale": "Temporal association (onset ~3 weeks after start) is consistent; nausea and headache are commonly reported, non-specific, and listed. No dechallenge/rechallenge information."}, "device_assessment": {"is_combination_product": false, "device_involved": false, "malfunction_description": "Not applicable", "device_problem_code": "Not applicable", "patient_harm": "Not applicable", "mdr_reportable": false, "mdr_report_type": "Not reportable", "mdr_rationale": "No device constituent.", "imdrf_annex_a_code": "Not applicable"}, "regulatory_reportability": [{"authority": "FDA (FAERS)", "reportable": true, "report_type": "Non-expedited (PADER/periodic)", "due_in_days": 0, "due_date": "", "rationale": "Non-serious, listed: not expedited; include in periodic report."}, {"authority": "EMA (EudraVigilance)", "reportable": true, "report_type": "Non-expedited (90-day)", "due_in_days": 90, "due_date": "", "rationale": "Non-serious EEA case: submit within 90 days per GVP Module VI."}, {"authority": "MHRA", "reportable": true, "report_type": "Non-expedited (90-day)", "due_in_days": 90, "due_date": "", "rationale": "Non-serious; 90-day timeline."}], "priority": {"level": "P3 - Routine", "rationale": "Non-serious, tolerable, drug continued; routine processing."}, "data_quality_flags": ["Oral contraceptive product not specified", "Lot number not collected"], "ai_confidence": 0.86, "review_required": true}, "S4": {"overall_serious": false, "seriousness_rationale": "Patient outcome (injection-site reaction) non-serious; however the combination-product device malfunction triggers a separate device-vigilance evaluation independent of patient seriousness.", "events_coded": [{"verbatim": "redness and swelling at the injection site", "meddra_pt": "Injection site reaction", "meddra_pt_code": "10022095", "meddra_soc": "General disorders and administration site conditions", "meddra_llt": "Injection site swelling", "serious": false, "seriousness_criteria": [], "expectedness": "Listed", "causality_who_umc": "Possible"}, {"verbatim": "device did not fully activate / autoinjector jammed", "meddra_pt": "Device malfunction", "meddra_pt_code": "10063341", "meddra_soc": "General disorders and administration site conditions", "meddra_llt": "Device failure", "serious": false, "seriousness_criteria": [], "expectedness": "Unlisted", "causality_who_umc": "Conditional/Unclassified"}], "case_causality": {"assessment": "Possible", "rationale": "Injection-site reaction is a listed local reaction; partial-dose delivery and mechanical jam point to a device-handling/quality issue rather than a pharmacologic effect."}, "device_assessment": {"is_combination_product": true, "device_involved": true, "malfunction_description": "Single-dose autoinjector failed to complete actuation (no second click; window did not fully change), resulting in suspected incomplete dose delivery.", "device_problem_code": "Failure to deliver / incomplete dose (activation failure)", "patient_harm": "Underdose of biologic + localized injection-site reaction; therapy completed with replacement device.", "mdr_reportable": true, "mdr_report_type": "Malfunction", "mdr_rationale": "Under 21 CFR Part 803, a malfunction of the device constituent that would be likely to cause or contribute to a death or serious injury if it were to recur is reportable as an eMDR Malfunction report (30 calendar days). Recommend complaint handling + returned-device evaluation and PMCF/trending.", "imdrf_annex_a_code": "A05 (Activation/actuation problem) - illustrative"}, "regulatory_reportability": [{"authority": "FDA (FAERS)", "reportable": true, "report_type": "Non-expedited (periodic)", "due_in_days": 0, "due_date": "", "rationale": "Drug-side AE is non-serious/listed: periodic reporting."}, {"authority": "FDA (eMDR, 21 CFR 803)", "reportable": true, "report_type": "Malfunction (30-day)", "due_in_days": 30, "due_date": "", "rationale": "Combination-product device malfunction: submit eMDR Malfunction report within 30 calendar days; evaluate returned device."}, {"authority": "EMA (EudraVigilance)", "reportable": true, "report_type": "Non-expedited (90-day)", "due_in_days": 90, "due_date": "", "rationale": "Non-serious EEA case; device-related info captured per EU MDR Art. 87 vigilance where applicable."}], "priority": {"level": "P2 - High", "rationale": "Dual-track (PV + device MDR) obligations; returned-device evaluation and 30-day eMDR clock are the binding constraint."}, "data_quality_flags": ["Confirm device returned/received for evaluation", "Lot ABJ2245 to be linked to manufacturing batch records", "Confirm whether full dose was ultimately delivered"], "ai_confidence": 0.78, "review_required": true}}, "sim_narrative": {"S1": "This spontaneous report was received on 02-Jun-2026 from a registered nurse via the manufacturer's patient support program (United States). The patient was a 72-year-old male with a history of atrial fibrillation, hypertension and type 2 diabetes mellitus who had been receiving Eliquis (apixaban) 5 mg twice daily since November 2025 for stroke prophylaxis in non-valvular atrial fibrillation. Concomitant medications included metformin and lisinopril. Approximately on 26-May-2026 the patient developed black, tarry stools and increasing fatigue. On 30-May-2026 he presented to the emergency department and was admitted overnight; haemoglobin was 7.9 g/dL and he received two units of packed red blood cells. An upper gastrointestinal haemorrhage was suspected and apixaban was withheld. At the time of reporting the patient was recovering. The reporter considered the event related to apixaban. Action taken with the suspect product: drug withdrawn. The events were assessed as serious (hospitalization).", "S2": "This serious case was identified from published literature (J Thorac Oncol. 2026;21(5):e44-e46, Moreau C et al.) and received on 05-Jun-2026; country of occurrence France. The patient was a 64-year-old woman with stage IV non-small cell lung carcinoma who received nivolumab (Opdivo) 240 mg intravenously every two weeks. Following the sixth cycle she developed progressive dyspnoea and a dry cough. Computed tomography of the chest demonstrated bilateral ground-glass opacities and bronchoscopy excluded an infectious cause. A diagnosis of immune-mediated pneumonitis (CTCAE Grade 3) was made. Nivolumab was permanently discontinued and high-dose corticosteroid therapy was initiated, with gradual clinical improvement over approximately three weeks. No rechallenge was attempted. The authors assessed the event as probably related to nivolumab. Action taken with the suspect product: drug withdrawn. Outcome: recovering.", "S3": "This non-serious spontaneous report was received on 09-Jun-2026 from the patient (consumer) via the medical information line (United States). The patient was a 34-year-old woman with moderate-to-severe plaque psoriasis who started Sotyktu (deucravacitinib) 6 mg once daily on approximately 19-May-2026. An oral contraceptive was taken concomitantly. About three weeks after starting therapy she experienced mild nausea and occasional morning headaches, without vomiting or fever. The symptoms were tolerable and the patient continued treatment. There was no hospitalization and the patient was not pregnant. The events were assessed as non-serious and the reporter relationship was possible. Action taken with the suspect product: dose not changed. Outcome: not recovered (ongoing, mild).", "S4": "This report describes a combination-product technical complaint with an associated adverse event, received on 06-Jun-2026 from a rheumatology nurse (United States). The patient was a 51-year-old woman (M.K.) with rheumatoid arthritis. During subcutaneous administration of Orencia (abatacept) 125 mg using the ClickJect single-dose autoinjector (Lot ABJ2245), the device failed to fully activate: after the first click the second click did not occur and the inspection window did not turn fully yellow, indicating a suspected incomplete dose. The autoinjector appeared to jam. The patient subsequently developed redness and swelling at the injection site. Therapy was completed using a replacement autoinjector per clinic protocol; the defective device was retained for return and evaluation. There was no hospitalization. The injection-site reaction was assessed as non-serious; the device malfunction was evaluated separately under medical device reporting requirements (21 CFR Part 803) and routed for complaint handling and returned-device analysis."}, "sim_dedup": {"S1": [{"case_id": "PV-2026-098112", "match_score": 0.91, "decision": "Likely duplicate", "matching_fields": ["Suspect product (apixaban)", "Patient age/sex (72/Male)", "Event (GI haemorrhage / melaena)", "Onset date (2026-05-28)", "Country (US)"], "rationale": "Same suspect drug, identical demographics, overlapping GI-bleed event and onset window, same country and PSP channel. High probability the same patient/event — route to duplicate reconciliation before creating a new case."}, {"case_id": "PV-2026-097540", "match_score": 0.08, "decision": "Unique", "matching_fields": [], "rationale": "Different product and event."}], "S2": [{"case_id": "PV-2026-097540", "match_score": 0.34, "decision": "Unique", "matching_fields": ["Suspect product (nivolumab)"], "rationale": "Same drug class/product but different event (pneumonitis vs colitis), different patient demographics and country. Not a duplicate; both are distinct immune-mediated events."}], "S3": [{"case_id": "PV-2026-096003", "match_score": 0.05, "decision": "Unique", "matching_fields": [], "rationale": "No meaningful overlap with existing cases."}], "S4": [{"case_id": "PV-2026-095221", "match_score": 0.04, "decision": "Unique", "matching_fields": [], "rationale": "No overlap; first report for this device/lot."}]}};
+</script>
+<script>
+/* ============================================================
+   PV-Sentinel — front-end controller
+   ============================================================ */
+"use strict";
+
+const $  = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) =>
+  ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+const state = {
+  mode: "unknown", model: "", samples: [], byId: {}, existing: [],
+  current: {}, audit: [],
+  tally: { P1: 0, P2: 0, P3: 0, d15: 0, d30: 0, d90: 0, periodic: 0,
+           serious: 0, device: 0, dup: 0, processed: 0 },
+  base:  { processed: 1284, serious: 527, device: 23, dup: 76,
+           P1: 188, P2: 642, P3: 454, d15: 690, d30: 41, d90: 392, periodic: 161 },
+};
+
+/* ---------------- boot ---------------- */
+async function boot() {
+  wireNav();
+  $("#processBtn").onclick = processCase;
+  $("#resetBtn").onclick = resetAll;
+  $("#sampleSelect").onchange = onSampleChange;
+  try {
+    const b = await (await fetch("/api/bootstrap")).json();
+    state.samples = b.samples; state.existing = b.existing_cases;
+    state.mode = b.mode; state.model = b.model;
+    b.samples.forEach((s) => (state.byId[s.id] = s));
+    populateSamples();
+    setModeChip(b.mode, b.model);
+  } catch (e) {
+    if (window.PV_DATA) bootStatic(); else setModeChip("error", "");
+  }
+  renderAbout();
+  renderDashboard();
+}
+
+/* Static (GitHub Pages) boot — no backend; data comes from data.js */
+function bootStatic() {
+  STATIC = true;
+  const d = window.PV_DATA;
+  state.samples = d.samples; state.existing = d.existing_cases;
+  state.mode = "simulation"; state.model = "static demo";
+  d.samples.forEach((s) => (state.byId[s.id] = s));
+  populateSamples();
+  setModeChip("simulation", "static demo");
+  $("#intakeHint").textContent =
+    "Static GitHub Pages demo — sample AI output runs entirely in your browser (no server, no API key).";
+}
+
+function setModeChip(mode, model) {
+  const c = $("#modeChip");
+  c.className = "mode-chip mode-" + (mode === "live" ? "live" : mode === "simulation" ? "simulation" : "unknown");
+  c.textContent = mode === "live" ? "● LIVE · " + model
+    : mode === "simulation" ? "● SIMULATION (sample AI)"
+    : "● offline";
+  $("#intakeHint").textContent = mode === "simulation"
+    ? "Simulation mode: replaying curated sample AI output (no API key set). Set ANTHROPIC_API_KEY for live Claude."
+    : mode === "live" ? "Live mode: AI stages powered by Claude (" + model + ")." : "";
+}
+
+function populateSamples() {
+  const sel = $("#sampleSelect");
+  sel.innerHTML = '<option value="">✎ Custom — paste your own source…</option>';
+  state.samples.forEach((s) => {
+    const o = document.createElement("option");
+    o.value = s.id; o.textContent = `${s.id} · ${s.label}`;
+    sel.appendChild(o);
+  });
+  sel.value = "S1";
+  $("#sourceText").value = state.byId["S1"].text;
+}
+function onSampleChange() {
+  const id = $("#sampleSelect").value;
+  $("#sourceText").value = id && state.byId[id] ? state.byId[id].text : "";
+}
+
+/* ---------------- nav ---------------- */
+function wireNav() {
+  $$(".nav-item").forEach((btn) => {
+    btn.onclick = () => {
+      $$(".nav-item").forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      $$(".view").forEach((v) => v.classList.remove("active"));
+      $("#view-" + btn.dataset.view).classList.add("active");
+      if (btn.dataset.view === "dashboard") renderDashboard();
+      if (btn.dataset.view === "audit") renderAudit();
+    };
+  });
+}
+
+/* ---------------- pipeline helpers ---------------- */
+function setStep(name, status) {
+  const li = $(`.pipeline li[data-step="${name}"]`);
+  if (!li) return;
+  li.classList.remove("active", "done");
+  if (status) li.classList.add(status);
+}
+function resetPipeline() { $$(".pipeline li").forEach((li) => li.classList.remove("active", "done")); }
+
+/* ---------------- API (server when present; static fallback for GitHub Pages) ------- */
+let STATIC = false, _staticCounter = 100000;
+
+async function api(path, body) {
+  if (STATIC) return localApi(path, body);
+  const res = await fetch(path, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok || data.error) throw new Error(data.error || "HTTP " + res.status);
+  return data;
+}
+
+/* No-backend implementations of the four endpoints, driven by data.js */
+const _deep = (o) => JSON.parse(JSON.stringify(o));
+const _nextStaticId = () => "PV-2026-" + String(++_staticCounter).padStart(6, "0");
+function _addDays(iso, days) {
+  const d = new Date(iso); if (isNaN(d)) return "";
+  d.setDate(d.getDate() + Number(days)); return d.toISOString().slice(0, 10);
+}
+function _staticDue(receipt, a) {
+  const base = receipt || new Date().toISOString().slice(0, 10);
+  (a.regulatory_reportability || []).forEach((r) => {
+    const days = r.due_in_days || 0;
+    r.due_date = (r.reportable && days) ? _addDays(base, days) : (r.due_date || "N/A");
+  });
+  return a;
+}
+async function localApi(path, body) {
+  const d = window.PV_DATA || {}, id = body.sample_id;
+  if (path === "/api/intake") {
+    const c = (id && d.sim_intake && d.sim_intake[id]) ? _deep(d.sim_intake[id]) : _genIntake(body.source_text || "");
+    c.case_id = _nextStaticId(); c.intake_timestamp = new Date().toISOString().slice(0, 19);
+    return { case: c, meta: { mode: "simulation", model: "static demo", usage: {} } };
+  }
+  if (path === "/api/assess") {
+    const a = (id && d.sim_assess && d.sim_assess[id]) ? _deep(d.sim_assess[id]) : _genAssess(body.case || {});
+    _staticDue((body.case || {}).receipt_date, a);
+    return { assessment: a, meta: { mode: "simulation" } };
+  }
+  if (path === "/api/narrative")
+    return { narrative: (id && d.sim_narrative && d.sim_narrative[id]) || _genNarr(body.case || {}), meta: { mode: "simulation" } };
+  if (path === "/api/duplicates") {
+    const m = (id && d.sim_dedup && d.sim_dedup[id]) ||
+      [{ case_id: ((d.existing_cases && d.existing_cases[0]) || {}).case_id || "—", match_score: 0.05,
+         decision: "Unique", matching_fields: [], rationale: "No meaningful overlap (static demo)." }];
+    return { matches: m, meta: { mode: "simulation" } };
+  }
+  throw new Error("Unknown endpoint " + path);
+}
+function _genIntake(text) {
+  return { channel: "Manual entry", report_type: "Spontaneous", receipt_date: new Date().toISOString().slice(0, 10),
+    country: "Unknown", source_description: "Custom pasted source (static demo)",
+    patient: { initials: "", age: 0, age_unit: "Years", sex: "Unknown", weight_kg: 0, medical_history: [] },
+    reporter: { type: "Unknown", qualification: "", country: "Unknown" },
+    products: [{ name: "(enter suspect product)", substance: "", role: "Suspect", dose: "", route: "", indication: "",
+      therapy_start: "", therapy_end: "", is_combination_product: false, device_component: "" }],
+    events: [{ verbatim: "(event term)", onset_date: "", outcome: "Unknown", serious: false, seriousness_criteria: [] }],
+    minimum_criteria: { identifiable_patient: false, identifiable_reporter: false, suspect_product: false, adverse_event: false },
+    source_excerpt: (text || "").slice(0, 280) };
+}
+function _genAssess(c) {
+  return { overall_serious: false,
+    seriousness_rationale: "Static demo — select a sample case for full AI output, or run locally with an API key for live Claude.",
+    events_coded: (c.events || []).map((e) => ({ verbatim: e.verbatim || "", meddra_pt: "(MedDRA PT)", meddra_pt_code: "",
+      meddra_soc: "", meddra_llt: "", serious: false, seriousness_criteria: [], expectedness: "Unknown", causality_who_umc: "Possible" })),
+    case_causality: { assessment: "Possible", rationale: "Static demo." },
+    device_assessment: { is_combination_product: false, device_involved: false, malfunction_description: "Not applicable",
+      device_problem_code: "Not applicable", patient_harm: "Not applicable", mdr_reportable: false,
+      mdr_report_type: "Not reportable", mdr_rationale: "Static demo.", imdrf_annex_a_code: "Not applicable" },
+    regulatory_reportability: [{ authority: "FDA (FAERS)", reportable: true, report_type: "Per assessment",
+      due_in_days: 15, due_date: "", rationale: "Static demo default." }],
+    priority: { level: "P3 - Routine", rationale: "Static demo." },
+    data_quality_flags: ["Static demo — select a sample case for full output."], ai_confidence: 0.5, review_required: true };
+}
+function _genNarr(c) {
+  const p = c.patient || {}, pr = (c.products || [{}])[0] || {};
+  return "Static demo narrative. A " + (p.age || "?") + "-year-old " + (p.sex || "patient") + " receiving " +
+    (pr.name || "the suspect product") + " experienced the reported event(s). Select a sample case for a full " +
+    "CIOMS-style narrative, or run locally with an API key for live Claude.";
+}
+
+/* ---------------- main flow ---------------- */
+async function processCase() {
+  const sampleId = $("#sampleSelect").value;
+  const sourceText = $("#sourceText").value.trim();
+  if (!sourceText) { toast("Paste or select a source document first."); return; }
+
+  resetStream();
+  resetPipeline();
+  const btn = $("#processBtn");
+  btn.disabled = true; btn.textContent = "⏳ Processing…";
+  $("#intakeHint").textContent = "AI pipeline running…";
+  state.current = { sampleId };
+
+  try {
+    /* 1 — intake / extraction */
+    setStep("intake", "active");
+    const r1 = await api("/api/intake", { sample_id: sampleId, source_text: sourceText });
+    state.current.case = r1.case;
+    renderCaseHeader(r1.case);
+    addCard(renderCaseCard(r1.case, r1.meta));
+    setStep("intake", "done");
+
+    /* 2 — assessment (triage → coding → causality → device → reportability) */
+    setStep("triage", "active");
+    const r2 = await api("/api/assess", { sample_id: sampleId, case: r1.case });
+    const a = r2.assessment; state.current.assessment = a;
+
+    addCard(renderTriageCard(a)); setStep("triage", "done"); await sleep(180);
+    setStep("coding", "active"); await sleep(120);
+    addCard(renderCodingCard(a)); setStep("coding", "done"); await sleep(160);
+    setStep("causality", "active"); await sleep(120);
+    addCard(renderCausalityCard(a)); setStep("causality", "done"); await sleep(160);
+    setStep("device", "active"); await sleep(120);
+    addCard(renderDeviceCard(a)); setStep("device", "done"); await sleep(160);
+    setStep("reportability", "active"); await sleep(120);
+    addCard(renderReportabilityCard(a)); setStep("reportability", "done");
+
+    updateHeaderFromAssessment(a);
+
+    /* 3 — narrative */
+    setStep("narrative", "active");
+    const r3 = await api("/api/narrative", { sample_id: sampleId, case: r1.case, assessment: a });
+    state.current.narrative = r3.narrative;
+    addCard(renderNarrativeCard(r3.narrative));
+    setStep("narrative", "done");
+
+    /* 4 — duplicate detection */
+    setStep("dedup", "active");
+    const r4 = await api("/api/duplicates", { sample_id: sampleId, case: r1.case });
+    state.current.dedup = r4.matches;
+    addCard(renderDedupCard(r4.matches));
+    setStep("dedup", "done");
+
+    /* E2B(R3) snapshot */
+    addCard(renderE2BCard(r1.case, a));
+
+    tallyCase(r1.case, a, r4.matches);
+    audit("Case digitized by AI pipeline", r1.case.case_id, a.ai_confidence,
+          `${a.overall_serious ? "Serious" : "Non-serious"} · ${a.priority.level}`);
+    $("#intakeHint").textContent = "Pipeline complete — every card is awaiting human-in-the-loop review.";
+    toast("Case processed — ready for medical review");
+  } catch (e) {
+    $("#intakeHint").textContent = "⚠ " + e.message;
+    toast("Error: " + e.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "⚡ Process with AI";
+  }
+}
+
+function resetStream() { $("#stageStream").innerHTML = ""; }
+function resetAll() {
+  resetStream(); resetPipeline();
+  ["CaseId", "Channel", "Country", "Received", "Serious", "Priority"]
+    .forEach((k) => ($("#hdr" + k).textContent = "—"));
+  $("#reportClock").innerHTML = "";
+  $("#intakeHint").textContent = "";
+}
+function addCard(node) { $("#stageStream").appendChild(node); node.scrollIntoView({ behavior: "smooth", block: "nearest" }); }
+
+/* ---------------- header ---------------- */
+function renderCaseHeader(c) {
+  $("#hdrCaseId").textContent = c.case_id || "—";
+  $("#hdrChannel").textContent = c.channel || "—";
+  $("#hdrCountry").textContent = c.country || "—";
+  $("#hdrReceived").textContent = c.receipt_date || "—";
+}
+function updateHeaderFromAssessment(a) {
+  const s = $("#hdrSerious");
+  s.innerHTML = a.overall_serious
+    ? '<span class="pill pill-red" style="margin:0">SERIOUS</span>'
+    : '<span class="pill pill-green" style="margin:0">Non-serious</span>';
+  const p = $("#hdrPriority");
+  const cls = a.priority.level.startsWith("P1") ? "pill-red"
+    : a.priority.level.startsWith("P2") ? "pill-amber" : "pill-teal";
+  p.innerHTML = `<span class="pill ${cls}" style="margin:0">${esc(a.priority.level)}</span>`;
+
+  // reporting clock
+  const rows = (a.regulatory_reportability || []).filter((r) => r.reportable && r.due_date && r.due_date !== "N/A");
+  rows.sort((x, y) => (x.due_date < y.due_date ? -1 : 1));
+  $("#reportClock").innerHTML = rows.map((r) => {
+    const urgent = (r.due_in_days || 99) <= 15 ? "var(--red)" :
+                   (r.due_in_days || 99) <= 30 ? "var(--amber)" : "var(--teal)";
+    return `<div class="clock-row"><span class="auth">${esc(r.authority)}</span>
+      <span class="pill pill-grey" style="margin:0">${esc(r.report_type)}</span>
+      <span class="due" style="color:${urgent}">${esc(r.due_date)}</span></div>`;
+  }).join("");
+}
+
+/* ---------------- card scaffold + HITL ---------------- */
+function makeCard({ num, title, conf, bodyHTML, item, badge = "AI EXTRACTED" }) {
+  const c = document.createElement("div");
+  c.className = "card";
+  const confHTML = (conf == null) ? "" :
+    `<div class="conf">conf <div class="conf-bar"><i style="width:${Math.round(conf * 100)}%"></i></div>${Math.round(conf * 100)}%</div>`;
+  c.innerHTML = `
+    <div class="card-head">
+      <span class="card-num">${num}</span>
+      <h3>${esc(title)}</h3>
+      <span class="ai-badge">${esc(badge)}</span>
+      ${confHTML}
+    </div>
+    <div class="card-body">${bodyHTML}</div>
+    <div class="hitl">
+      <span class="hitl-label">Human-in-the-loop</span>
+      <button class="btn btn-sm btn-appr" data-act="approve">✓ Approve</button>
+      <button class="btn btn-sm btn-edit" data-act="edit">✎ Edit</button>
+      <button class="btn btn-sm btn-flag" data-act="flag">⚑ Flag</button>
+      <span class="spacer"></span>
+      <span class="stamp approved" data-stamp="approve">✓ Reviewed &amp; approved</span>
+      <span class="stamp flagged" data-stamp="flag">⚑ Flagged for query</span>
+    </div>`;
+  c.querySelectorAll("[data-act]").forEach((b) =>
+    (b.onclick = () => hitl(c, item, b.dataset.act, conf)));
+  return c;
+}
+function hitl(card, item, act, conf) {
+  const ap = card.querySelector('[data-stamp="approve"]');
+  const fl = card.querySelector('[data-stamp="flag"]');
+  if (act === "approve") {
+    ap.classList.add("show"); fl.classList.remove("show");
+    audit("Approved", item, conf, "Reviewer confirmed AI output");
+    toast("Approved by reviewer");
+  } else if (act === "flag") {
+    fl.classList.add("show"); ap.classList.remove("show");
+    audit("Flagged for query", item, conf, "Routed for clarification / follow-up");
+    toast("Flagged for query");
+  } else {
+    const ta = card.querySelector(".narrative-text");
+    if (ta) { ta.removeAttribute("readonly"); ta.focus(); }
+    audit("Manual edit", item, conf, "Reviewer override / edit");
+    toast("Edit logged to audit trail");
+  }
+}
+
+/* ---------------- stage renderers ---------------- */
+function renderCaseCard(c, meta) {
+  const p = c.patient || {}, r = c.reporter || {};
+  const mc = c.minimum_criteria || {};
+  const crit = (ok) => ok ? '<span class="pill pill-green" style="margin:0">✓</span>'
+                          : '<span class="pill pill-red" style="margin:0">✗</span>';
+  const prods = (c.products || []).map((pr) => `
+    <tr><td><b>${esc(pr.name)}</b><div class="muted">${esc(pr.substance)}</div></td>
+        <td><span class="pill ${pr.role === "Suspect" ? "pill-red" : "pill-grey"}" style="margin:0">${esc(pr.role)}</span></td>
+        <td>${esc(pr.dose || "—")}<div class="muted">${esc(pr.route || "")}</div></td>
+        <td>${esc(pr.indication || "—")}</td>
+        <td>${pr.is_combination_product ? '<span class="pill pill-amber" style="margin:0">Combination</span><div class="muted mono">' + esc(pr.device_component || "") + "</div>" : '<span class="muted">—</span>'}</td></tr>`).join("");
+  const events = (c.events || []).map((e) => `
+    <tr><td>${esc(e.verbatim)}</td><td class="mono">${esc(e.onset_date || "—")}</td>
+        <td>${esc(e.outcome || "—")}</td>
+        <td>${e.serious ? '<span class="pill pill-red" style="margin:0">Serious</span>' : '<span class="pill pill-grey" style="margin:0">Non-serious</span>'}
+            ${(e.seriousness_criteria || []).map((s) => `<span class="pill pill-amber">${esc(s)}</span>`).join("")}</td></tr>`).join("");
+
+  const body = `
+    <div class="kv">
+      <div class="k">Report type</div><div class="v">${esc(c.report_type)} · ${esc(c.channel)}</div>
+      <div class="k">Source</div><div class="v">${esc(c.source_description)}</div>
+      <div class="k">Patient</div><div class="v">${esc(p.initials || "—")} · ${esc(p.age || "?")} ${esc(p.age_unit || "")} · ${esc(p.sex || "?")}${p.weight_kg ? " · " + esc(p.weight_kg) + " kg" : ""}</div>
+      <div class="k">Medical history</div><div class="v">${(p.medical_history || []).map(esc).join(", ") || "—"}</div>
+      <div class="k">Reporter</div><div class="v">${esc(r.type)} (${esc(r.qualification || "—")}) · ${esc(r.country)}</div>
+    </div>
+    <div class="subhead">Products</div>
+    <table class="data-table"><thead><tr><th>Product</th><th>Role</th><th>Dose/Route</th><th>Indication</th><th>Combination</th></tr></thead><tbody>${prods}</tbody></table>
+    <div class="subhead">Adverse events (verbatim)</div>
+    <table class="data-table"><thead><tr><th>Verbatim term</th><th>Onset</th><th>Outcome</th><th>Seriousness</th></tr></thead><tbody>${events}</tbody></table>
+    <div class="subhead">ICH minimum reporting criteria</div>
+    <div>${crit(mc.identifiable_patient)} Patient &nbsp; ${crit(mc.identifiable_reporter)} Reporter &nbsp; ${crit(mc.suspect_product)} Product &nbsp; ${crit(mc.adverse_event)} Event &nbsp;
+      <span class="pill ${(mc.identifiable_patient && mc.identifiable_reporter && mc.suspect_product && mc.adverse_event) ? "pill-green" : "pill-amber"}">${(mc.identifiable_patient && mc.identifiable_reporter && mc.suspect_product && mc.adverse_event) ? "Valid ICSR" : "Incomplete"}</span></div>
+    <div class="rationale"><b>Source excerpt:</b> ${esc(c.source_excerpt)} <span class="muted">· ${meta.mode === "live" ? "extracted by " + esc(meta.model) : "simulated extraction"}</span></div>`;
+  return makeCard({ num: 1, title: "Case Intake & Structured Extraction", conf: null, bodyHTML: body, item: c.case_id, badge: "AI EXTRACTED" });
+}
+
+function renderTriageCard(a) {
+  const flags = (a.data_quality_flags || []).map((f) => `<span class="pill pill-amber">${esc(f)}</span>`).join("") || '<span class="muted">none</span>';
+  const pc = a.priority.level.startsWith("P1") ? "pill-red" : a.priority.level.startsWith("P2") ? "pill-amber" : "pill-teal";
+  const body = `
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      ${a.overall_serious ? '<span class="pill pill-red">SERIOUS CASE</span>' : '<span class="pill pill-green">NON-SERIOUS</span>'}
+      <span class="pill ${pc}">${esc(a.priority.level)}</span>
+    </div>
+    <div class="rationale"><b>Seriousness rationale (ICH E2D):</b> ${esc(a.seriousness_rationale)}</div>
+    <div class="rationale"><b>Triage priority:</b> ${esc(a.priority.rationale)}</div>
+    <div class="subhead">Data-quality flags</div><div>${flags}</div>`;
+  return makeCard({ num: 2, title: "Triage & Seriousness Assessment", conf: a.ai_confidence, bodyHTML: body, item: "Triage", badge: "AI ASSESSED" });
+}
+
+function renderCodingCard(a) {
+  const rows = (a.events_coded || []).map((e) => `
+    <tr><td>${esc(e.verbatim)}</td>
+        <td><b>${esc(e.meddra_pt)}</b><div class="muted">LLT: ${esc(e.meddra_llt || "—")}</div></td>
+        <td class="code">${esc(e.meddra_pt_code || "—")}</td>
+        <td>${esc(e.meddra_soc)}</td>
+        <td><span class="pill ${e.expectedness === "Listed" ? "pill-grey" : e.expectedness === "Unlisted" ? "pill-red" : "pill-amber"}" style="margin:0">${esc(e.expectedness)}</span></td>
+        <td>${causalityPill(e.causality_who_umc)}</td></tr>`).join("");
+  const body = `
+    <table class="data-table"><thead><tr><th>Verbatim</th><th>MedDRA PT</th><th>PT code</th><th>Primary SOC</th><th>Expectedness</th><th>Causality</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="rationale muted">⚠ MedDRA Preferred Terms and codes are <b>illustrative</b> for demonstration. A validated deployment auto-codes against the licensed MedDRA dictionary, with this step gated by human review.</div>`;
+  return makeCard({ num: 3, title: "MedDRA Coding & Expectedness", conf: a.ai_confidence, bodyHTML: body, item: "MedDRA coding", badge: "AI CODED" });
+}
+function causalityPill(c) {
+  const map = { "Certain": "pill-red", "Probable/Likely": "pill-red", "Possible": "pill-amber",
+    "Unlikely": "pill-grey", "Conditional/Unclassified": "pill-blue", "Unassessable/Unclassifiable": "pill-grey" };
+  return `<span class="pill ${map[c] || "pill-grey"}" style="margin:0">${esc(c)}</span>`;
+}
+
+function renderCausalityCard(a) {
+  const cc = a.case_causality || {};
+  const body = `
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:4px">
+      <span class="muted">Overall case causality (WHO-UMC):</span> ${causalityPill(cc.assessment)}</div>
+    <div class="rationale"><b>Rationale:</b> ${esc(cc.rationale)}</div>`;
+  return makeCard({ num: 4, title: "Causality Assessment", conf: a.ai_confidence, bodyHTML: body, item: "Causality", badge: "AI ASSESSED" });
+}
+
+function renderDeviceCard(a) {
+  const d = a.device_assessment || {};
+  let body;
+  if (d.device_involved || d.is_combination_product) {
+    body = `
+      <div class="device-flag">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+          <span class="mdr-tag">${esc(d.mdr_report_type)}</span>
+          ${d.mdr_reportable ? '<span class="pill pill-red" style="margin:0">MDR REPORTABLE</span>' : '<span class="pill pill-grey" style="margin:0">Not MDR reportable</span>'}
+          <span class="pill pill-amber" style="margin:0">Combination product</span>
+        </div>
+        <div class="kv">
+          <div class="k">Device problem</div><div class="v">${esc(d.device_problem_code)}</div>
+          <div class="k">Malfunction</div><div class="v">${esc(d.malfunction_description)}</div>
+          <div class="k">Patient harm</div><div class="v">${esc(d.patient_harm)}</div>
+          <div class="k">IMDRF Annex A</div><div class="v mono">${esc(d.imdrf_annex_a_code)}</div>
+        </div>
+      </div>
+      <div class="rationale"><b>21 CFR Part 803 (eMDR) rationale:</b> ${esc(d.mdr_rationale)}</div>`;
+  } else {
+    body = `<div class="device-ok"><span class="pill pill-grey" style="margin:0">No device constituent</span>
+      &nbsp; Medical Device Reporting (21 CFR 803 / EU MDR) not applicable to this case.</div>`;
+  }
+  return makeCard({ num: 5, title: "Device / Combination-Product Vigilance (MDR)", conf: a.ai_confidence, bodyHTML: body, item: "Device/MDR", badge: "AI ASSESSED" });
+}
+
+function renderReportabilityCard(a) {
+  const rows = (a.regulatory_reportability || []).map((r) => {
+    const urgent = (r.due_in_days || 99) <= 15 ? "pill-red" : (r.due_in_days || 99) <= 30 ? "pill-amber" : "pill-grey";
+    return `<tr>
+      <td><b>${esc(r.authority)}</b></td>
+      <td>${r.reportable ? '<span class="pill pill-green" style="margin:0">Reportable</span>' : '<span class="pill pill-grey" style="margin:0">No</span>'}</td>
+      <td>${esc(r.report_type)}</td>
+      <td><span class="pill ${urgent}" style="margin:0">${r.due_in_days ? r.due_in_days + " days" : "periodic"}</span></td>
+      <td class="code">${esc(r.due_date || "—")}</td>
+      <td class="muted">${esc(r.rationale)}</td></tr>`;
+  }).join("");
+  const body = `<table class="data-table"><thead><tr><th>Authority</th><th>Reportable</th><th>Report type</th><th>Clock</th><th>Due date</th><th>Rationale</th></tr></thead><tbody>${rows}</tbody></table>`;
+  return makeCard({ num: 6, title: "Regulatory Reportability & Submission Clocks", conf: a.ai_confidence, bodyHTML: body, item: "Reportability", badge: "AI DETERMINED" });
+}
+
+function renderNarrativeCard(text) {
+  const body = `<textarea class="narrative-text" readonly>${esc(text)}</textarea>
+    <div class="rationale muted">CIOMS-style draft generated by AI. Click <b>Edit</b> to revise; all edits are captured in the audit trail.</div>`;
+  return makeCard({ num: 7, title: "Case Narrative (CIOMS-style draft)", conf: null, bodyHTML: body, item: "Narrative", badge: "AI DRAFTED" });
+}
+
+function renderDedupCard(matches) {
+  const rows = (matches || []).map((m) => {
+    const col = m.decision === "Likely duplicate" ? "var(--red)" :
+                m.decision === "Possible duplicate" ? "var(--amber)" : "var(--teal)";
+    return `<div class="dedup-row">
+      <div class="dedup-score" style="background:${col}"><span>${Math.round(m.match_score * 100)}%</span><small>MATCH</small></div>
+      <div class="dedup-main">
+        <div class="cid">${esc(m.case_id)} · <span style="color:${col};font-weight:800">${esc(m.decision)}</span></div>
+        <div class="muted" style="margin:3px 0">${(m.matching_fields || []).map((f) => `<span class="pill pill-grey">${esc(f)}</span>`).join("") || '<span class="muted">no overlapping fields</span>'}</div>
+        <div class="muted">${esc(m.rationale)}</div>
+      </div></div>`;
+  }).join("");
+  const likely = (matches || []).some((m) => m.decision === "Likely duplicate");
+  const banner = likely
+    ? '<div class="device-flag" style="margin-bottom:10px"><b>⚠ Potential duplicate detected.</b> Route to duplicate reconciliation before creating a new case.</div>'
+    : '<div class="device-ok" style="margin-bottom:10px"><span class="pill pill-green" style="margin:0">No likely duplicate</span> &nbsp; checked against ' + (state.existing.length) + ' database cases.</div>';
+  return makeCard({ num: 8, title: "Duplicate Detection", conf: null, bodyHTML: banner + rows, item: "Duplicate check", badge: "AI MATCHED" });
+}
+
+function renderE2BCard(c, a) {
+  const p = c.patient || {}, r = c.reporter || {};
+  const sus = (c.products || []).find((x) => x.role === "Suspect") || {};
+  const e0 = (a.events_coded || [])[0] || {};
+  const line = (k, v, code) => `<div><span class="ek">${esc(k)}</span> <span class="ev">${esc(v || "—")}</span> ${code ? '<span class="ec">// ' + esc(code) + "</span>" : ""}</div>`;
+  const body = `<div class="e2b">
+    ${line("C.1.1  Sender case ID", c.case_id)}
+    ${line("C.1.2  Date of creation", new Date().toISOString().slice(0, 10))}
+    ${line("C.1.3  Type of report", c.report_type)}
+    ${line("C.1.4  Date first received", c.receipt_date)}
+    ${line("C.1.8.1 Worldwide unique ID", "BMS-" + (c.case_id || ""))}
+    ${line("D.1   Patient initials", p.initials || "(privacy-masked)", "GVP VI Add. II")}
+    ${line("D.2.1  Age", (p.age ? p.age + " " + (p.age_unit || "") : ""))}
+    ${line("D.5   Sex", p.sex)}
+    ${line("G.k.2.2 Medicinal product", sus.name)}
+    ${line("G.k.2.3.r Substance", sus.substance)}
+    ${line("G.k.1  Drug role", "Suspect")}
+    ${line("E.i.2.1b Reaction (MedDRA PT)", e0.meddra_pt, e0.meddra_pt_code)}
+    ${line("E.i.3.2 Seriousness", a.overall_serious ? "Yes" : "No")}
+    ${sus.is_combination_product ? line("Device constituent", sus.device_component, "21 CFR 803 / EU MDR") : ""}
+    ${line("Primary source country", r.country)}
+  </div>
+  <div class="rationale muted">Representative ICH <b>E2B(R3)</b> data elements assembled from the structured case — the export an electronic gateway submission (FDA FAERS / EudraVigilance) would carry.</div>`;
+  return makeCard({ num: 9, title: "E2B(R3) Data Snapshot", conf: null, bodyHTML: body, item: "E2B(R3) export", badge: "SYSTEM" });
+}
+
+/* ---------------- audit ---------------- */
+function audit(action, item, conf, detail) {
+  state.audit.unshift({
+    time: new Date().toLocaleString(), user: "Dr. A. Rao", action,
+    item: item || "—", conf: (conf == null ? "" : Math.round(conf * 100) + "%"), detail: detail || "",
+  });
+  renderAudit();
+}
+function renderAudit() {
+  const tb = $("#auditTable tbody");
+  if (!tb) return;
+  tb.innerHTML = state.audit.map((a) => `
+    <tr><td class="mono">${esc(a.time)}</td><td>${esc(a.user)}</td>
+        <td><b>${esc(a.action)}</b></td><td class="mono">${esc(a.item)}</td>
+        <td>${esc(a.conf)}</td><td class="muted">${esc(a.detail)}</td></tr>`).join("");
+  $("#auditEmpty").style.display = state.audit.length ? "none" : "block";
+}
+
+/* ---------------- dashboard ---------------- */
+function tallyCase(c, a, matches) {
+  const t = state.tally;
+  t.processed++;
+  if (a.overall_serious) t.serious++;
+  if (a.priority.level.startsWith("P1")) t.P1++;
+  else if (a.priority.level.startsWith("P2")) t.P2++; else t.P3++;
+  if (a.device_assessment && (a.device_assessment.device_involved || a.device_assessment.is_combination_product)) t.device++;
+  (a.regulatory_reportability || []).forEach((r) => {
+    if (!r.reportable) return;
+    if (r.due_in_days === 15) t.d15++;
+    else if (r.due_in_days === 30) t.d30++;
+    else if (r.due_in_days === 90) t.d90++;
+    else t.periodic++;
+  });
+  if ((matches || []).some((m) => m.decision === "Likely duplicate")) t.dup++;
+  renderDashboard();
+}
+function renderDashboard() {
+  const t = state.tally, b = state.base;
+  const totalProc = b.processed + t.processed;
+  const seriousPct = Math.round(((b.serious + t.serious) / totalProc) * 100);
+  const kpis = [
+    { v: t.processed, l: "Cases processed (this session)", sub: '<span class="pill pill-teal">AI-assisted intake</span>' },
+    { v: "~4 min", l: "Avg AI cycle time", sub: '<span class="pill pill-green">vs ~45 min manual</span>' },
+    { v: seriousPct + "%", l: "Serious cases", sub: `<span class="muted">${b.serious + t.serious} of ${totalProc}</span>` },
+    { v: "100%", l: "On-time expedited reporting", sub: '<span class="pill pill-green">no late submissions</span>' },
+    { v: b.device + t.device, l: "Combination-product / device cases", sub: '<span class="pill pill-amber">MDR track</span>' },
+    { v: b.dup + t.dup, l: "Duplicate suspects intercepted", sub: '<span class="muted">pre-database</span>' },
+  ];
+  $("#kpiGrid").innerHTML = kpis.map((k) => `
+    <div class="kpi"><div class="kpi-val">${k.v}</div><div class="kpi-lab">${k.l}</div><div class="kpi-sub">${k.sub}</div></div>`).join("");
+
+  bars("#chartPriority", [
+    { label: "P1 — Critical", val: b.P1 + t.P1, color: "var(--p1)" },
+    { label: "P2 — High", val: b.P2 + t.P2, color: "var(--p2)" },
+    { label: "P3 — Routine", val: b.P3 + t.P3, color: "var(--p3)" },
+  ]);
+  bars("#chartReport", [
+    { label: "15-day expedited", val: b.d15 + t.d15, color: "var(--red)" },
+    { label: "30-day eMDR (device)", val: b.d30 + t.d30, color: "var(--amber)" },
+    { label: "90-day non-serious", val: b.d90 + t.d90, color: "var(--teal)" },
+    { label: "Periodic only", val: b.periodic + t.periodic, color: "#64748b" },
+  ]);
+}
+function bars(sel, data) {
+  const max = Math.max(...data.map((d) => d.val), 1);
+  $(sel).innerHTML = data.map((d) => `
+    <div class="bar-row"><div>${d.label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round((d.val / max) * 100)}%;background:${d.color}"></div></div>
+      <div class="bar-val">${d.val}</div></div>`).join("");
+}
+
+/* ---------------- about ---------------- */
+function renderAbout() {
+  const cards = [
+    { tag: "What this is", title: "AI-augmented ICSR processing",
+      items: ["Mirrors Oracle Argus / Veeva Vault Safety / ArisGlobal LifeSphere workflows.",
+        "Eight AI stages: intake, triage, MedDRA coding, causality, device/MDR, reportability, narrative, deduplication.",
+        "Powered by the Claude API (structured outputs) with a human-in-the-loop review gate on every stage."] },
+    { tag: "Regulatory alignment", title: "Standards & frameworks",
+      items: ["ICH E2B(R3) electronic submission data elements; ICH E2A/E2D seriousness & expectedness.",
+        "FDA 21 CFR 314.80 (15-day) and 21 CFR Part 803 eMDR (combination-product device reporting).",
+        "EU GVP Module VI / EudraVigilance; EU MDR vigilance; MHRA timelines.",
+        "WHO-UMC causality; MedDRA coding (licensed dictionary in production)."] },
+    { tag: "Responsible AI", title: "Human-in-the-loop & explainability",
+      items: ["Every AI output carries a confidence score and a written rationale (explainability).",
+        "Qualified medical/safety reviewer approves, edits, or flags each decision.",
+        "Full audit trail of human actions (21 CFR Part 11-style).",
+        "Aligned with EMA reflection on AI in the medicines lifecycle: risk-based, transparent, human-overseen."] },
+    { tag: "Role fit", title: "Maps to the BMS Director JD",
+      items: ["Digitized AE case processing via AI/NLP/LLM with HITL oversight.",
+        "Device reporting & MDR oversight; combination-product dual-reporting (PV + MDR).",
+        "ICH E2B(R3) adoption; EudraVigilance & FAERS submission readiness.",
+        "KPI/metrics framework: cycle time, automation rate, reportability compliance."] },
+  ];
+  $("#aboutGrid").innerHTML = cards.map((c) => `
+    <div class="about-card"><span class="tag">${esc(c.tag)}</span><h3>${esc(c.title)}</h3>
+      <ul>${c.items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul></div>`).join("") + `
+    <div class="disclaimer"><b>Demonstration disclaimer.</b> All cases, patients, reporters, lot numbers and database
+    records are <b>synthetic</b>. MedDRA terms/codes are <b>illustrative</b> only; a validated system integrates the
+    licensed MedDRA dictionary. This prototype showcases architecture and AI capability and is <b>not a validated
+    safety system</b> and must not be used for real pharmacovigilance reporting. Product names are referenced for
+    realism only.</div>`;
+}
+
+/* ---------------- toast ---------------- */
+let toastT;
+function toast(msg) {
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+boot();
+
+</script>
+</body>
+</html>
