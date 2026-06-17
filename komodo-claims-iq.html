@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Komodo Claims IQ — PharBioMed</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0c0f1a;--card:#141828;--cardAlt:#1a1f35;--border:#252b45;--text:#e2e8f0;--muted:#94a3b8;--accent:#0f766e;--accentL:#14b8a6;--purple:#a855f7;--amber:#f59e0b;--red:#ef4444;--blue:#3b82f6;--pink:#ec4899;--green:#10b981}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+.header{background:linear-gradient(135deg,#0b1022,#141832,#0f1628);border-bottom:1px solid var(--border);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;color:#fff}
+.logo-text{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.logo-text span{color:var(--accentL)}
+.logo-sub{font-size:11px;color:var(--muted)}
+.header-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn{padding:9px 20px;border-radius:8px;border:none;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accentL));color:#fff}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--accentL);color:var(--accentL)}
+.file-badge{font-size:12px;color:var(--accentL);background:var(--cardAlt);padding:6px 14px;border-radius:20px;border:1px solid var(--border)}
+.tabs{padding:14px 28px 0;display:flex;gap:4px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tab{padding:10px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;background:transparent;color:var(--muted);font-family:inherit;white-space:nowrap;transition:all .2s}
+.tab.active{background:linear-gradient(135deg,var(--accent),var(--accentL));color:#fff;font-weight:700}
+.tab:hover:not(.active){color:var(--text)}
+.content{padding:20px 28px 40px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:800px){.grid2{grid-template-columns:1fr}}
+.kpi-row{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:20px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;flex:1 1 180px;min-width:170px}
+.kpi-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:6px}
+.kpi-value{font-size:28px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.kpi-sub{font-size:11px;color:var(--accentL);margin-top:4px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px}
+.card h3{font-size:16px;font-weight:700;margin-bottom:16px}
+.chart-box{position:relative;width:100%;height:320px}
+.chart-box.tall{height:420px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:16px}
+th{padding:10px 12px;text-align:left;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border)}
+td{padding:8px 12px;border-bottom:1px solid var(--border)}
+td.mono{font-family:'JetBrains Mono',monospace;color:var(--accentL);font-size:12px}
+td.bold{font-weight:600}
+.ai-box{background:var(--cardAlt);border-radius:10px;padding:20px;line-height:1.75;font-size:14px;white-space:pre-wrap;border-left:4px solid var(--accentL)}
+.ai-empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.ai-empty .icon{font-size:48px;margin-bottom:12px}
+.footer{text-align:center;padding:16px 0 24px;font-size:11px;color:var(--muted);border-top:1px solid var(--border)}
+.footer span{color:var(--accentL);font-weight:700}
+.hidden{display:none}
+input[type=file]{display:none}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-icon">K</div>
+    <div>
+      <div class="logo-text">Komodo Claims<span> IQ</span></div>
+      <div class="logo-sub">Real-World Claims Data Analytics Platform</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span id="fileBadge" class="file-badge hidden"></span>
+    <label class="btn btn-primary" id="uploadBtn">📤 Upload Claims Data
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+    </label>
+    <button class="btn btn-ghost hidden" id="resetBtn" onclick="resetSample()">Reset to Sample</button>
+  </div>
+</div>
+
+<div class="tabs" id="tabBar"></div>
+<div class="content" id="mainContent"></div>
+<div class="footer">Komodo Claims IQ — Built by <span>PharBioMed</span> | Powered by Claude AI</div>
+
+<script>
+// ─── Color Palette ───
+const C = ['#0f766e','#a855f7','#f59e0b','#ef4444','#3b82f6','#ec4899','#10b981','#f97316','#6366f1','#14b8a6'];
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = '#252b45';
+Chart.defaults.font.family = "'DM Sans',sans-serif";
+
+// ─── Sample Data Generator ───
+function generateSample() {
+  const dx=['E11.9','J44.1','I10','C34.90','M79.3','G43.909','F32.9','J06.9','K21.0','N18.6'];
+  const dxN=['Type 2 Diabetes','COPD','Hypertension','Lung Cancer','Panniculitis','Migraine','Major Depression','Upper Resp Infection','GERD','End-Stage Renal'];
+  const cpt=['99213','99214','99215','99232','99233','99291','36415','71046','93000','80053'];
+  const cptN=['Office Visit L3','Office Visit L4','Office Visit L5','Inpatient L2','Inpatient L3','Critical Care','Venipuncture','Chest X-Ray','ECG','Metabolic Panel'];
+  const payers=['Medicare','Medicaid','Aetna','UnitedHealth','Cigna','BlueCross','Humana','Kaiser'];
+  const states=['CA','TX','NY','FL','IL','PA','OH','GA','NC','MI'];
+  const settings=['Outpatient','Inpatient','Emergency','Ambulatory Surgery','Telehealth'];
+  const specs=['Internal Medicine','Cardiology','Pulmonology','Oncology','Neurology','Psychiatry','Family Medicine','Emergency Medicine'];
+  const r=a=>a[Math.floor(Math.random()*a.length)];
+  const ri=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+  const rows=[];
+  for(let i=0;i<500;i++){
+    const di=ri(0,9),ci=ri(0,9),m=ri(1,12),d=ri(1,28);
+    rows.push({
+      claim_id:'KMD'+String(100000+i),patient_id:'PT'+ri(10000,30000),
+      service_date:`2025-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`,
+      dx_code:dx[di],dx_name:dxN[di],cpt_code:cpt[ci],cpt_name:cptN[ci],
+      payer:r(payers),state:r(states),gender:r(['M','F']),age:ri(18,89),
+      care_setting:r(settings),specialty:r(specs),
+      allowed_amount:+(ri(50,5000)+Math.random()).toFixed(2),
+      paid_amount:+(ri(30,4500)+Math.random()).toFixed(2),
+      patient_responsibility:+(ri(0,800)+Math.random()).toFixed(2)
+    });
+  }
+  return rows;
+}
+
+let DATA = generateSample();
+let charts = [];
+let currentTab = 0;
+let aiInsight = null;
+
+const TABS = ['Overview','Diagnosis','Procedures','Payer Mix','Geography','Cost Analytics','Demographics','AI Insights'];
+
+// ─── Utilities ───
+const fmt$ = v => v>=1e6?`$${(v/1e6).toFixed(1)}M`:v>=1e3?`$${(v/1e3).toFixed(1)}K`:`$${v.toFixed(0)}`;
+const fmtN = v => v>=1e6?`${(v/1e6).toFixed(1)}M`:v>=1e3?`${(v/1e3).toFixed(1)}K`:String(v);
+function countBy(arr,key){const m={};arr.forEach(r=>{const k=r[key]||'Unknown';m[k]=(m[k]||0)+1});return m;}
+function topN(obj,n=10){return Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,n);}
+function groupSum(arr,grpKey,sumKey){const m={};arr.forEach(r=>{const k=r[grpKey]||'Unknown';m[k]=(m[k]||0)+ +(r[sumKey]||0)});return m;}
+function groupAvg(arr,grpKey,sumKey){const m={},c={};arr.forEach(r=>{const k=r[grpKey]||'Unknown';m[k]=(m[k]||0)+ +(r[sumKey]||0);c[k]=(c[k]||0)+1});const o={};for(let k in m)o[k]=m[k]/c[k];return o;}
+
+function computeAnalytics(){
+  const d=DATA, n=d.length;
+  const uPat=[...new Set(d.map(r=>r.patient_id))].length;
+  const totA=d.reduce((s,r)=>s+ +(r.allowed_amount||0),0);
+  const totP=d.reduce((s,r)=>s+ +(r.paid_amount||0),0);
+  const byDx=topN(countBy(d,'dx_name'));
+  const byCpt=topN(countBy(d,'cpt_name'));
+  const byPayer=topN(countBy(d,'payer'),12);
+  const byState=topN(countBy(d,'state'));
+  const bySetting=topN(countBy(d,'care_setting'),8);
+  const bySpec=topN(countBy(d,'specialty'),10);
+  const byGender=topN(countBy(d,'gender'));
+  // monthly
+  const mMap={};d.forEach(r=>{const m=(r.service_date||'').substring(0,7);if(!m)return;if(!mMap[m])mMap[m]={claims:0,allowed:0,paid:0};mMap[m].claims++;mMap[m].allowed+= +(r.allowed_amount||0);mMap[m].paid+= +(r.paid_amount||0)});
+  const byMonth=Object.entries(mMap).sort((a,b)=>a[0].localeCompare(b[0]));
+  // age buckets
+  const ageBuckets=[{l:'18-30',a:18,b:30},{l:'31-45',a:31,b:45},{l:'46-60',a:46,b:60},{l:'61-75',a:61,b:75},{l:'76+',a:76,b:120}];
+  const byAge=ageBuckets.map(b=>({label:b.l,count:d.filter(r=>+(r.age||0)>=b.a&&+(r.age||0)<=b.b).length}));
+  // cost by dx
+  const costDx={};const cntDx={};d.forEach(r=>{const k=r.dx_name||'Unknown';costDx[k]=(costDx[k]||0)+ +(r.allowed_amount||0);cntDx[k]=(cntDx[k]||0)+1});
+  const avgCostDx=Object.entries(costDx).map(([k,v])=>({name:k,avg:v/cntDx[k]})).sort((a,b)=>b.avg-a.avg).slice(0,10);
+  // payer cost
+  const payerAllowed=groupSum(d,'payer','allowed_amount');
+  const payerPaid=groupSum(d,'payer','paid_amount');
+  return {n,uPat,totA,totP,avgCost:totA/n,byDx,byCpt,byPayer,byState,bySetting,bySpec,byGender,byMonth,byAge,avgCostDx,payerAllowed,payerPaid};
+}
+
+// ─── Destroy old charts ───
+function destroyCharts(){charts.forEach(c=>{try{c.destroy()}catch(e){}});charts=[];}
+
+// ─── Build Tabs ───
+function buildTabs(){
+  const bar=document.getElementById('tabBar');
+  bar.innerHTML='';
+  TABS.forEach((t,i)=>{
+    const b=document.createElement('button');
+    b.className='tab'+(i===currentTab?' active':'');
+    b.textContent=t;
+    b.onclick=()=>{currentTab=i;buildTabs();render()};
+    bar.appendChild(b);
+  });
+}
+
+// ─── Render ───
+function render(){
+  destroyCharts();
+  const a=computeAnalytics();
+  const el=document.getElementById('mainContent');
+
+  switch(currentTab){
+    case 0: renderOverview(el,a);break;
+    case 1: renderDiagnosis(el,a);break;
+    case 2: renderProcedures(el,a);break;
+    case 3: renderPayer(el,a);break;
+    case 4: renderGeo(el,a);break;
+    case 5: renderCost(el,a);break;
+    case 6: renderDemo(el,a);break;
+    case 7: renderAI(el,a);break;
+  }
+}
+
+// ─── 0: Overview ───
+function renderOverview(el,a){
+  el.innerHTML=`
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">📋 Total Claims</div><div class="kpi-value">${fmtN(a.n)}</div><div class="kpi-sub">${a.byMonth.length} months of data</div></div>
+    <div class="kpi"><div class="kpi-label">👥 Unique Patients</div><div class="kpi-value">${fmtN(a.uPat)}</div><div class="kpi-sub">${(a.n/a.uPat).toFixed(1)} claims/patient</div></div>
+    <div class="kpi"><div class="kpi-label">💰 Total Allowed</div><div class="kpi-value">${fmt$(a.totA)}</div><div class="kpi-sub">Avg ${fmt$(a.avgCost)}/claim</div></div>
+    <div class="kpi"><div class="kpi-label">✅ Total Paid</div><div class="kpi-value">${fmt$(a.totP)}</div><div class="kpi-sub">${((a.totP/a.totA)*100).toFixed(1)}% pay rate</div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Monthly Claims Trend</h3><div class="chart-box"><canvas id="ch0a"></canvas></div></div>
+    <div class="card"><h3>Care Setting Distribution</h3><div class="chart-box"><canvas id="ch0b"></canvas></div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h3>Top 10 Diagnoses</h3><div class="chart-box"><canvas id="ch0c"></canvas></div></div>
+    <div class="card"><h3>Top 10 Procedures</h3><div class="chart-box"><canvas id="ch0d"></canvas></div></div>
+  </div>`;
+
+  charts.push(new Chart(document.getElementById('ch0a'),{type:'line',data:{labels:a.byMonth.map(m=>m[0]),datasets:[{label:'Claims',data:a.byMonth.map(m=>m[1].claims),borderColor:'#0f766e',backgroundColor:'rgba(15,118,110,.15)',fill:true,tension:.4,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}}));
+
+  charts.push(new Chart(document.getElementById('ch0b'),{type:'doughnut',data:{labels:a.bySetting.map(s=>s[0]),datasets:[{data:a.bySetting.map(s=>s[1]),backgroundColor:C}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{padding:14,usePointStyle:true}}}}}));
+
+  charts.push(new Chart(document.getElementById('ch0c'),{type:'bar',data:{labels:a.byDx.map(d=>d[0]),datasets:[{label:'Claims',data:a.byDx.map(d=>d[1]),backgroundColor:C}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}}}}));
+
+  charts.push(new Chart(document.getElementById('ch0d'),{type:'bar',data:{labels:a.byCpt.map(d=>d[0]),datasets:[{label:'Claims',data:a.byCpt.map(d=>d[1]),backgroundColor:C.slice().reverse()}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}}}}));
+}
+
+// ─── 1: Diagnosis ───
+function renderDiagnosis(el,a){
+  let rows=a.byDx.map((d,i)=>{
+    const code=(DATA.find(r=>r.dx_name===d[0])||{}).dx_code||'—';
+    return `<tr><td>${i+1}</td><td class="bold">${d[0]}</td><td class="mono">${code}</td><td>${d[1]}</td><td>${((d[1]/a.n)*100).toFixed(1)}%</td></tr>`;
+  }).join('');
+  el.innerHTML=`<div class="card"><h3>Diagnosis Code Frequency (ICD-10)</h3><div class="chart-box tall"><canvas id="ch1"></canvas></div>
+  <table><thead><tr><th>Rank</th><th>Diagnosis</th><th>ICD-10</th><th>Claims</th><th>% Share</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  charts.push(new Chart(document.getElementById('ch1'),{type:'bar',data:{labels:a.byDx.map(d=>d[0]),datasets:[{label:'Claims',data:a.byDx.map(d=>d[1]),backgroundColor:C}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{maxRotation:35}}}}}));
+}
+
+// ─── 2: Procedures ───
+function renderProcedures(el,a){
+  let rows=a.byCpt.map((d,i)=>{
+    const code=(DATA.find(r=>r.cpt_name===d[0])||{}).cpt_code||'—';
+    return `<tr><td>${i+1}</td><td class="bold">${d[0]}</td><td class="mono">${code}</td><td>${d[1]}</td><td>${((d[1]/a.n)*100).toFixed(1)}%</td></tr>`;
+  }).join('');
+  el.innerHTML=`<div class="card"><h3>Procedure Utilization (CPT Codes)</h3><div class="chart-box tall"><canvas id="ch2"></canvas></div>
+  <table><thead><tr><th>Rank</th><th>Procedure</th><th>CPT</th><th>Claims</th><th>% Share</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  charts.push(new Chart(document.getElementById('ch2'),{type:'bar',data:{labels:a.byCpt.map(d=>d[0]),datasets:[{label:'Claims',data:a.byCpt.map(d=>d[1]),backgroundColor:C.slice().reverse()}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{maxRotation:35}}}}}));
+}
+
+// ─── 3: Payer Mix ───
+function renderPayer(el,a){
+  const payers=a.byPayer.map(p=>p[0]);
+  el.innerHTML=`<div class="grid2">
+    <div class="card"><h3>Payer Distribution</h3><div class="chart-box"><canvas id="ch3a"></canvas></div></div>
+    <div class="card"><h3>Payer Cost Comparison</h3><div class="chart-box"><canvas id="ch3b"></canvas></div></div>
+  </div>`;
+  charts.push(new Chart(document.getElementById('ch3a'),{type:'pie',data:{labels:payers,datasets:[{data:a.byPayer.map(p=>p[1]),backgroundColor:C}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{padding:12,usePointStyle:true}}}}}));
+  charts.push(new Chart(document.getElementById('ch3b'),{type:'bar',data:{labels:payers,datasets:[
+    {label:'Allowed',data:payers.map(p=>a.payerAllowed[p]||0),backgroundColor:'#3b82f6'},
+    {label:'Paid',data:payers.map(p=>a.payerPaid[p]||0),backgroundColor:'#10b981'}
+  ]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>fmt$(v)}}}}}));
+}
+
+// ─── 4: Geography ───
+function renderGeo(el,a){
+  el.innerHTML=`<div class="card"><h3>Claims by State (Top 10)</h3><div class="chart-box tall"><canvas id="ch4"></canvas></div></div>`;
+  charts.push(new Chart(document.getElementById('ch4'),{type:'bar',data:{labels:a.byState.map(s=>s[0]),datasets:[{label:'Claims',data:a.byState.map(s=>s[1]),backgroundColor:C}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}}));
+}
+
+// ─── 5: Cost Analytics ───
+function renderCost(el,a){
+  el.innerHTML=`<div class="card"><h3>Average Allowed Cost by Diagnosis</h3><div class="chart-box tall"><canvas id="ch5a"></canvas></div></div>
+  <div class="card"><h3>Monthly Cost Trend</h3><div class="chart-box"><canvas id="ch5b"></canvas></div></div>`;
+  charts.push(new Chart(document.getElementById('ch5a'),{type:'bar',data:{labels:a.avgCostDx.map(d=>d.name),datasets:[{label:'Avg Allowed ($)',data:a.avgCostDx.map(d=>d.avg),backgroundColor:'#6366f1'}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>'$'+v.toFixed(0)}}}}}));
+  charts.push(new Chart(document.getElementById('ch5b'),{type:'line',data:{labels:a.byMonth.map(m=>m[0]),datasets:[
+    {label:'Allowed',data:a.byMonth.map(m=>m[1].allowed),borderColor:'#a855f7',tension:.4,pointRadius:4},
+    {label:'Paid',data:a.byMonth.map(m=>m[1].paid),borderColor:'#10b981',tension:.4,pointRadius:4}
+  ]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>fmt$(v)}}}}}));
+}
+
+// ─── 6: Demographics ───
+function renderDemo(el,a){
+  const gLabels=a.byGender.map(g=>g[0]==='M'?'Male':g[0]==='F'?'Female':g[0]);
+  el.innerHTML=`<div class="grid2">
+    <div class="card"><h3>Gender Distribution</h3><div class="chart-box"><canvas id="ch6a"></canvas></div></div>
+    <div class="card"><h3>Age Distribution</h3><div class="chart-box"><canvas id="ch6b"></canvas></div></div>
+  </div>
+  <div class="card"><h3>Specialty Referral Patterns</h3><div class="chart-box"><canvas id="ch6c"></canvas></div></div>`;
+  charts.push(new Chart(document.getElementById('ch6a'),{type:'doughnut',data:{labels:gLabels,datasets:[{data:a.byGender.map(g=>g[1]),backgroundColor:['#3b82f6','#ec4899','#f59e0b']}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}}));
+  charts.push(new Chart(document.getElementById('ch6b'),{type:'bar',data:{labels:a.byAge.map(b=>b.label),datasets:[{label:'Patients',data:a.byAge.map(b=>b.count),backgroundColor:C}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}}));
+  charts.push(new Chart(document.getElementById('ch6c'),{type:'radar',data:{labels:a.bySpec.map(s=>s[0]),datasets:[{label:'Claims',data:a.bySpec.map(s=>s[1]),borderColor:'#a855f7',backgroundColor:'rgba(168,85,247,.15)',pointBackgroundColor:'#a855f7'}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{grid:{color:'#252b45'},angleLines:{color:'#252b45'},ticks:{backdropColor:'transparent'}}}}}));
+}
+
+// ─── 7: AI Insights ───
+function renderAI(el,a){
+  el.innerHTML=`<div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+      <h3 style="margin:0">AI-Powered Claims Insights</h3>
+      <button class="btn btn-primary" id="aiBtn" onclick="generateAI()">🧠 Generate AI Insights</button>
+    </div>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px">Leverages Claude AI to analyze your claims data and surface strategic patterns, cost optimization opportunities, and utilization anomalies.</p>
+    <div id="aiOutput">${aiInsight?`<div class="ai-box">${aiInsight}</div>`:'<div class="ai-empty"><div class="icon">🧠</div><div>Click "Generate AI Insights" to analyze your claims data with Claude AI</div></div>'}</div>
+  </div>`;
+}
+
+async function generateAI(){
+  const btn=document.getElementById('aiBtn');
+  const out=document.getElementById('aiOutput');
+  btn.disabled=true;btn.textContent='⏳ Analyzing…';
+  out.innerHTML='<div class="ai-empty"><div class="icon">⏳</div><div>Analyzing claims patterns…</div></div>';
+  const a=computeAnalytics();
+  const summary=`Claims data: ${a.n} claims, ${a.uPat} unique patients, $${(a.totA/1e6).toFixed(2)}M total allowed. Top Dx: ${a.byDx.slice(0,5).map(d=>d[0]+'('+d[1]+')').join(', ')}. Top CPT: ${a.byCpt.slice(0,5).map(d=>d[0]+'('+d[1]+')').join(', ')}. Top payers: ${a.byPayer.slice(0,4).map(d=>d[0]+'('+d[1]+')').join(', ')}. Settings: ${a.bySetting.map(d=>d[0]+'('+d[1]+')').join(', ')}. Avg cost/claim: $${a.avgCost.toFixed(0)}.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,
+        messages:[{role:'user',content:`You are a healthcare data analyst expert specializing in Komodo Health claims analytics. Given this claims data summary, provide 5-7 actionable strategic insights covering utilization patterns, cost optimization opportunities, patient journey observations, payer mix implications, and care setting trends. Be specific with numbers. Format as numbered insights.\n\n${summary}`}]})
+    });
+    const d=await res.json();
+    aiInsight=d.content?.[0]?.text||'Unable to generate insights.';
+  }catch(e){aiInsight='API call failed. Please check connectivity and try again.';}
+  out.innerHTML=`<div class="ai-box">${aiInsight}</div>`;
+  btn.disabled=false;btn.textContent='🧠 Generate AI Insights';
+}
+
+// ─── File Upload ───
+document.getElementById('fileInput').addEventListener('change',function(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      const wb=XLSX.read(ev.target.result,{type:'array'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const json=XLSX.utils.sheet_to_json(ws);
+      if(json.length>0){
+        DATA=json;
+        document.getElementById('fileBadge').textContent='📎 '+file.name;
+        document.getElementById('fileBadge').classList.remove('hidden');
+        document.getElementById('resetBtn').classList.remove('hidden');
+        aiInsight=null;
+        render();
+      }
+    }catch(err){alert('Could not parse file. Please upload a valid .xlsx or .csv.');}
+  };
+  reader.readAsArrayBuffer(file);
+});
+
+function resetSample(){
+  DATA=generateSample();
+  document.getElementById('fileBadge').classList.add('hidden');
+  document.getElementById('resetBtn').classList.add('hidden');
+  aiInsight=null;
+  render();
+}
+
+// ─── Init ───
+buildTabs();
+render();
+</script>
+</body>
+</html>
