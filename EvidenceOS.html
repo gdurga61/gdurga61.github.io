@@ -233,6 +233,7 @@ var DEFAULT_STATE=function(){return {
  appraisalTool:'RoB2',
  effectMeasure:'OR',
  metaMethod:'DL',
+ customColumns:[],   // [{id,name,question}] user-defined extraction fields
  prisma:{
    id_db:0, id_reg:0, id_other:0,
    dup_removed:0, auto_removed:0,
@@ -250,6 +251,14 @@ var CUR='setup';
 var BUSY=false;
 var _uid=0;
 function uid(p){return (p||'r')+(Date.now().toString(36))+(++_uid)}
+var _pdfBlobs={};   // runtime-only PDF bytes (recId -> ArrayBuffer) for click-to-source page render
+var _liveResults=[];// current live-search results
+var LIVE_SOURCES={
+ openalex:{name:'OpenAlex (250M+ works)',src:'OpenAlex'},
+ europepmc:{name:'Europe PMC (MEDLINE + PMC)',src:'Europe PMC'},
+ pubmed:{name:'PubMed (via Europe PMC MED)',src:'PubMed / MEDLINE'},
+ ctgov:{name:'ClinicalTrials.gov',src:'ClinicalTrials.gov'}
+};
 
 var STAGES=[
  {id:'setup',n:'1 · Setup & PICO',ico:'◐'},
@@ -694,6 +703,14 @@ STAGE_RENDER.search=function(){
  (apiKey()?'':'<span class="mut" style="margin-left:10px">Set an API key in Settings first</span>')+
  '</div>'+
  '<div id="stratBox">'+strat+'</div>'+
+ '<div class="card"><div class="ct">⚡ Live search & import (no export needed)</div><div class="cdesc">Search open, CORS-friendly indexes directly from your browser and import results in one click. For regulatory submissions, still run and document the named-database queries above (PubMed/Embase/Cochrane); use live search to accelerate scoping & supplementary searches.</div>'+
+ '<div class="cg">'+
+   '<div class="fg"><label class="fl">Source</label><select id="liveSrc">'+Object.keys(LIVE_SOURCES).map(function(k){return '<option value="'+k+'">'+esc(LIVE_SOURCES[k].name)+'</option>'}).join('')+'</select></div>'+
+   '<div class="fg"><label class="fl">Max results</label><select id="liveMax"><option>25</option><option selected>50</option><option>100</option><option>200</option></select></div>'+
+   '<div class="fg"><label class="fl">&nbsp;</label><button class="btn bp" style="width:100%" onclick="liveSearch()">🔎 Search</button></div>'+
+ '</div>'+
+ '<div class="fg"><label class="fl">Query</label><textarea id="liveQ" style="min-height:54px;font-family:DM Mono,monospace;font-size:11px" placeholder="'+esc((S.searchStrategy&&S.searchStrategy.generic)||(S.pico.i+' AND '+S.pico.p))+'">'+esc((S.searchStrategy&&S.searchStrategy.generic)||'')+'</textarea></div>'+
+ '<div id="liveBox"></div></div>'+
  '<div style="display:flex;gap:8px;margin-top:6px"><button class="btn bp" onclick="markDone(\'search\');goStage(\'import\')">Continue to Import →</button></div>';
 };
 function toggleDB(id){var i=S.databases.indexOf(id);if(i>=0)S.databases.splice(i,1);else S.databases.push(id);persist();render();}
@@ -727,6 +744,50 @@ function renderStrategy(){
  return '<div class="card"><div class="ct">Concept blocks</div>'+concepts+
    (o.notes?'<div class="info">'+esc(o.notes)+'</div>':'')+'</div>'+
    '<div class="card"><div class="ct">Database queries</div><div class="cdesc">Open each database, run the query, export citations (RIS/CSV/NBIB), then import them in the next stage.</div>'+links+'</div>';
+}
+/* ---- Live search via open APIs (CORS-friendly, no key) ---- */
+function abstractFromInverted(inv){
+ if(!inv)return '';var arr=[];Object.keys(inv).forEach(function(w){inv[w].forEach(function(pos){arr[pos]=w;});});return arr.join(' ').trim();
+}
+async function liveSearch(){
+ var src=$('liveSrc').value, q=($('liveQ').value||'').trim(), max=parseInt($('liveMax').value)||50;
+ if(!q){notif('Enter a query','warn');return;}
+ var box=$('liveBox');box.innerHTML='<div class="aip"><span class="spin"></span> Searching '+esc(LIVE_SOURCES[src].name)+'…</div>';
+ try{
+   var results=[];
+   if(src==='openalex'){
+     var yr='';if(S.pico.from||S.pico.to)yr='&filter=from_publication_date:'+(S.pico.from||'1900')+'-01-01,to_publication_date:'+(S.pico.to||'2100')+'-12-31';
+     var r=await fetch('https://api.openalex.org/works?search='+encodeURIComponent(q)+'&per-page='+Math.min(max,200)+yr);
+     var d=await r.json();
+     results=(d.results||[]).map(function(w){return {title:w.title||'',abstract:abstractFromInverted(w.abstract_inverted_index),authors:(w.authorships||[]).map(function(a){return a.author&&a.author.display_name}).filter(Boolean).join('; '),year:String(w.publication_year||''),journal:(w.primary_location&&w.primary_location.source&&w.primary_location.source.display_name)||'',doi:(w.doi||'').replace('https://doi.org/',''),pmid:(w.ids&&w.ids.pmid||'').replace(/.*\//,'')};});
+   }else if(src==='europepmc'||src==='pubmed'){
+     var qq=q+(src==='pubmed'?' AND SRC:MED':'')+((S.pico.from||S.pico.to)?(' AND (PUB_YEAR:['+(S.pico.from||'1900')+' TO '+(S.pico.to||'2100')+'])'):'');
+     var r2=await fetch('https://www.ebi.ac.uk/europepmc/webservices/rest/search?query='+encodeURIComponent(qq)+'&format=json&pageSize='+Math.min(max,100)+'&resultType=core');
+     var d2=await r2.json();
+     results=((d2.resultList&&d2.resultList.result)||[]).map(function(w){return {title:w.title||'',abstract:w.abstractText||'',authors:w.authorString||'',year:String(w.pubYear||''),journal:(w.journalInfo&&w.journalInfo.journal&&w.journalInfo.journal.title)||w.bookOrReportDetails||'',doi:w.doi||'',pmid:w.pmid||''};});
+   }else if(src==='ctgov'){
+     var r3=await fetch('https://clinicaltrials.gov/api/v2/studies?query.term='+encodeURIComponent(q)+'&pageSize='+Math.min(max,100));
+     var d3=await r3.json();
+     results=((d3.studies)||[]).map(function(s){var ps=s.protocolSection||{};var idm=ps.identificationModule||{};var dm=ps.descriptionModule||{};var st=ps.statusModule||{};return {title:idm.briefTitle||idm.officialTitle||'',abstract:dm.briefSummary||'',authors:(ps.sponsorCollaboratorsModule&&ps.sponsorCollaboratorsModule.leadSponsor&&ps.sponsorCollaboratorsModule.leadSponsor.name)||'',year:(st.startDateStruct&&st.startDateStruct.date||'').slice(0,4),journal:'ClinicalTrials.gov',doi:'',pmid:'',nct:idm.nctId||''};});
+   }
+   _liveResults=results.filter(function(x){return x.title}).map(function(x){x._sel=true;x._src=LIVE_SOURCES[src].src;return x;});
+   audit('live_search',src+': '+_liveResults.length+' hits for "'+q.slice(0,60)+'"');
+   renderLiveResults();
+ }catch(e){box.innerHTML='<div class="warn">Search failed: '+esc(e.message)+'. The source may be temporarily unavailable or blocked by your network. You can still export from the database links above and import manually.</div>';}
+}
+function renderLiveResults(){
+ var box=$('liveBox');if(!box)return;
+ if(!_liveResults.length){box.innerHTML='<div class="mut">No results.</div>';return;}
+ var sel=_liveResults.filter(function(x){return x._sel}).length;
+ box.innerHTML='<div class="rowflex"><div><b>'+_liveResults.length+'</b> results · <b>'+sel+'</b> selected</div><div style="display:flex;gap:6px"><button class="btn bs bsm" onclick="liveSelAll(true)">Select all</button><button class="btn bs bsm" onclick="liveSelAll(false)">None</button><button class="btn bp bsm" onclick="importLive()">⬇ Import selected ('+sel+')</button></div></div>'+
+ '<div style="max-height:360px;overflow-y:auto;margin-top:8px">'+_liveResults.map(function(x,i){return '<div class="scrd sp" style="padding:10px"><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" '+(x._sel?'checked':'')+' onchange="_liveResults['+i+']._sel=this.checked;renderLiveResults()"><div><div class="scrd-t">'+esc(x.title)+'</div><div class="scrd-m">'+esc((x.authors||'—').slice(0,70))+' · '+esc(x.year||'n.d.')+' · '+esc(x.journal||'')+(x.doi?' · '+esc(x.doi):'')+'</div>'+(x.abstract?'<div class="scrd-a" onclick="event.preventDefault();this.classList.toggle(\'exp\')">'+esc(x.abstract.slice(0,400))+'</div>':'<div class="mut" style="font-size:10px">no abstract</div>')+'</div></label></div>';}).join('')+'</div>';
+}
+function liveSelAll(v){_liveResults.forEach(function(x){x._sel=v});renderLiveResults();}
+function importLive(){
+ var picked=_liveResults.filter(function(x){return x._sel});
+ if(!picked.length){notif('Select at least one result','warn');return;}
+ var recs=picked.map(function(x){return {id:uid(),source:x._src,status:'pending',title:x.title,abstract:x.abstract||'',authors:x.authors||'',year:(String(x.year).match(/\d{4}/)||[''])[0],journal:x.journal||'',doi:x.doi||'',pmid:x.pmid||'',nct:x.nct||''};});
+ commitRecords(recs);_liveResults=[];renderLiveResults();notif('Imported '+recs.length+' records','ok');
 }
 /* ====================== STAGE 3: IMPORT ====================== */
 var _importBuffer=null; // {headers, rows} for column mapping
@@ -1075,15 +1136,54 @@ async function loadPdfTo(id,file){
  try{
    notif('Extracting '+file.name+'…','in');
    var buf=await file.arrayBuffer();
+   _pdfBlobs[id]=buf.slice(0); // keep bytes in-session for click-to-source page render
    var pdf=await pdfjsLib.getDocument({data:buf}).promise;
-   var text='';
-   for(var p=1;p<=pdf.numPages;p++){var page=await pdf.getPage(p);var tc=await page.getTextContent();text+=tc.items.map(function(it){return it.str}).join(' ')+'\n';}
-   S.fulltext[id]={name:file.name,pages:pdf.numPages,text:text.slice(0,180000)};
+   var text='',pageTexts=[];
+   for(var p=1;p<=pdf.numPages;p++){var page=await pdf.getPage(p);var tc=await page.getTextContent();var pt=tc.items.map(function(it){return it.str}).join(' ');pageTexts.push(pt);text+=pt+'\n';}
+   S.fulltext[id]={name:file.name,pages:pdf.numPages,text:text.slice(0,180000),pageTexts:pageTexts};
    persist();audit('pdf_loaded',file.name+' -> '+id.slice(0,8)+' ('+pdf.numPages+'p)');
    notif('Loaded '+file.name+' ('+pdf.numPages+' pages)','ok');
  }catch(e){notif('PDF failed: '+e.message,'error');}
 }
 function docText(r){var ft=S.fulltext[r.id];return ft?ft.text:('TITLE: '+r.title+'\nABSTRACT: '+(r.abstract||'(none)'));}
+/* ---- Click-to-source verification ---- */
+function normWS(s){return String(s==null?'':s).replace(/\s+/g,' ').trim();}
+function findSourcePage(recId,quote){var ft=S.fulltext[recId];if(!ft||!ft.pageTexts)return -1;var nq=normWS(quote).toLowerCase().slice(0,60);if(nq.length<8)return -1;for(var i=0;i<ft.pageTexts.length;i++){if(normWS(ft.pageTexts[i]).toLowerCase().indexOf(nq)>=0)return i+1;}return -1;}
+function showSource(recId,quote){
+ var r=S.records.find(function(x){return x.id===recId;});
+ var ft=S.fulltext[recId];
+ var raw=ft?ft.text:(r?('TITLE: '+(r.title||'')+'\n\nABSTRACT: '+(r.abstract||'')):'');
+ var H=normWS(raw),Q=normWS(quote),page=findSourcePage(recId,quote),body;
+ if(Q&&H){
+   var key=Q.length>120?Q.slice(0,120):Q,idx=H.toLowerCase().indexOf(key.toLowerCase());
+   if(idx<0){var w=Q.split(' ').slice(0,8).join(' ');idx=H.toLowerCase().indexOf(w.toLowerCase());if(idx>=0)key=w;}
+   if(idx>=0){
+     var s=Math.max(0,idx-450),e=Math.min(H.length,idx+key.length+650);
+     body='<div class="info"><b>Quote located'+(page>0?' on page '+page:'')+(ft?'':' in abstract')+'.</b> Verify the highlighted text matches the extracted value.</div>'+
+       '<div class="rp" style="max-height:46vh;color:#222"><p>'+(s>0?'… ':'')+esc(H.slice(s,idx))+'<mark style="background:#fde68a;padding:0 2px">'+esc(H.slice(idx,idx+key.length))+'</mark>'+esc(H.slice(idx+key.length,e))+(e<H.length?' …':'')+'</p></div>';
+   }else{
+     body='<div class="warn">Could not auto-locate this quote in the '+(ft?'full text':'abstract')+' — the model may have paraphrased, or the value came from a table/figure. Review manually.</div>'+(quote?'<blockquote style="color:var(--t2)">'+esc(quote)+'</blockquote>':'')+'<div class="rp" style="max-height:34vh;color:#222"><p>'+esc(raw.slice(0,2600))+(raw.length>2600?' …':'')+'</p></div>';
+   }
+ }else{
+   body='<div class="mut">No source text available. Upload the full-text PDF in the Full-text stage to enable source verification.</div>'+(quote?'<blockquote style="color:var(--t2)">'+esc(quote)+'</blockquote>':'');
+ }
+ var canRender=ft&&_pdfBlobs[recId]&&page>0;
+ $('modalBox').innerHTML='<h2>🔍 Source — '+esc(r?studyLabel(r):'')+'</h2>'+body+
+   (canRender?'<div style="margin-top:10px"><button class="btn bs bsm" onclick="renderSourcePage(\''+recId+'\','+page+')">Render PDF page '+page+'</button></div><div id="srcPageWrap"></div>':'')+
+   '<div style="margin-top:12px"><button class="btn bs" onclick="closeModal()">Close</button></div>';
+ $('overlay').classList.add('open');
+}
+async function renderSourcePage(recId,page){
+ var buf=_pdfBlobs[recId];if(!buf){notif('PDF not in memory — re-upload to render pages','warn');return;}
+ var wrap=$('srcPageWrap');wrap.innerHTML='<div class="aip"><span class="spin"></span> Rendering page '+page+'…</div>';
+ try{
+   var pdf=await pdfjsLib.getDocument({data:buf.slice(0)}).promise;
+   var pg=await pdf.getPage(page);var vp=pg.getViewport({scale:1.3});
+   var c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;c.style.maxWidth='100%';c.style.borderRadius='8px';c.style.marginTop='8px';
+   await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+   wrap.innerHTML='';wrap.appendChild(c);
+ }catch(e){wrap.innerHTML='<div class="warn">Render failed: '+esc(e.message)+'</div>';}
+}
 function setFt(id,st){var r=S.records.find(function(x){return x.id===id});r.ftStatus=st;if(st==='included')r.ftReason='';recomputeFt();persist();renderFtList();audit('fulltext_decision',st+': '+r.title.slice(0,40));}
 function excludeFt(id){
  var reasons=['Wrong population','Wrong intervention/device','Wrong comparator','Wrong outcomes','Wrong study design','Wrong publication type (review/editorial)','Duplicate / overlapping cohort','Full text unavailable','Non-English / not retrievable','Insufficient data reported'];
@@ -1201,7 +1301,7 @@ function renderRobSummary(){
  var head='<tr><th>Study</th>'+t.domains.map(function(d){return '<th title="'+esc(d)+'">'+esc(d.split(' ')[0])+'</th>'}).join('')+'<th>Overall</th></tr>';
  var rows=recs.map(function(r){
    var a=r.appraisal;
-   var cells=t.domains.map(function(dn,i){var dj=(a.domains[i]||{}).judgement||'?';return '<td title="'+esc((a.domains[i]||{}).support||'')+'"><span class="score-badge" style="background:'+robColor(dj)+'22;color:'+robColor(dj)+'">'+esc(dj.slice(0,4))+'</span></td>';}).join('');
+   var cells=t.domains.map(function(dn,i){var dd=a.domains[i]||{};var dj=dd.judgement||'?';return '<td title="'+esc(dd.support||'')+'" style="cursor:pointer" onclick="showSource(\''+r.id+'\','+JSON.stringify(dd.support||'').replace(/"/g,'&quot;')+')"><span class="score-badge" style="background:'+robColor(dj)+'22;color:'+robColor(dj)+'">'+esc(dj.slice(0,4))+'</span></td>';}).join('');
    return '<tr><td style="max-width:200px">'+esc(studyLabel(r))+(a.locked?' 🔒':'')+'</td>'+cells+'<td><span class="score-badge" style="background:'+robColor(a.overall)+'22;color:'+robColor(a.overall)+'">'+esc(a.overall)+'</span> <button class="btn bs" style="padding:2px 7px;font-size:9px" onclick="editAppraisal(\''+r.id+'\')">edit</button></td></tr>';
  }).join('');
  return '<div class="tw"><table class="dt"><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div>';
@@ -1254,12 +1354,18 @@ function extractionSchema(){
    effect_measure:{type:'string'},effect_value:{type:'string'},ci_lower:{type:'string'},ci_upper:{type:'string'},p_value:{type:'string'},
    source_quote:{type:'string'}
  },required:['name','timepoint','n_intervention','n_comparator','events_intervention','events_comparator','mean_intervention','sd_intervention','mean_comparator','sd_comparator','effect_measure','effect_value','ci_lower','ci_upper','p_value','source_quote'],additionalProperties:false};
- return {type:'object',properties:{
+ var props={
    study_design:{type:'string'},country:{type:'string'},setting:{type:'string'},funding:{type:'string'},conflicts:{type:'string'},
    n_total:{type:'string'},population:{type:'string'},intervention:{type:'string'},comparator:{type:'string'},followup:{type:'string'},
    outcomes:{type:'array',items:outcome},
    safety:{type:'string'},limitations:{type:'string'}
- },required:['study_design','country','setting','funding','conflicts','n_total','population','intervention','comparator','followup','outcomes','safety','limitations'],additionalProperties:false};
+ };
+ var req=['study_design','country','setting','funding','conflicts','n_total','population','intervention','comparator','followup','outcomes','safety','limitations'];
+ if(S.customColumns&&S.customColumns.length){
+   props.custom_fields={type:'array',items:{type:'object',properties:{column:{type:'string'},value:{type:'string'},source_quote:{type:'string'}},required:['column','value','source_quote'],additionalProperties:false}};
+   req.push('custom_fields');
+ }
+ return {type:'object',properties:props,required:req,additionalProperties:false};
 }
 function extractionSystem(){
  return 'You are a data-extraction specialist for a '+docTypeName()+', following PRISMA 2020 and Cochrane data-extraction standards.\n\n'+domainHint()+'\n\n'+
@@ -1271,7 +1377,8 @@ function extractionSystem(){
  '4. Capture each reported outcome relevant to the review as a separate item in the outcomes array (with its timepoint). If the study reports no relevant quantitative outcome, return an empty outcomes array.\n'+
  '5. effect_measure should be one of OR, RR, HR, MD, SMD, proportion, or NOT_REPORTED — matching how the study reports it.\n'+
  '6. Numbers must be plain (e.g. "1.42", "0.95", "12"). Keep CI bounds separate (ci_lower, ci_upper). p_value as reported (e.g. "0.03", "<0.001", or NOT_REPORTED).\n'+
- '7. Do not summarise or paraphrase numbers — transcribe exactly.';
+ '7. Do not summarise or paraphrase numbers — transcribe exactly.'+
+ ((S.customColumns&&S.customColumns.length)?('\n\nCUSTOM EXTRACTION FIELDS — return one entry in custom_fields per question below (use the exact column name; value = the answer from the text or "NOT_REPORTED"; source_quote = verbatim supporting text):\n'+S.customColumns.map(function(c){return '  • '+c.name+': '+c.question;}).join('\n')):'');
 }
 STAGE_RENDER.extract=function(){
  var recs=includedStudies();
@@ -1283,8 +1390,13 @@ STAGE_RENDER.extract=function(){
  '<div class="card"><div class="ct">Run extraction</div>'+
  '<div class="pb"><div class="pf" id="exPF"></div></div><div class="mut" id="exStat">'+(recs.length-done)+' pending</div>'+
  '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn bp" onclick="extractAll()" '+(apiKey()&&recs.length?'':'disabled')+'>⊞ Extract all</button></div></div>'+
+ '<div class="card"><div class="ct">🧩 Custom extraction columns</div><div class="cdesc">Define your own fields with a plain-language question (Elicit-style). They are added to the schema and answered per study with a source quote — re-run extraction after adding columns.</div>'+
+ '<div id="ccList">'+renderCustomCols()+'</div>'+
+ '<div class="cg2" style="margin-top:8px"><div class="fg"><input type="text" id="ccName" placeholder="Column name (e.g. Sample size justification)"></div><div class="fg" style="display:flex;gap:6px"><input type="text" id="ccQ" placeholder="Question (e.g. Did the study report a sample-size/power calculation?)"><button class="btn bp bsm" onclick="addCustomCol()">+ Add</button></div></div>'+
+ (S.customColumns.length?'<div id="ccTbl">'+renderCustomTable()+'</div>':'')+
+ '</div>'+
  '<div class="card"><div class="ct">Study characteristics</div><div id="charTbl">'+renderCharTable()+'</div></div>'+
- '<div class="card"><div class="ct">Quantitative outcomes (editable)</div><div class="cdesc">Tag the rows you want pooled. NOT_REPORTED cells are highlighted; fill or correct them manually.</div><div id="outTbl">'+renderOutcomeTable()+'</div></div>'+
+ '<div class="card"><div class="ct">Quantitative outcomes (editable)</div><div class="cdesc">Tag the rows you want pooled. NOT_REPORTED cells are highlighted; fill or correct them manually. Use 🔍 source to verify any value against the full text.</div><div id="outTbl">'+renderOutcomeTable()+'</div></div>'+
  (done?'<div style="display:flex;gap:8px"><button class="btn bp" onclick="markDone(\'extract\');goStage(\'meta\')">Continue to Statistics →</button></div>':'');
 };
 async function extractOne(id){
@@ -1323,7 +1435,7 @@ function renderOutcomeTable(){
    '<td>'+cell(oc,'effect_value')+'</td><td>'+cell(oc,'ci_lower')+'</td><td>'+cell(oc,'ci_upper')+'</td>'+
    '<td>'+cell(oc,'n_intervention')+'</td><td>'+cell(oc,'n_comparator')+'</td>'+
    '<td>'+cell(oc,'p_value')+'</td>'+
-   '<td title="'+esc(oc.source_quote||'')+'" style="max-width:160px;font-size:9px;color:var(--t3)">'+esc((oc.source_quote||'').slice(0,70))+'</td>'+
+   '<td style="max-width:170px;font-size:9px;color:var(--t3)"><button class="btn bs" style="padding:2px 6px;font-size:9px" title="'+esc(oc.source_quote||'')+'" onclick="showSource(\''+oc._study+'\','+JSON.stringify(oc.source_quote||'').replace(/"/g,'&quot;')+')">🔍 source</button> '+esc((oc.source_quote||'').slice(0,40))+'</td>'+
    '<td><button class="btn bs" style="padding:2px 6px" onclick="delOutcome(\''+oc._id+'\')">×</button></td>'+
  '</tr>';}).join('');
  return '<div class="tw"><table class="dt"><thead><tr><th>Pool</th><th>Study</th><th>Outcome</th><th>Meas</th><th>Effect</th><th>CI low</th><th>CI high</th><th>n(I)</th><th>n(C)</th><th>p</th><th>Source</th><th></th></tr></thead><tbody>'+body+'</tbody></table></div>'+
@@ -1338,6 +1450,27 @@ function addOutcomeRow(){
  var r=recs[0];if(!r.extraction)r.extraction={outcomes:[]};if(!r.extraction.outcomes)r.extraction.outcomes=[];
  r.extraction.outcomes.push({_id:uid('o'),_study:r.id,name:'New outcome',effect_measure:S.effectMeasure,effect_value:'',ci_lower:'',ci_upper:'',n_intervention:'',n_comparator:'',p_value:'',source_quote:'manual entry',_pool:false});
  persist();render();
+}
+/* ---- custom extraction columns ---- */
+function renderCustomCols(){
+ if(!S.customColumns.length)return '<div class="mut">No custom columns yet.</div>';
+ return S.customColumns.map(function(c){return '<div class="rowflex" style="border-bottom:1px solid var(--bdr)"><div><b style="font-size:12px">'+esc(c.name)+'</b><div class="mut">'+esc(c.question)+'</div></div><button class="btn bs bsm" onclick="delCustomCol(\''+c.id+'\')">remove</button></div>';}).join('');
+}
+function addCustomCol(){
+ var name=($('ccName').value||'').trim(),q=($('ccQ').value||'').trim();
+ if(!name||!q){notif('Enter both a column name and a question','warn');return;}
+ S.customColumns.push({id:uid('c'),name:name,question:q});persist();audit('custom_column_added',name);render();
+}
+function delCustomCol(id){S.customColumns=S.customColumns.filter(function(c){return c.id!==id});persist();render();}
+function customVal(r,colName){var cf=(r.extraction&&r.extraction.custom_fields)||[];var f=cf.find(function(x){return normWS(x.column).toLowerCase()===normWS(colName).toLowerCase();});return f||null;}
+function renderCustomTable(){
+ var recs=includedStudies().filter(function(r){return r.extraction;});
+ if(!recs.length)return '';
+ var head='<tr><th>Study</th>'+S.customColumns.map(function(c){return '<th>'+esc(c.name)+'</th>'}).join('')+'</tr>';
+ var rows=recs.map(function(r){
+   return '<tr><td style="max-width:140px">'+esc(studyLabel(r))+'</td>'+S.customColumns.map(function(c){var f=customVal(r,c.name);var v=f?f.value:'';var nr=(v===''||v==='NOT_REPORTED');return '<td style="max-width:180px">'+(nr?'<span style="color:var(--ro)">NR</span>':esc(v))+(f&&f.source_quote?' <button class="btn bs" style="padding:1px 5px;font-size:9px" onclick="showSource(\''+r.id+'\','+JSON.stringify(f.source_quote).replace(/"/g,'&quot;')+')">🔍</button>':'')+'</td>';}).join('')+'</tr>';
+ }).join('');
+ return '<div class="tw" style="margin-top:10px"><table class="dt"><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div>';
 }
 /* ====================== STAGE 9: STATISTICS & META-ANALYSIS ====================== */
 var _metaResult=null,_metaRatio=false,_metaLabel='',_metaOutcome='__all__';
@@ -1580,7 +1713,9 @@ function reportContext(){
  var outcomes=outcomeRows().filter(function(x){return isPoolable(x.oc);}).map(function(x){return studyLabel(x.r)+' — '+x.oc.name+': '+x.oc.effect_measure+' '+x.oc.effect_value+' ('+x.oc.ci_lower+'–'+x.oc.ci_upper+'), p='+x.oc.p_value;}).join('\n');
  var meta='';
  if(_metaResult){var r=_metaResult;var d=function(v){return r.ratio?Math.exp(v):v;};meta='Meta-analysis ('+r.outcome+', '+r.method+', '+r.measure+'): pooled '+fmt(d(r.est))+' (95% CI '+fmt(d(r.ciLo))+'–'+fmt(d(r.ciHi))+'), p='+fmt(r.p,4)+', I²='+fmt(r.I2,0)+'%, '+r.k+' studies. 95% PI '+fmt(d(r.piLo))+'–'+fmt(d(r.piHi))+'.'+(r.interpretation?'\nInterpretation: '+r.interpretation:'');}
- return 'PROJECT: '+S.project+'\nPIPELINE: '+dom().label+' SLR\nREVIEW/REPORT TYPE: '+S.documentType+'\n\nPICO:\n  P: '+S.pico.p+'\n  I: '+S.pico.i+'\n  C: '+S.pico.c+'\n  O: '+S.pico.o+'\n  Timeframe: '+tfStr()+'\n  Eligible designs: '+designsStr()+'\n\nSEARCH: databases = '+S.databases.join(', ')+'\n\nPRISMA: identified='+(p.id_db+p.id_reg+p.id_other)+', duplicates removed='+p.dup_removed+', screened='+p.screened+', excluded (T/A)='+p.excl_ts+', sought='+p.sought+', assessed='+p.assessed+', full-text excluded='+Object.keys(p.excl_ft).map(function(k){return k+' ('+p.excl_ft[k]+')'}).join(', ')+', INCLUDED='+p.included+'\n\nINCLUDED STUDY CHARACTERISTICS:\n'+(chars||'(extraction pending)')+'\n\nRISK OF BIAS ('+S.appraisalTool+'):\n'+(appr||'(appraisal pending)')+'\n\nKEY OUTCOMES:\n'+(outcomes||'(no quantitative outcomes)')+'\n\n'+meta;
+ var custom='';
+ if(S.customColumns&&S.customColumns.length){custom='\n\nCUSTOM EXTRACTION FIELDS:\n'+studies.filter(function(r){return r.extraction&&r.extraction.custom_fields;}).map(function(r){return studyLabel(r)+': '+S.customColumns.map(function(c){var f=customVal(r,c.name);return c.name+'='+(f?f.value:'NOT_REPORTED');}).join('; ');}).join('\n');}
+ return 'PROJECT: '+S.project+'\nPIPELINE: '+dom().label+' SLR\nREVIEW/REPORT TYPE: '+S.documentType+'\n\nPICO:\n  P: '+S.pico.p+'\n  I: '+S.pico.i+'\n  C: '+S.pico.c+'\n  O: '+S.pico.o+'\n  Timeframe: '+tfStr()+'\n  Eligible designs: '+designsStr()+'\n\nSEARCH: databases = '+S.databases.join(', ')+'\n\nPRISMA: identified='+(p.id_db+p.id_reg+p.id_other)+', duplicates removed='+p.dup_removed+', screened='+p.screened+', excluded (T/A)='+p.excl_ts+', sought='+p.sought+', assessed='+p.assessed+', full-text excluded='+Object.keys(p.excl_ft).map(function(k){return k+' ('+p.excl_ft[k]+')'}).join(', ')+', INCLUDED='+p.included+'\n\nINCLUDED STUDY CHARACTERISTICS:\n'+(chars||'(extraction pending)')+'\n\nRISK OF BIAS ('+S.appraisalTool+'):\n'+(appr||'(appraisal pending)')+'\n\nKEY OUTCOMES:\n'+(outcomes||'(no quantitative outcomes)')+custom+'\n\n'+meta;
 }
 function reportSystem(){
  var t=REPORT_TEMPLATES[S.documentType]||REPORT_TEMPLATES.Generic;
@@ -1647,6 +1782,7 @@ function exportWorkbook(){
  if(ext.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ext),'Extraction');
  var apr=[];includedStudies().forEach(function(r){if(r.appraisal){var row={Study:studyLabel(r),Tool:S.appraisalTool,Overall:r.appraisal.overall};r.appraisal.domains.forEach(function(d){row[d.name.split(' ')[0]]=d.judgement;});apr.push(row);}});
  if(apr.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(apr),'Appraisal');
+ if(S.customColumns&&S.customColumns.length){var cc=[];includedStudies().forEach(function(r){if(r.extraction){var row={Study:studyLabel(r)};S.customColumns.forEach(function(c){var f=customVal(r,c.name);row[c.name]=f?f.value:'';});cc.push(row);}});if(cc.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(cc),'Custom fields');}
  XLSX.writeFile(wb,S.project.replace(/\s+/g,'_')+'_data.xlsx');
  audit('export_workbook','xlsx');
 }
