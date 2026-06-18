@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EvidenceOS — AI Systematic Review Platform (Device & Drug · CER/PSUR/CSR/HTA)</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>if(window.pdfjsLib){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'}</script>
+<style>
+:root{--bg:#060a12;--bg2:#0e1525;--bgc:#141e33;--bgi:#0a1020;--bdr:#1e2d48;--t1:#e2e8f4;--t2:#7e90ad;--t3:#4e5f7a;--bl:#3b82f6;--cy:#06b6d4;--em:#10b981;--vi:#8b5cf6;--am:#f59e0b;--ro:#f43f5e;--or:#f97316;--gp:linear-gradient(135deg,#3b82f6,#06b6d4);--ga:linear-gradient(135deg,#8b5cf6,#06b6d4);--ge:linear-gradient(135deg,#10b981,#06b6d4);--r:12px;--rs:8px;--paper:#ffffff;--ink:#1a1a1a}
+[data-theme="light"]{--bg:#eef2f8;--bg2:#ffffff;--bgc:#ffffff;--bgi:#f4f7fb;--bdr:#d6e0ee;--t1:#16233a;--t2:#51647f;--t3:#8093ad}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px}
+a{color:var(--bl)}
+.hdr{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--bg2);backdrop-filter:blur(20px);border-bottom:1px solid var(--bdr);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-i{width:34px;height:34px;background:var(--gp);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;color:#fff;letter-spacing:-.5px}
+.logo-t{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;background:var(--gp);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.logo-v{font-size:10px;color:var(--cy);font-weight:700;background:rgba(6,182,212,.12);padding:2px 8px;border-radius:10px}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.api-s{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t3)}
+.api-d{width:7px;height:7px;border-radius:50%;background:var(--ro);box-shadow:0 0 8px rgba(244,63,94,.5)}
+.api-d.on{background:var(--em);box-shadow:0 0 8px rgba(16,185,129,.6)}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:none;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.bp{background:var(--gp);color:#fff;box-shadow:0 4px 16px rgba(59,130,246,.25)}.bp:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(59,130,246,.38)}
+.bs{background:var(--bgc);color:var(--t1);border:1px solid var(--bdr)}.bs:hover{border-color:var(--bl)}
+.bac{background:var(--ga);color:#fff}.bgo{background:var(--ge);color:#fff;box-shadow:0 4px 16px rgba(16,185,129,.25)}
+.bdang{background:rgba(244,63,94,.12);color:var(--ro);border:1px solid rgba(244,63,94,.3)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none}
+.bsm{padding:6px 11px;font-size:11px}.blg{padding:13px 28px;font-size:14px;border-radius:10px}
+.icobtn{width:34px;height:34px;border-radius:8px;background:var(--bgc);border:1px solid var(--bdr);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:.2s}.icobtn:hover{border-color:var(--bl);color:var(--t1)}
+.fg{margin-bottom:13px}
+.fl{display:block;font-size:11px;font-weight:600;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+input[type=text],input[type=number],input[type=password],input[type=email],textarea,select{width:100%;background:var(--bgi);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 13px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--t1);outline:none;transition:.2s}
+input:focus,textarea:focus,select:focus{border-color:var(--bl);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+textarea{resize:vertical;min-height:62px;line-height:1.55}
+.card{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--r);padding:20px;margin-bottom:16px}
+.ct{font-size:15px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.cdesc{font-size:12px;color:var(--t3);margin-bottom:14px;line-height:1.5}
+.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.cg2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sr{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px}
+.sc{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;text-align:center}
+.sv{font-size:26px;font-weight:800;background:var(--gp);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1}
+.sl{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-top:4px;font-weight:600}
+.tw{overflow-x:auto;border-radius:var(--r);border:1px solid var(--bdr)}
+.dt{width:100%;border-collapse:collapse;font-size:11px}
+.dt th{text-align:left;padding:9px 10px;background:var(--bg2);border-bottom:2px solid var(--bdr);font-weight:700;color:var(--t2);text-transform:uppercase;font-size:9px;letter-spacing:.5px;position:sticky;top:0}
+.dt td{padding:8px 10px;border-bottom:1px solid var(--bdr);vertical-align:top}
+.dt tr:hover td{background:rgba(59,130,246,.04)}
+.mono{font-family:'DM Mono',monospace}
+.iedit{background:var(--bgi);border:1px solid var(--bdr);border-radius:5px;padding:4px 7px;font-family:'DM Mono',monospace;font-size:11px;color:var(--t1);width:74px;outline:none}.iedit:focus{border-color:var(--bl)}
+.tabs{display:flex;border-bottom:1px solid var(--bdr);margin-bottom:16px;gap:2px;overflow-x:auto}
+.tab{padding:8px 14px;border:none;background:none;color:var(--t3);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;white-space:nowrap}
+.tab.on{color:var(--bl);border-bottom-color:var(--bl)}
+.tc{display:none}.tc.on{display:block;animation:fi .35s}
+.pb{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin:8px 0}
+.pf{height:100%;background:var(--gp);border-radius:3px;transition:width .5s ease;width:0}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid var(--bdr);border-top-color:var(--bl);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}@keyframes fi{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:8px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.b-inc{background:rgba(16,185,129,.14);color:var(--em)}.b-exc{background:rgba(244,63,94,.14);color:var(--ro)}.b-may{background:rgba(245,158,11,.14);color:var(--am)}.b-pend{background:rgba(126,144,173,.14);color:var(--t2)}
+.b-low{background:rgba(16,185,129,.14);color:var(--em)}.b-mod{background:rgba(245,158,11,.14);color:var(--am)}.b-high{background:rgba(244,63,94,.14);color:var(--ro)}.b-ni{background:rgba(126,144,173,.14);color:var(--t2)}
+.conf{display:inline-flex;padding:1px 6px;border-radius:5px;font-size:9px;font-weight:700;font-family:'DM Mono',monospace}
+.conf-high{background:rgba(16,185,129,.12);color:var(--em)}.conf-medium{background:rgba(245,158,11,.12);color:var(--am)}.conf-low{background:rgba(244,63,94,.12);color:var(--ro)}
+.notif{position:fixed;bottom:20px;right:20px;padding:11px 18px;border-radius:var(--r);font-size:12px;font-weight:500;z-index:400;animation:fi .3s;display:flex;align-items:center;gap:8px;box-shadow:0 16px 48px rgba(0,0,0,.4);max-width:420px}
+.notif.ok{background:var(--em);color:#fff}.notif.er{background:var(--ro);color:#fff}.notif.in{background:var(--bl);color:#fff}.notif.wn{background:var(--am);color:#fff}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;align-items:center;justify-content:center;padding:20px}.ov.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--r);padding:24px;max-width:860px;width:100%;max-height:88vh;overflow-y:auto}
+.modal h2{font-family:'Playfair Display',serif;font-size:20px;margin-bottom:14px}
+.layout{display:flex;margin-top:56px;min-height:calc(100vh - 56px)}
+.side{width:236px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--bdr);padding:14px 10px;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto}
+.side-h{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;font-weight:700;padding:8px 10px 6px}
+.nav-i{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--rs);cursor:pointer;transition:.15s;font-size:12px;font-weight:500;color:var(--t2);margin-bottom:2px}
+.nav-i:hover{background:var(--bgc)}
+.nav-i.on{background:rgba(59,130,246,.1);color:var(--bl);font-weight:600}
+.nav-i.done .nav-n{background:var(--em);border-color:var(--em);color:#fff}
+.nav-n{width:21px;height:21px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:1.5px solid var(--bdr);flex-shrink:0;transition:.2s}
+.nav-i.on .nav-n{border-color:var(--bl);color:var(--bl)}
+.nav-i.locked{opacity:.45;cursor:not-allowed}
+.main{flex:1;padding:22px;max-width:1280px;margin:0 auto;width:100%}
+.stage{display:none;animation:fi .35s}.stage.on{display:block}
+.stage-h{margin-bottom:18px}
+.stage-t{font-family:'Playfair Display',serif;font-size:25px;font-weight:800;margin-bottom:4px}
+.stage-d{font-size:12.5px;color:var(--t3);line-height:1.5;max-width:760px}
+.pico-g{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.pico-c{background:var(--bgi);border:1px solid var(--bdr);border-radius:var(--r);padding:14px}
+.pico-l{font-family:'Playfair Display',serif;font-size:30px;font-weight:800;margin-bottom:2px}
+.pico-lb{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:600}
+.crit-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:7px}
+.crit-row .iditag{font-family:'DM Mono',monospace;font-size:9px;background:var(--bgi);border:1px solid var(--bdr);border-radius:5px;padding:5px 7px;color:var(--cy);white-space:nowrap;margin-top:1px}
+.dbgrid{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.dbt{display:flex;align-items:center;gap:7px;padding:7px 13px;border:1px solid var(--bdr);border-radius:var(--rs);cursor:pointer;transition:.15s;font-size:12px;user-select:none;background:var(--bgi)}
+.dbt.on{border-color:var(--bl);background:rgba(59,130,246,.08);color:var(--bl);font-weight:600}
+.dbt .dbck{width:15px;height:15px;border:1.5px solid var(--t3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
+.dbt.on .dbck{background:var(--bl);border-color:var(--bl)}
+.drop{border:2px dashed var(--bdr);border-radius:var(--r);padding:34px;text-align:center;cursor:pointer;transition:.2s;color:var(--t3)}
+.drop:hover,.drop.dragover{border-color:var(--bl);background:rgba(59,130,246,.04);color:var(--t2)}
+.scrd{background:var(--bgc);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;margin-bottom:8px;transition:.2s}
+.scrd.si{border-left:4px solid var(--em)}.scrd.se{border-left:4px solid var(--ro)}.scrd.sm{border-left:4px solid var(--am)}.scrd.sp{border-left:4px solid var(--t3)}
+.scrd-t{font-size:13px;font-weight:600;margin-bottom:4px;line-height:1.35}
+.scrd-m{font-size:10px;color:var(--t3);margin-bottom:6px;font-family:'DM Mono',monospace}
+.scrd-a{font-size:11.5px;color:var(--t2);line-height:1.55;margin-bottom:8px;max-height:60px;overflow:hidden;transition:max-height .3s}
+.scrd-a.exp{max-height:600px}
+.scrd-j{font-size:10.5px;color:var(--cy);background:var(--bgi);border-radius:6px;padding:7px 9px;margin-bottom:8px;line-height:1.5}
+.scrd-btns{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.sb{padding:4px 11px;border-radius:6px;border:1px solid;font-size:10px;font-weight:600;cursor:pointer;background:transparent;transition:.15s}
+.sb-i{border-color:var(--em);color:var(--em)}.sb-i:hover,.sb-i.on{background:var(--em);color:#fff}
+.sb-e{border-color:var(--ro);color:var(--ro)}.sb-e:hover,.sb-e.on{background:var(--ro);color:#fff}
+.sb-m{border-color:var(--am);color:var(--am)}.sb-m:hover,.sb-m.on{background:var(--am);color:#fff}
+.aip{display:flex;align-items:center;gap:8px;padding:10px 13px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.16);border-radius:var(--r);margin:10px 0;font-size:11px;color:var(--bl)}
+.warn{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22);border-radius:var(--r);padding:11px 13px;margin:10px 0;font-size:11.5px;color:var(--am);line-height:1.5}
+.info{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.18);border-radius:var(--r);padding:11px 13px;margin:10px 0;font-size:11.5px;color:var(--t2);line-height:1.55}
+.cb{background:var(--bgi);border:1px solid var(--bdr);border-radius:var(--rs);padding:11px;font-family:'DM Mono',monospace;font-size:11px;overflow-x:auto;white-space:pre-wrap;color:var(--cy);line-height:1.5;word-break:break-word}
+.dblink{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bgi);border:1px solid var(--bdr);border-radius:var(--rs);padding:10px 12px;margin-bottom:7px}
+.dblink-l{font-size:12px;font-weight:600}
+.dblink .q{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace;margin-top:3px;word-break:break-all;max-width:640px}
+.rob-grid{display:grid;grid-template-columns:auto repeat(auto-fit,minmax(60px,1fr)) auto;gap:0;font-size:10px}
+.score-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:9px;font-size:10px;font-weight:700}
+.auto-step{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:var(--rs);transition:.3s;font-size:12.5px;border:1px solid transparent;margin-bottom:4px}
+.auto-step.run{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2)}
+.auto-step.done{background:rgba(16,185,129,.05);border-color:rgba(16,185,129,.15)}
+.auto-step.err{background:rgba(244,63,94,.06);border-color:rgba(244,63,94,.18)}
+.auto-step.pend{opacity:.45}
+.as-ico{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;border:2px solid var(--bdr);background:var(--bg)}
+.auto-step.done .as-ico{background:var(--em);border-color:var(--em);color:#fff}
+.auto-step.run .as-ico{border-color:var(--bl);color:var(--bl)}
+.auto-step.err .as-ico{background:var(--ro);border-color:var(--ro);color:#fff}
+.as-nm{font-weight:600;flex:1}.as-st{font-size:10px;color:var(--t3);font-family:'DM Mono',monospace}
+.rp{background:var(--paper);color:var(--ink);border-radius:var(--r);padding:40px;max-height:680px;overflow-y:auto;font-size:13px;line-height:1.7;font-family:'DM Sans',sans-serif}
+.rp h1{font-size:22px;margin-bottom:12px;font-family:'Playfair Display',serif;color:#111}
+.rp h2{font-size:16px;margin:22px 0 9px;border-bottom:2px solid #e5e5e5;padding-bottom:6px;color:#1a1a1a}
+.rp h3{font-size:14px;margin:15px 0 6px;color:#333}
+.rp p{margin-bottom:10px;color:#2a2a2a}.rp ul,.rp ol{margin:8px 0 10px 22px;color:#2a2a2a}.rp li{margin-bottom:4px}
+.rp table{width:100%;border-collapse:collapse;margin:13px 0;font-size:11px}
+.rp th,.rp td{border:1px solid #d5d5d5;padding:6px 9px;text-align:left}.rp th{background:#f3f5f8;font-weight:700}
+.rp blockquote{border-left:3px solid #3b82f6;padding:6px 14px;margin:10px 0;color:#444;background:#f7f9fc;font-style:italic}
+.svgwrap{background:var(--paper);border-radius:var(--r);padding:18px;margin:10px 0;overflow-x:auto}
+.toggle{position:relative;width:42px;height:23px;background:var(--bgi);border:1px solid var(--bdr);border-radius:12px;cursor:pointer;transition:.2s}
+.toggle.on{background:var(--bl);border-color:var(--bl)}
+.toggle .knob{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.2s}
+.toggle.on .knob{left:21px}
+.rowflex{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0}
+.mut{color:var(--t3);font-size:11px}
+.kpi{display:inline-flex;align-items:baseline;gap:5px}.kpi b{font-size:15px;color:var(--t1)}
+.chip{display:inline-flex;padding:3px 9px;border-radius:7px;font-size:10px;font-weight:600;background:var(--bgi);border:1px solid var(--bdr);color:var(--t2);margin:2px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.seg{display:inline-flex;background:var(--bgi);border:1px solid var(--bdr);border-radius:10px;padding:3px;gap:2px}
+.seg button{padding:7px 16px;border:none;border-radius:8px;background:transparent;color:var(--t2);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:.2s}
+.seg button.on{background:var(--gp);color:#fff;box-shadow:0 2px 10px rgba(59,130,246,.3)}
+.seg.dom button.on{background:var(--ge)}
+.errbar{background:rgba(244,63,94,.1);border:1px solid var(--ro);border-radius:var(--r);padding:16px;margin:14px 0;color:var(--ro);font-size:13px;line-height:1.6}
+.errbar code{background:rgba(0,0,0,.25);padding:2px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px}
+.dd{position:relative}
+.dd-menu{display:none;position:absolute;top:100%;left:0;right:0;z-index:30;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rs);margin-top:4px;padding:8px;max-height:240px;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.dd-menu.open{display:block}
+.dd-opt{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:12px}
+.dd-opt:hover{background:var(--bgc)}
+.dd-opt .ck{width:15px;height:15px;border:1.5px solid var(--t3);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
+.dd-opt.on .ck{background:var(--bl);border-color:var(--bl)}
+.dd-btn{cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+@media(max-width:900px){.side{display:none}.pico-g{grid-template-columns:1fr 1fr}.cg2,.split{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="logo"><div class="logo-i">Eo</div><span class="logo-t">EvidenceOS</span><span class="logo-v" id="domBadge">Device · SLR</span></div>
+  <div class="hdr-r">
+    <div class="seg" id="modeSeg" title="Run the pipeline automatically or review every step (human-in-the-loop)"><button id="modeStep" class="on" onclick="setMode('stepwise')">Step-by-Step</button><button id="modeAuto" onclick="setMode('autopilot')">Autopilot</button></div>
+    <div class="api-s"><div class="api-d" id="apiDot"></div><span id="apiTxt">No API key</span></div>
+    <button class="icobtn" onclick="toggleTheme()" title="Toggle theme" id="themeBtn">☀️</button>
+    <button class="btn bsm bs" onclick="openModal('settings')">⚙ Settings</button>
+    <button class="btn bsm bs" onclick="saveCheckpoint()" title="Download checkpoint">💾 Save</button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="side">
+    <div class="side-h">Pipeline</div>
+    <div id="navList"></div>
+    <div class="side-h" style="margin-top:14px">Project</div>
+    <div class="nav-i" onclick="openModal('audit')"><span class="nav-n">📋</span><span>Audit Trail</span></div>
+    <div class="nav-i" onclick="loadCheckpointPrompt()"><span class="nav-n">📂</span><span>Load Checkpoint</span></div>
+    <div class="nav-i" onclick="resetProject()"><span class="nav-n">↺</span><span>New Project</span></div>
+  </aside>
+  <main class="main" id="mainPanel"></main>
+</div>
+
+<div class="ov" id="overlay"><div class="modal" id="modalBox"></div></div>
+<input type="file" id="fileInput" style="display:none">
+<input type="file" id="ckptInput" accept=".json" style="display:none">
+<input type="file" id="pdfInput" accept="application/pdf" multiple style="display:none">
+
+<script>
+/* ============================================================
+   EvidenceOS — AI Systematic Review Platform (Device & Drug pipelines)
+   Single-file. Uses Claude API (user-supplied key) via browser fetch.
+   Features: Device/Drug pipelines, 15 review/report types, Autopilot +
+   Step-by-Step (HIL) modes, structured-output JSON schemas (screening/
+   appraisal/extraction), strict NOT_REPORTED rule, batching + exponential
+   backoff, explicit PRISMA counters, RoB2/ROBINS-I/JBI/NOS, in-browser
+   random-effects meta-analysis, EU-MDR/ICH report templates, audit trail.
+   ============================================================ */
+"use strict";
+
+/* ====================== STATE ====================== */
+var DB_LIST=[
+ {id:'pubmed',name:'PubMed / MEDLINE',api:true,url:'https://pubmed.ncbi.nlm.nih.gov/?term='},
+ {id:'cochrane',name:'Cochrane CENTRAL',api:false,url:'https://www.cochranelibrary.com/en/search?q='},
+ {id:'embase',name:'Embase',api:false,url:'https://www.embase.com/search'},
+ {id:'scopus',name:'Scopus',api:false,url:'https://www.scopus.com/search/form.uri?display=basic'},
+ {id:'wos',name:'Web of Science',api:false,url:'https://www.webofscience.com/wos/woscc/basic-search'},
+ {id:'biosis',name:'BIOSIS Previews',api:false,url:'https://www.webofscience.com/wos/biosis/basic-search'},
+ {id:'ctgov',name:'ClinicalTrials.gov',api:true,url:'https://clinicaltrials.gov/search?term='},
+ {id:'gscholar',name:'Google Scholar',api:false,url:'https://scholar.google.com/scholar?q='},
+ {id:'europepmc',name:'Europe PMC',api:true,url:'https://europepmc.org/search?query='}
+];
+var DEFAULT_STATE=function(){return {
+ v:8,
+ project:'Untitled Review',
+ domain:'device',           // device | drug
+ mode:'stepwise',           // stepwise | autopilot
+ documentType:'CER',        // review / report type
+ pico:{p:'',i:'',c:'',o:'',from:'',to:'',designs:[]},
+ criteria:{include:[],exclude:[]},
+ databases:['pubmed','cochrane','embase','ctgov'],
+ searchStrategy:null,
+ records:[],
+ fulltext:{},        // recId -> {name, text, pages}
+ appraisalTool:'RoB2',
+ effectMeasure:'OR',
+ metaMethod:'DL',
+ prisma:{
+   id_db:0, id_reg:0, id_other:0,
+   dup_removed:0, auto_removed:0,
+   screened:0, excl_ts:0,
+   sought:0, not_retrieved:0,
+   assessed:0, excl_ft:{},
+   included:0
+ },
+ report:'',
+ audit:[],
+ done:{}
+};};
+var S=DEFAULT_STATE();
+var CUR='setup';
+var BUSY=false;
+var _uid=0;
+function uid(p){return (p||'r')+(Date.now().toString(36))+(++_uid)}
+
+var STAGES=[
+ {id:'setup',n:'1 · Setup & PICO',ico:'◐'},
+ {id:'search',n:'2 · Search Strategy',ico:'⌕'},
+ {id:'import',n:'3 · Import Results',ico:'⬆'},
+ {id:'dedup',n:'4 · Deduplicate',ico:'⧉'},
+ {id:'screen',n:'5 · Title/Abstract',ico:'☑'},
+ {id:'fulltext',n:'6 · Full-text',ico:'📄'},
+ {id:'appraise',n:'7 · Critical Appraisal',ico:'⚖'},
+ {id:'extract',n:'8 · Data Extraction',ico:'⊞'},
+ {id:'meta',n:'9 · Statistics & Meta',ico:'∑'},
+ {id:'prisma',n:'10 · PRISMA Diagram',ico:'▦'},
+ {id:'report',n:'11 · Report',ico:'✎'},
+ {id:'export',n:'12 · Export',ico:'⬇'}
+];
+
+/* ---- Domain pipelines (Device vs Drug) ---- */
+var DOMAINS={
+ device:{label:'Device',badge:'Device · SLR',iLabel:'Intervention / Device',defaultDbs:['pubmed','cochrane','embase','ctgov'],defaultTool:'ROBINS-I',defaultMeasure:'PROP',
+   reviewTypes:['CER','PMCF','SSCP','PMS','PSUR','State-of-the-Art','Equivalence','Generic','HTA'],
+   designs:['RCT','Non-randomised comparative','Prospective cohort','Retrospective cohort','Case-control','Single-arm / case series','Registry study','Cross-sectional','Pooled analysis / meta-analysis']},
+ drug:{label:'Drug',badge:'Drug · SLR',iLabel:'Intervention / Drug',defaultDbs:['pubmed','embase','cochrane','ctgov'],defaultTool:'RoB2',defaultMeasure:'OR',
+   reviewTypes:['CSR','PSUR','PBRER','DSUR','SafetyReview','EfficacyReview','HTA','PayerDossier','Generic','State-of-the-Art'],
+   designs:['RCT','Pragmatic RCT','Open-label extension','Prospective cohort','Retrospective cohort','Case-control','Single-arm trial','Real-world / registry','Pharmacovigilance / case reports','Pooled analysis / meta-analysis']}
+};
+function dom(){return DOMAINS[S.domain]||DOMAINS.device;}
+function tfStr(){var f=S.pico.from,t=S.pico.to;return f||t?((f||'…')+'–'+(t||'present')):'any';}
+function designsStr(){return (S.pico.designs&&S.pico.designs.length)?S.pico.designs.join(', '):'any';}
+function domainHint(){return S.domain==='drug'
+ ?'DOMAIN: This is a DRUG / biologic systematic review. Treat the intervention as a medicinal product — capture INN and brand names, drug class, dose and regimen, route, and comparator therapies. Outcomes of interest include efficacy/effectiveness and safety (adverse drug reactions, serious adverse events, discontinuations).'
+ :'DOMAIN: This is a MEDICAL DEVICE systematic review. Treat the intervention as a device — capture device name, model, manufacturer, intended purpose/indication, and (where relevant) equivalent devices. Outcomes of interest include clinical performance (clinical benefit) and clinical safety (device-related adverse events, reinterventions).';}
+
+/* ====================== UTILITIES ====================== */
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function $(id){return document.getElementById(id)}
+function num(x){var n=parseFloat(x);return isNaN(n)?null:n}
+function notif(m,t){var d=document.createElement('div');d.className='notif '+(t==='error'?'er':t==='warn'?'wn':t==='ok'?'ok':'in');d.textContent=m;document.body.appendChild(d);setTimeout(function(){d.style.opacity='0';d.style.transition='opacity .4s';setTimeout(function(){d.remove()},400)},3400)}
+function dl(name,content,mime){var b=new Blob([content],{type:mime||'text/plain'});var u=URL.createObjectURL(b);var a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(u)},1500)}
+function audit(action,detail){S.audit.push({ts:new Date().toISOString(),action:action,detail:detail||'',stage:CUR});persist()}
+function nowStamp(){return new Date().toISOString().slice(0,19).replace('T',' ')}
+
+/* robust JSON extraction fallback (structured output should already be clean) */
+function parseJSONLoose(raw){
+ if(raw==null)return null;
+ if(typeof raw==='object')return raw;
+ try{return JSON.parse(raw)}catch(e){}
+ var c=String(raw).replace(/```json/gi,'').replace(/```/g,'').trim();
+ try{return JSON.parse(c)}catch(e){}
+ var m=c.match(/[\[{][\s\S]*[\]}]/);if(m){try{return JSON.parse(m[0])}catch(e){}}
+ try{return JSON.parse(c.replace(/,\s*([}\]])/g,'$1'))}catch(e){}
+ return null;
+}
+
+/* ====================== PERSISTENCE ====================== */
+function persist(){
+ try{
+   var light=Object.assign({},S);
+   // store fulltext text but cap size; PDFs not stored as binary
+   localStorage.setItem('evidenceos',JSON.stringify(light));
+ }catch(e){/* quota */ }
+}
+function restore(){
+ try{var r=localStorage.getItem('evidenceos');if(r){var p=JSON.parse(r);if(p&&p.v===8){S=Object.assign(DEFAULT_STATE(),p);}}}catch(e){}
+ var k=localStorage.getItem('litai7_key');if(k){S._key=k;}
+ var m=localStorage.getItem('litai7_model');S._model=m||'claude-opus-4-8';
+ var th=localStorage.getItem('litai7_theme');if(th){document.documentElement.setAttribute('data-theme',th)}
+}
+function saveCheckpoint(){
+ var ck=Object.assign({},S);delete ck._key;
+ dl('EvidenceOS_checkpoint_'+new Date().toISOString().slice(0,10)+'.json',JSON.stringify(ck,null,2),'application/json');
+ notif('Checkpoint downloaded','ok');
+}
+function loadCheckpointPrompt(){ $('ckptInput').click(); }
+function resetProject(){
+ if(!confirm('Start a new project? Current in-browser progress will be cleared (download a checkpoint first if needed).'))return;
+ S=DEFAULT_STATE();localStorage.removeItem('evidenceos');CUR='setup';render();notif('New project started','in');
+}
+
+/* ====================== CLAUDE API LAYER ====================== */
+function apiKey(){return S._key||localStorage.getItem('litai7_key')||''}
+function apiModel(){return S._model||localStorage.getItem('litai7_model')||'claude-opus-4-8'}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+
+/* core call: opts={system,user,schema,thinking,maxTokens,model,signal}
+   returns parsed object (if schema) or string (text). Implements retry w/ backoff. */
+async function callClaude(opts){
+ var key=apiKey();
+ if(!key) throw new Error('No API key set. Open Settings and paste your Claude API key.');
+ var body={
+   model: opts.model||apiModel(),
+   max_tokens: opts.maxTokens||4096,
+   messages:[{role:'user',content:opts.user}]
+ };
+ if(opts.system) body.system=[{type:'text',text:opts.system,cache_control:{type:'ephemeral'}}];
+ if(opts.schema) body.output_config={format:{type:'json_schema',schema:opts.schema}};
+ if(opts.thinking) body.thinking={type:'adaptive'};
+ var delays=[0,2000,4000,8000,16000];
+ var lastErr;
+ for(var attempt=0;attempt<delays.length;attempt++){
+   if(delays[attempt]) await sleep(delays[attempt]);
+   try{
+     var r=await fetch('https://api.anthropic.com/v1/messages',{
+       method:'POST',
+       headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+       body:JSON.stringify(body),
+       signal:opts.signal
+     });
+     if(r.status===429||r.status===529||r.status>=500){
+       lastErr=new Error('Transient API error '+r.status+' (retrying)');continue;
+     }
+     if(!r.ok){
+       var ed={};try{ed=await r.json()}catch(e){}
+       throw new Error((ed.error&&ed.error.message)||('API error '+r.status));
+     }
+     var data=await r.json();
+     if(data.stop_reason==='refusal'){throw new Error('Model declined this request (refusal).');}
+     var text=(data.content||[]).filter(function(b){return b.type==='text'}).map(function(b){return b.text}).join('');
+     if(data.stop_reason==='max_tokens'){/* may be truncated; structured parse may still work */}
+     if(opts.schema){var o=parseJSONLoose(text);if(o==null)throw new Error('Could not parse structured response');return o;}
+     return text;
+   }catch(e){
+     if(e.name==='AbortError')throw e;
+     lastErr=e;
+     // for non-network 4xx (non-retryable) thrown above, break
+     if(/API error 4/.test(e.message)||/refusal/.test(e.message)||/parse structured/.test(e.message)) throw e;
+   }
+ }
+ throw lastErr||new Error('API call failed after retries');
+}
+
+async function validateKey(){
+ try{
+   setApiStatus('checking');
+   var r=await callClaude({user:'Reply with exactly: OK',maxTokens:16});
+   var ok=/OK/i.test(r);
+   setApiStatus(ok?'on':'on');
+   notif(ok?'API key valid — connected':'Connected (unexpected reply)','ok');
+   audit('api_validated','model='+apiModel());
+   return true;
+ }catch(e){setApiStatus('off');notif('Key check failed: '+e.message,'error');return false;}
+}
+function setApiStatus(st){
+ var d=$('apiDot'),t=$('apiTxt');if(!d)return;
+ if(st==='on'){d.classList.add('on');t.textContent=apiModel().replace('claude-','');}
+ else if(st==='checking'){d.classList.remove('on');t.textContent='Checking…';}
+ else{d.classList.remove('on');t.textContent=apiKey()?'Key set (untested)':'No API key';}
+}
+
+/* ====================== STATISTICS ENGINE ====================== */
+function erf(x){var s=x<0?-1:1;x=Math.abs(x);var t=1/(1+0.3275911*x);var y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-x*x);return s*y}
+function normCDF(z){return 0.5*(1+erf(z/Math.SQRT2))}
+function normP2(z){return 2*(1-normCDF(Math.abs(z)))}
+function gammaln(x){var c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];var y=x,t=x+5.5;t-=(x+0.5)*Math.log(t);var s=1.000000000190015;for(var j=0;j<6;j++){y++;s+=c[j]/y}return -t+Math.log(2.5066282746310005*s/x)}
+function gser(a,x){var ap=a,sum=1/a,del=sum;for(var n=0;n<200;n++){ap++;del*=x/ap;sum+=del;if(Math.abs(del)<Math.abs(sum)*1e-10)break}return sum*Math.exp(-x+a*Math.log(x)-gammaln(a))}
+function gcf(a,x){var b=x+1-a,c=1e30,d=1/b,h=d;for(var i=1;i<200;i++){var an=-i*(i-a);b+=2;d=an*d+b;if(Math.abs(d)<1e-30)d=1e-30;c=b+an/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;var del=d*c;h*=del;if(Math.abs(del-1)<1e-10)break}return Math.exp(-x+a*Math.log(x)-gammaln(a))*h}
+function gammq(a,x){if(x<0||a<=0)return 1;if(x<a+1)return 1-gser(a,x);return gcf(a,x)}
+function chi2P(x,df){return gammq(df/2,x/2)} /* upper tail */
+function betacf(a,b,x){var qab=a+b,qap=a+1,qam=a-1,c=1,d=1-qab*x/qap;if(Math.abs(d)<1e-30)d=1e-30;d=1/d;var h=d;for(var m=1;m<200;m++){var m2=2*m;var aa=m*(b-m)*x/((qam+m2)*(a+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;h*=d*c;aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));d=1+aa*d;if(Math.abs(d)<1e-30)d=1e-30;c=1+aa/c;if(Math.abs(c)<1e-30)c=1e-30;d=1/d;var del=d*c;h*=del;if(Math.abs(del-1)<1e-10)break}return h}
+function ibeta(a,b,x){if(x<=0)return 0;if(x>=1)return 1;var bt=Math.exp(gammaln(a+b)-gammaln(a)-gammaln(b)+a*Math.log(x)+b*Math.log(1-x));if(x<(a+1)/(a+b+2))return bt*betacf(a,b,x)/a;return 1-bt*betacf(b,a,1-x)/b}
+function tP2(t,df){var x=df/(df+t*t);return ibeta(df/2,0.5,x)} /* two-tailed */
+function tCDF(t,df){var p=tP2(Math.abs(t),df);return t>0?1-p/2:p/2}
+function tCrit(df,conf){if(df<1)return 1.96;var lo=0,hi=100,target=1-(1-conf)/2;for(var i=0;i<80;i++){var mid=(lo+hi)/2;if(tCDF(mid,df)<target)lo=mid;else hi=mid}return (lo+hi)/2}
+function fmt(x,d){if(x==null||isNaN(x))return '—';return Number(x).toFixed(d==null?2:d)}
+
+/* random-effects meta-analysis. studies:[{label,yi,sei}] in (log)effect space */
+function metaAnalyze(studies,method){
+ studies=studies.filter(function(s){return s.sei>0&&isFinite(s.yi)&&isFinite(s.sei)});
+ var k=studies.length;
+ if(k<1)return null;
+ var wf=studies.map(function(s){return 1/(s.sei*s.sei)});
+ var sumW=wf.reduce(function(a,b){return a+b},0);
+ var sumWy=studies.reduce(function(a,s,i){return a+wf[i]*s.yi},0);
+ var Mf=sumWy/sumW;
+ var Q=studies.reduce(function(a,s,i){return a+wf[i]*(s.yi-Mf)*(s.yi-Mf)},0);
+ var df=k-1;
+ var sumW2=wf.reduce(function(a,w){return a+w*w},0);
+ var C=sumW-sumW2/sumW;
+ var tau2=C>0?Math.max(0,(Q-df)/C):0;
+ if(method==='FE')tau2=0;
+ var wr=studies.map(function(s){return 1/(s.sei*s.sei+tau2)});
+ var sumWr=wr.reduce(function(a,b){return a+b},0);
+ var Mr=studies.reduce(function(a,s,i){return a+wr[i]*s.yi},0)/sumWr;
+ var seR=Math.sqrt(1/sumWr);
+ var est=method==='FE'?Mf:Mr;
+ var se=method==='FE'?Math.sqrt(1/sumW):seR;
+ var ciLo=est-1.96*se, ciHi=est+1.96*se;
+ var z=est/se, p=normP2(z);
+ var I2=Q>df?Math.max(0,(Q-df)/Q*100):0;
+ var H2=df>0?Q/df:1;
+ var pHet=df>0?chi2P(Q,df):1;
+ var tcrit=tCrit(df>0?df:1,0.95);
+ var piLo=est-tcrit*Math.sqrt(tau2+se*se), piHi=est+tcrit*Math.sqrt(tau2+se*se);
+ // per-study weights (random)
+ var perW=method==='FE'?wf:wr; var sumPerW=perW.reduce(function(a,b){return a+b},0);
+ var rows=studies.map(function(s,i){return {label:s.label,yi:s.yi,sei:s.sei,ciLo:s.yi-1.96*s.sei,ciHi:s.yi+1.96*s.sei,w:perW[i]/sumPerW*100}});
+ // Egger's regression test (precision vs standardized effect)
+ var egger=eggerTest(studies);
+ return {k:k,est:est,se:se,ciLo:ciLo,ciHi:ciHi,z:z,p:p,tau2:tau2,Q:Q,df:df,I2:I2,H2:H2,pHet:pHet,piLo:piLo,piHi:piHi,rows:rows,egger:egger,method:method};
+}
+function eggerTest(studies){
+ if(studies.length<3)return null;
+ // regress (yi/sei) on (1/sei): intercept tests asymmetry
+ var xs=studies.map(function(s){return 1/s.sei});
+ var ys=studies.map(function(s){return s.yi/s.sei});
+ var n=xs.length;var mx=xs.reduce(function(a,b){return a+b},0)/n;var my=ys.reduce(function(a,b){return a+b},0)/n;
+ var sxx=0,sxy=0;for(var i=0;i<n;i++){sxx+=(xs[i]-mx)*(xs[i]-mx);sxy+=(xs[i]-mx)*(ys[i]-my)}
+ if(sxx===0)return null;
+ var slope=sxy/sxx;var icpt=my-slope*mx;
+ var sse=0;for(var j=0;j<n;j++){var pred=icpt+slope*xs[j];sse+=(ys[j]-pred)*(ys[j]-pred)}
+ var s2=sse/(n-2);var seInt=Math.sqrt(s2*(1/n+mx*mx/sxx));
+ var t=icpt/seInt;var p=tP2(t,n-2);
+ return {intercept:icpt,t:t,p:p,df:n-2};
+}
+/* ====================== UI FRAMEWORK ====================== */
+function toggleTheme(){
+ var cur=document.documentElement.getAttribute('data-theme')==='light'?'dark':'light';
+ document.documentElement.setAttribute('data-theme',cur);
+ localStorage.setItem('litai7_theme',cur);
+ $('themeBtn').textContent=cur==='light'?'🌙':'☀️';
+}
+function stageUnlocked(id){
+ // setup/search/import always available; others require records
+ if(['setup','search','import'].indexOf(id)>=0)return true;
+ if(id==='dedup'||id==='screen')return S.records.length>0;
+ var inc=includedTiAb().length;
+ if(['fulltext','appraise','extract'].indexOf(id)>=0)return inc>0;
+ if(id==='meta')return S.records.some(function(r){return r.extraction});
+ if(id==='prisma'||id==='report'||id==='export')return S.records.length>0;
+ return true;
+}
+function renderNav(){
+ var h='';
+ STAGES.forEach(function(st){
+   var locked=!stageUnlocked(st.id);
+   var done=S.done[st.id];
+   h+='<div class="nav-i '+(CUR===st.id?'on':'')+(done?' done':'')+(locked?' locked':'')+'" onclick="'+(locked?'notif(\'Complete earlier stages first\',\'warn\')':'goStage(\''+st.id+'\')')+'">'+
+      '<span class="nav-n">'+(done?'✓':st.ico)+'</span><span>'+esc(st.n)+'</span></div>';
+ });
+ $('navList').innerHTML=h;
+}
+function goStage(id){CUR=id;render();window.scrollTo(0,0);}
+function markDone(id){S.done[id]=true;persist();renderNav();}
+function render(){
+ try{ setApiStatus(apiKey()?'on':'off'); renderNav(); }catch(e){}
+ var fn=STAGE_RENDER[CUR];
+ try{
+   $('mainPanel').innerHTML=fn?fn():'<div class="card">Stage not found.</div>';
+ }catch(e){
+   $('mainPanel').innerHTML='<div class="errbar"><b>⚠ Could not render the “'+esc(CUR)+'” stage.</b><br>'+esc(e.message)+'<br><br>Your data is auto-saved. <button class="btn bs bsm" onclick="goStage(\'setup\')">Go to Setup</button> <button class="btn bs bsm" onclick="saveCheckpoint()">Save checkpoint</button></div>';
+   return;
+ }
+ if(STAGE_AFTER[CUR]){try{STAGE_AFTER[CUR]();}catch(e){}}
+}
+var STAGE_RENDER={}, STAGE_AFTER={};
+
+/* ---------- modals ---------- */
+function openModal(which){
+ var h='';
+ if(which==='settings')h=settingsModal();
+ else if(which==='audit')h=auditModal();
+ else if(which==='autopilot')h=autopilotModal();
+ $('modalBox').innerHTML=h;$('overlay').classList.add('open');
+}
+function closeModal(){$('overlay').classList.remove('open')}
+$('overlay').addEventListener('click',function(e){if(e.target===this)closeModal()});
+
+function settingsModal(){
+ return '<h2>⚙ Settings</h2>'+
+ '<div class="info">Your Claude API key is stored only in this browser (localStorage) and sent directly to api.anthropic.com. Get a key at console.anthropic.com.</div>'+
+ '<div class="fg"><label class="fl">Claude API Key</label><input type="password" id="setKey" placeholder="sk-ant-..." value="'+esc(apiKey())+'"></div>'+
+ '<div class="cg2">'+
+   '<div class="fg"><label class="fl">Model</label><select id="setModel">'+
+     [['claude-opus-4-8','Claude Opus 4.8 — most capable (default)'],['claude-sonnet-4-6','Claude Sonnet 4.6 — balanced (good for high-volume screening)'],['claude-haiku-4-5','Claude Haiku 4.5 — fastest / cheapest']].map(function(o){return '<option value="'+o[0]+'"'+(apiModel()===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')+
+   '</select></div>'+
+   '<div class="fg"><label class="fl">Project name</label><input type="text" id="setProj" value="'+esc(S.project)+'"></div>'+
+ '</div>'+
+ '<div class="cg2">'+
+   '<div class="fg"><label class="fl">SLR pipeline</label><select id="setDomain" onchange="S.domain=this.value;persist()"><option value="device"'+(S.domain==='device'?' selected':'')+'>🩺 Device SLR</option><option value="drug"'+(S.domain==='drug'?' selected':'')+'>💊 Drug SLR</option></select></div>'+
+   '<div class="fg"><label class="fl">Review / report type</label><select id="setDoc">'+
+     Object.keys(REVIEW_INFO).map(function(v){return '<option value="'+v+'"'+(S.documentType===v?' selected':'')+'>'+esc(reviewName(v))+'</option>'}).join('')+
+   '</select></div>'+
+ '</div>'+
+ '<div class="bg2" style="display:flex;gap:8px;margin-top:14px"><button class="btn bp" onclick="saveSettings()">Save</button>'+
+ '<button class="btn bs" onclick="saveSettings(true)">Save & Test Key</button>'+
+ '<button class="btn bs" onclick="closeModal()">Close</button></div>';
+}
+function saveSettings(test){
+ var k=$('setKey').value.trim();S._key=k;localStorage.setItem('litai7_key',k);
+ S._model=$('setModel').value;localStorage.setItem('litai7_model',S._model);
+ S.project=$('setProj').value||'Untitled Review';
+ if($('setDomain'))S.domain=$('setDomain').value;
+ S.documentType=$('setDoc').value;
+ if($('domBadge'))$('domBadge').textContent=dom().badge;
+ persist();setApiStatus(k?'on':'off');render();
+ if(test){validateKey();}else{notif('Settings saved','ok');closeModal();}
+}
+function auditModal(){
+ var rows=S.audit.slice().reverse().map(function(a){
+   return '<tr><td class="mono" style="white-space:nowrap">'+esc(a.ts.slice(0,19).replace('T',' '))+'</td><td><b>'+esc(a.action)+'</b></td><td>'+esc(a.stage)+'</td><td>'+esc(a.detail)+'</td></tr>';
+ }).join('');
+ return '<h2>📋 Audit Trail</h2><div class="info">Immutable log of every analytical action — required for reproducibility & regulatory traceability (ISO 14155, MDCG 2020-13).</div>'+
+ '<div class="tw" style="max-height:50vh"><table class="dt"><thead><tr><th>Timestamp (UTC)</th><th>Action</th><th>Stage</th><th>Detail</th></tr></thead><tbody>'+(rows||'<tr><td colspan=4 class=mut>No actions yet.</td></tr>')+'</tbody></table></div>'+
+ '<div style="display:flex;gap:8px;margin-top:14px"><button class="btn bs" onclick="exportAudit()">Export CSV</button><button class="btn bs" onclick="closeModal()">Close</button></div>';
+}
+function exportAudit(){
+ var csv='timestamp,action,stage,detail\n'+S.audit.map(function(a){return [a.ts,a.action,a.stage,'"'+String(a.detail).replace(/"/g,'""')+'"'].join(',')}).join('\n');
+ dl('LITAI_audit.csv',csv,'text/csv');
+}
+/* ====================== STAGE 1: SETUP & PICO ====================== */
+STAGE_RENDER.setup=function(){
+ var p=S.pico;
+ return stageHead('Setup & PICO Framework','Choose your pipeline (Device or Drug), the review/report type, and the PICO question. These anchor the search strategy, screening criteria, extraction schema and report — and are passed to the model as rigid context so every decision stays consistent.')+
+ (apiKey()?'':'<div class="warn">⚠ No Claude API key set. Click <b>⚙ Settings</b> (top right) and paste your key to enable AI screening, appraisal, extraction and report writing. The tool still works manually without a key.</div>')+
+ '<div class="card"><div class="ct">Pipeline & review type</div><div class="cdesc">Device and Drug use different default databases, appraisal tools, extraction fields and report templates.</div>'+
+ '<div class="cg2">'+
+   '<div class="fg"><label class="fl">SLR pipeline</label><div class="seg dom" style="width:100%"><button class="'+(S.domain==='device'?'on':'')+'" style="flex:1" onclick="setDomain(\'device\')">🩺 Device SLR</button><button class="'+(S.domain==='drug'?'on':'')+'" style="flex:1" onclick="setDomain(\'drug\')">💊 Drug SLR</button></div></div>'+
+   '<div class="fg"><label class="fl">Review / report type</label><select id="set_doc2" onchange="S.documentType=this.value;persist();render()">'+
+     dom().reviewTypes.map(function(v){return '<option value="'+v+'"'+(S.documentType===v?' selected':'')+'>'+esc(reviewName(v))+'</option>'}).join('')+'</select></div>'+
+ '</div></div>'+
+ '<div class="card"><div class="ct">Review question (PICO)</div>'+
+ '<div class="cg2">'+
+   picoField('p','Population / Problem',S.domain==='drug'?'Adults with type 2 diabetes and established ASCVD':'Adults with symptomatic knee osteoarthritis (Kellgren-Lawrence ≥2)')+
+   picoField('i',dom().iLabel,S.domain==='drug'?'Empagliflozin (SGLT2 inhibitor)':'Device X — intra-articular hyaluronic acid injection')+
+   picoField('c','Comparator',S.domain==='drug'?'Placebo or other glucose-lowering therapy':'Saline / corticosteroid / placebo / standard of care')+
+   picoField('o','Outcomes',S.domain==='drug'?'MACE, CV death, HF hospitalisation, serious adverse events':'WOMAC pain, function, adverse events, reintervention rate')+
+ '</div>'+
+ '<div class="cg">'+
+   '<div class="fg"><label class="fl">Publication window — From</label><input type="number" id="pic_from" value="'+esc(p.from)+'" placeholder="2014" min="1900" max="2100"></div>'+
+   '<div class="fg"><label class="fl">To</label><input type="number" id="pic_to" value="'+esc(p.to)+'" placeholder="2025" min="1900" max="2100"></div>'+
+   '<div class="fg"><label class="fl">Eligible study designs</label>'+designsDropdown()+'</div>'+
+ '</div>'+
+ '<button class="btn bs bsm" onclick="aiSuggestCriteria()" '+(apiKey()?'':'disabled')+'>✨ Auto-draft I/E criteria from PICO</button>'+
+ '</div>'+
+ critCard('include','Inclusion criteria','b-inc','Records must satisfy ALL inclusion criteria.')+
+ critCard('exclude','Exclusion criteria','b-exc','Records violating ANY exclusion criterion are excluded; the model must name the violated criterion id.')+
+ '<div class="card"><div class="ct">Appraisal & analysis defaults</div>'+
+ '<div class="cg">'+
+   '<div class="fg"><label class="fl">Risk-of-bias / appraisal tool</label><select id="set_tool" onchange="S.appraisalTool=this.value;persist()">'+
+     [['RoB2','Cochrane RoB 2 (RCTs)'],['ROBINS-I','ROBINS-I (non-randomised)'],['JBI','JBI checklist (case series/cohort)'],['NOS','Newcastle-Ottawa (cohort/case-control)']].map(function(o){return '<option value="'+o[0]+'"'+(S.appraisalTool===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')+'</select></div>'+
+   '<div class="fg"><label class="fl">Default effect measure</label><select id="set_eff" onchange="S.effectMeasure=this.value;persist()">'+
+     [['OR','Odds Ratio (OR)'],['RR','Risk Ratio (RR)'],['HR','Hazard Ratio (HR)'],['MD','Mean Difference (MD)'],['SMD','Std. Mean Difference (SMD)'],['PROP','Proportion / single-arm']].map(function(o){return '<option value="'+o[0]+'"'+(S.effectMeasure===o[0]?' selected':'')+'>'+esc(o[1])+'</option>'}).join('')+'</select></div>'+
+ '</div></div>'+
+ '<div style="display:flex;gap:8px"><button class="btn bp" onclick="saveSetup()">Save & Continue →</button></div>';
+};
+function designsDropdown(){
+ var sel=S.pico.designs||[];
+ var label=sel.length?sel.length+' selected':'Select designs…';
+ return '<div class="dd"><div class="bs btn dd-btn" style="width:100%;justify-content:space-between" onclick="var m=this.nextElementSibling;m.classList.toggle(\'open\')"><span>'+esc(label)+'</span><span>▾</span></div>'+
+   '<div class="dd-menu">'+dom().designs.map(function(d){var on=sel.indexOf(d)>=0;return '<div class="dd-opt '+(on?'on':'')+'" onclick="toggleDesign(\''+esc(d).replace(/'/g,"\\'")+'\')"><span class="ck">'+(on?'✓':'')+'</span>'+esc(d)+'</div>'}).join('')+'</div></div>';
+}
+function toggleDesign(d){var a=S.pico.designs||(S.pico.designs=[]);var i=a.indexOf(d);if(i>=0)a.splice(i,1);else a.push(d);persist();var box=$('mainPanel');/* re-render just the dropdown area cheaply */ render();}
+function setDomain(dm){
+ collectSetup();
+ S.domain=dm;
+ var d=DOMAINS[dm];
+ if(d.reviewTypes.indexOf(S.documentType)<0)S.documentType=d.reviewTypes[0];
+ S.appraisalTool=d.defaultTool;S.effectMeasure=d.defaultMeasure;
+ if(!S.records.length)S.databases=d.defaultDbs.slice();
+ // keep only designs valid for this domain
+ S.pico.designs=(S.pico.designs||[]).filter(function(x){return d.designs.indexOf(x)>=0});
+ persist();if($('domBadge'))$('domBadge').textContent=d.badge;audit('domain_set',dm);render();
+}
+function picoField(k,label,ph){return '<div class="fg"><label class="fl">'+esc(label)+'</label><textarea id="pic_'+k+'" placeholder="'+esc(ph)+'">'+esc(S.pico[k])+'</textarea></div>';}
+function critCard(type,title,cls,desc){
+ var arr=S.criteria[type];
+ var rows=arr.map(function(c,i){
+   return '<div class="crit-row"><span class="iditag">'+esc(c.id)+'</span><input type="text" value="'+esc(c.text)+'" oninput="S.criteria.'+type+'['+i+'].text=this.value;persist()"><button class="icobtn" style="width:30px;height:30px;flex-shrink:0" onclick="delCrit(\''+type+'\','+i+')">×</button></div>';
+ }).join('');
+ return '<div class="card"><div class="ct"><span class="badge '+cls+'">'+esc(title)+'</span></div><div class="cdesc">'+esc(desc)+'</div>'+
+   '<div id="crit_'+type+'">'+(rows||'<div class="mut">No criteria yet.</div>')+'</div>'+
+   '<button class="btn bs bsm" style="margin-top:8px" onclick="addCrit(\''+type+'\')">+ Add '+(type==='include'?'inclusion':'exclusion')+' criterion</button></div>';
+}
+function critPrefix(t){return t==='include'?'INC':'EXC'}
+function addCrit(type){
+ var n=S.criteria[type].length+1;
+ S.criteria[type].push({id:critPrefix(type)+String(n).padStart(2,'0'),text:''});
+ persist();render();
+}
+function delCrit(type,i){S.criteria[type].splice(i,1);reindexCrit(type);persist();render();}
+function reindexCrit(type){S.criteria[type].forEach(function(c,i){c.id=critPrefix(type)+String(i+1).padStart(2,'0')});}
+function collectSetup(){
+ ['p','i','c','o'].forEach(function(k){var el=$('pic_'+k);if(el)S.pico[k]=el.value});
+ if($('pic_from'))S.pico.from=$('pic_from').value;
+ if($('pic_to'))S.pico.to=$('pic_to').value;
+}
+function saveSetup(){
+ collectSetup();
+ if(!S.pico.p||!S.pico.i){notif('Population and Intervention are required','warn');return;}
+ if(S.criteria.include.length===0){notif('Add at least one inclusion criterion','warn');return;}
+ persist();markDone('setup');audit('setup_saved','PICO + '+S.criteria.include.length+' inc / '+S.criteria.exclude.length+' exc criteria');
+ notif('Setup saved','ok');goStage('search');
+}
+async function aiSuggestCriteria(){
+ collectSetup();
+ if(!S.pico.p){notif('Fill in at least Population first','warn');return;}
+ notif('Drafting criteria…','in');
+ var schema={type:'object',properties:{
+   inclusion:{type:'array',items:{type:'string'}},
+   exclusion:{type:'array',items:{type:'string'}}
+ },required:['inclusion','exclusion'],additionalProperties:false};
+ try{
+   var sys='You are a systematic-review methodologist drafting eligibility criteria for a '+docTypeName()+' following PRISMA 2020 and the Cochrane Handbook. Produce concise, individually-checkable, mutually-exclusive criteria anchored to the PICO. Each criterion must be a single testable statement.';
+   var user='PICO:\nPopulation: '+S.pico.p+'\nIntervention: '+S.pico.i+'\nComparator: '+S.pico.c+'\nOutcomes: '+S.pico.o+'\nTimeframe: '+tfStr()+'\nDesigns: '+designsStr()+'\n\nReturn 4-7 inclusion and 4-7 exclusion criteria.';
+   var o=await callClaude({system:sys,user:user,schema:schema,maxTokens:1500});
+   S.criteria.include=(o.inclusion||[]).map(function(t,i){return {id:'INC'+String(i+1).padStart(2,'0'),text:t}});
+   S.criteria.exclude=(o.exclusion||[]).map(function(t,i){return {id:'EXC'+String(i+1).padStart(2,'0'),text:t}});
+   persist();render();audit('ai_criteria_drafted',S.criteria.include.length+' inc / '+S.criteria.exclude.length+' exc');notif('Criteria drafted — review & edit','ok');
+ }catch(e){notif('Draft failed: '+e.message,'error');}
+}
+var REVIEW_INFO={
+ CER:['CER — Clinical Evaluation Report','Clinical Evaluation Report (EU MDR 2017/745, MEDDEV 2.7/1 Rev 4)'],
+ PMCF:['PMCF Evaluation Report','Post-Market Clinical Follow-up evaluation (MDCG 2020-7/8)'],
+ SSCP:['SSCP — Summary of Safety & Clinical Performance','Summary of Safety and Clinical Performance (EU MDR Art. 32)'],
+ PMS:['PMS Report','Post-Market Surveillance report (EU MDR Art. 85)'],
+ PSUR:['PSUR / PBRER','Periodic Safety Update Report (EU MDR Art. 86 / ICH E2C(R2))'],
+ PBRER:['PBRER','Periodic Benefit-Risk Evaluation Report (ICH E2C(R2))'],
+ DSUR:['DSUR','Development Safety Update Report (ICH E2F)'],
+ CSR:['CSR — Clinical Study Report','Clinical Study Report (ICH E3)'],
+ SafetyReview:['Safety / PV Review','drug safety & pharmacovigilance literature review'],
+ EfficacyReview:['Efficacy Review','efficacy/effectiveness systematic review'],
+ HTA:['HTA Evidence Dossier','Health Technology Assessment evidence synthesis'],
+ PayerDossier:['Payer / Value Dossier','payer value dossier (AMCP-style)'],
+ Equivalence:['Equivalence Assessment','device equivalence evaluation (MDCG 2020-5)'],
+ 'State-of-the-Art':['State-of-the-Art Review','state-of-the-art / current knowledge review'],
+ Generic:['Generic SLR / Meta-analysis','systematic literature review (PRISMA 2020)']
+};
+function reviewName(v){return (REVIEW_INFO[v]||[v])[0];}
+function docTypeName(){return (REVIEW_INFO[S.documentType]||[null,'systematic literature review'])[1];}
+function stageHead(t,d){return '<div class="stage-h"><div class="stage-t">'+esc(t)+'</div><div class="stage-d">'+esc(d)+'</div></div>';}
+/* ====================== STAGE 2: SEARCH STRATEGY ====================== */
+STAGE_RENDER.search=function(){
+ var dbs=DB_LIST.map(function(d){
+   var on=S.databases.indexOf(d.id)>=0;
+   return '<div class="dbt '+(on?'on':'')+'" onclick="toggleDB(\''+d.id+'\')"><span class="dbck">'+(on?'✓':'')+'</span>'+esc(d.name)+(d.api?'':' <span class="mut" style="font-size:9px">(link)</span>')+'</div>';
+ }).join('');
+ var strat='';
+ if(S.searchStrategy){strat=renderStrategy();}
+ return stageHead('Search Strategy','Select databases, then auto-generate database-specific Boolean queries (PubMed MeSH, Embase Emtree, etc.). Subscription databases without open APIs open as a pre-filled link — run the search, export the results, and import them in the next stage.')+
+ '<div class="card"><div class="ct">Databases</div><div class="cdesc">Toggle the sources you will search. PRISMA records each source separately.</div><div class="dbgrid">'+dbs+'</div></div>'+
+ '<div class="card"><div class="ct">Generate strategy</div><div class="cdesc">Uses your PICO to build a sensitivity-maximising search per database.</div>'+
+ '<button class="btn bp" onclick="genSearchStrategy()" '+(apiKey()?'':'disabled')+'>✨ Generate database-specific queries</button>'+
+ (apiKey()?'':'<span class="mut" style="margin-left:10px">Set an API key in Settings first</span>')+
+ '</div>'+
+ '<div id="stratBox">'+strat+'</div>'+
+ '<div style="display:flex;gap:8px;margin-top:6px"><button class="btn bp" onclick="markDone(\'search\');goStage(\'import\')">Continue to Import →</button></div>';
+};
+function toggleDB(id){var i=S.databases.indexOf(id);if(i>=0)S.databases.splice(i,1);else S.databases.push(id);persist();render();}
+async function genSearchStrategy(){
+ if(!S.pico.p){notif('Define PICO in Setup first','warn');goStage('setup');return;}
+ notif('Building search strategy…','in');
+ var schema={type:'object',properties:{
+   concepts:{type:'array',items:{type:'object',properties:{label:{type:'string'},terms:{type:'array',items:{type:'string'}}},required:['label','terms'],additionalProperties:false}},
+   pubmed:{type:'string'},embase:{type:'string'},cochrane:{type:'string'},scopus:{type:'string'},wos:{type:'string'},ctgov:{type:'string'},generic:{type:'string'},
+   notes:{type:'string'}
+ },required:['concepts','pubmed','embase','cochrane','scopus','wos','ctgov','generic','notes'],additionalProperties:false};
+ try{
+   var sys='You are an information specialist building a systematic-review search strategy. '+domainHint()+' Build concept blocks (synonyms, MeSH/Emtree, truncation, field tags) and combine with AND/OR. Provide a database-tailored query for each platform using its correct syntax (PubMed [tiab]/[mesh], Embase Emtree/ti,ab, Scopus TITLE-ABS-KEY, Web of Science TS=, Cochrane MeSH/.ti,ab.). Maximise sensitivity. ClinicalTrials.gov: simple key terms.';
+   var user='PICO:\nPopulation: '+S.pico.p+'\nIntervention: '+S.pico.i+'\nComparator: '+S.pico.c+'\nOutcomes: '+S.pico.o+'\nTimeframe: '+tfStr()+'\nDesigns: '+designsStr();
+   var o=await callClaude({system:sys,user:user,schema:schema,maxTokens:2500,thinking:true});
+   S.searchStrategy=o;persist();render();audit('search_strategy_generated',(o.concepts||[]).length+' concept blocks');notif('Search strategy ready','ok');
+ }catch(e){notif('Failed: '+e.message,'error');}
+}
+function renderStrategy(){
+ var o=S.searchStrategy;
+ var concepts=(o.concepts||[]).map(function(c){return '<div style="margin-bottom:8px"><b style="font-size:12px">'+esc(c.label)+'</b><div>'+(c.terms||[]).map(function(t){return '<span class="chip">'+esc(t)+'</span>'}).join('')+'</div></div>';}).join('');
+ var links=S.databases.map(function(id){
+   var d=DB_LIST.find(function(x){return x.id===id});if(!d)return '';
+   var q=o[id]||o.generic||'';
+   var href=d.api||d.url.indexOf('?')<0?d.url+encodeURIComponent(q):d.url+encodeURIComponent(q);
+   if(id==='gscholar')href='https://scholar.google.com/scholar?q='+encodeURIComponent(o.generic||q);
+   return '<div class="dblink"><div><div class="dblink-l">'+esc(d.name)+'</div><div class="q">'+esc(q||'(use generic query)')+'</div></div>'+
+     '<div style="display:flex;gap:6px"><button class="btn bs bsm" onclick="navigator.clipboard.writeText('+JSON.stringify(q||o.generic).replace(/"/g,'&quot;')+');notif(\'Query copied\',\'ok\')">Copy</button>'+
+     '<a class="btn bp bsm" href="'+esc(href)+'" target="_blank" rel="noopener">Open ↗</a></div></div>';
+ }).join('');
+ return '<div class="card"><div class="ct">Concept blocks</div>'+concepts+
+   (o.notes?'<div class="info">'+esc(o.notes)+'</div>':'')+'</div>'+
+   '<div class="card"><div class="ct">Database queries</div><div class="cdesc">Open each database, run the query, export citations (RIS/CSV/NBIB), then import them in the next stage.</div>'+links+'</div>';
+}
+/* ====================== STAGE 3: IMPORT ====================== */
+var _importBuffer=null; // {headers, rows} for column mapping
+STAGE_RENDER.import=function(){
+ var n=S.records.length;
+ var bySrc={};S.records.forEach(function(r){bySrc[r.source]=(bySrc[r.source]||0)+1});
+ var srcRows=Object.keys(bySrc).map(function(k){return '<span class="chip">'+esc(k)+': '+bySrc[k]+'</span>'}).join('')||'<span class="mut">none yet</span>';
+ return stageHead('Import Search Results','Upload exported citations from each database (CSV, Excel .xlsx, RIS, or PubMed .nbib). Map the columns once; EvidenceOS normalises everything into a single record set and tags each record with its source for PRISMA counting.')+
+ '<div class="sr"><div class="sc"><div class="sv">'+n+'</div><div class="sl">Records imported</div></div>'+
+   '<div class="sc"><div class="sv">'+Object.keys(bySrc).length+'</div><div class="sl">Sources</div></div></div>'+
+ '<div class="card"><div class="ct">Upload file</div>'+
+ '<div class="cg2"><div class="fg"><label class="fl">Source / database for this file</label><select id="impSrc">'+
+   DB_LIST.filter(function(d){return S.databases.indexOf(d.id)>=0}).map(function(d){return '<option value="'+esc(d.name)+'">'+esc(d.name)+'</option>'}).join('')+
+   '<option value="Other registry">Other registry</option><option value="Citation searching">Citation / hand searching</option></select></div>'+
+   '<div class="fg"><label class="fl">&nbsp;</label><div class="drop" id="impDrop" onclick="$(\'fileInput\').click()">⬆ Click or drop CSV / XLSX / RIS / NBIB</div></div></div>'+
+ '<div id="mapBox"></div></div>'+
+ '<div class="card"><div class="ct">Or paste references</div><div class="cdesc">Paste tab- or comma-separated rows, or RIS text. First row = headers for CSV/TSV.</div>'+
+ '<textarea id="pasteArea" style="min-height:120px;font-family:DM Mono,monospace;font-size:11px" placeholder="title,authors,year,journal,abstract,doi"></textarea>'+
+ '<div style="display:flex;gap:8px;margin-top:8px"><button class="btn bs bsm" onclick="parsePaste()">Parse pasted text</button><button class="btn bs bsm" onclick="addManualRecord()">+ Add one record manually</button></div></div>'+
+ '<div class="card"><div class="ct">Current sources</div>'+srcRows+
+ (n?'<div style="margin-top:12px"><button class="btn bdang bsm" onclick="clearRecords()">Clear all records</button></div>':'')+'</div>'+
+ (n?'<div style="display:flex;gap:8px"><button class="btn bp" onclick="finishImport()">Continue to Deduplicate →</button></div>':'');
+};
+STAGE_AFTER.import=function(){
+ var drop=$('impDrop');if(!drop)return;
+ ['dragover','dragleave','drop'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();if(ev==='dragover')drop.classList.add('dragover');else drop.classList.remove('dragover');if(ev==='drop'&&e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});});
+};
+$('fileInput').addEventListener('change',function(e){if(e.target.files[0]){handleFile(e.target.files[0]);e.target.value='';}});
+
+function handleFile(file){
+ var name=file.name.toLowerCase();
+ var reader=new FileReader();
+ if(name.endsWith('.xlsx')||name.endsWith('.xls')){
+   reader.onload=function(ev){
+     try{var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});var ws=wb.Sheets[wb.SheetNames[0]];var arr=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});prepMapping(arr);}catch(err){notif('Excel parse failed: '+err.message,'error');}
+   };reader.readAsArrayBuffer(file);
+ }else if(name.endsWith('.ris')||name.endsWith('.nbib')||name.endsWith('.txt')){
+   reader.onload=function(ev){var recs=parseRIS(ev.target.result,name.endsWith('.nbib'));if(recs.length){commitRecords(recs);notif('Imported '+recs.length+' records','ok');}else notif('No records found in file','warn');};reader.readAsText(file);
+ }else{ // csv
+   reader.onload=function(ev){try{var wb=XLSX.read(ev.target.result,{type:'string'});var ws=wb.Sheets[wb.SheetNames[0]];var arr=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});prepMapping(arr);}catch(err){notif('CSV parse failed: '+err.message,'error');}};reader.readAsText(file);
+ }
+}
+function prepMapping(arr){
+ if(!arr||arr.length<2){notif('File has no data rows','warn');return;}
+ var headers=arr[0].map(function(h){return String(h).trim()});
+ var rows=arr.slice(1).filter(function(r){return r.some(function(c){return String(c).trim()!==''})});
+ _importBuffer={headers:headers,rows:rows};
+ renderMapping();
+}
+function guessCol(headers,keys){for(var i=0;i<headers.length;i++){var h=headers[i].toLowerCase();for(var j=0;j<keys.length;j++){if(h.indexOf(keys[j])>=0)return i;}}return -1;}
+function renderMapping(){
+ var h=_importBuffer.headers;
+ var fields=[['title',['title','article title','ti']],['abstract',['abstract','ab ']],['authors',['author','au']],['year',['year','publication year','py','date']],['journal',['journal','source','source title','jt']],['doi',['doi']],['pmid',['pmid','accession']]];
+ var opts=function(sel){return '<option value="-1">— none —</option>'+h.map(function(c,i){return '<option value="'+i+'"'+(i===sel?' selected':'')+'>'+esc(c)+'</option>'}).join('')};
+ var rows=fields.map(function(f){var g=guessCol(h,f[1]);return '<div class="rowflex"><span style="width:90px;font-weight:600;font-size:12px">'+f[0]+'</span><select id="map_'+f[0]+'">'+opts(g)+'</select></div>';}).join('');
+ $('mapBox').innerHTML='<div class="info" style="margin-top:14px">Detected '+_importBuffer.rows.length+' rows. Map columns (auto-guessed):</div>'+rows+
+   '<button class="btn bp bsm" style="margin-top:10px" onclick="applyMapping()">Import '+_importBuffer.rows.length+' records</button>';
+}
+function applyMapping(){
+ var get=function(f){var v=parseInt($('map_'+f).value);return v;};
+ var mi={title:get('title'),abstract:get('abstract'),authors:get('authors'),year:get('year'),journal:get('journal'),doi:get('doi'),pmid:get('pmid')};
+ var src=$('impSrc').value;
+ var recs=_importBuffer.rows.map(function(r){
+   var rec={id:uid(),source:src,status:'pending'};
+   Object.keys(mi).forEach(function(f){rec[f]=mi[f]>=0?String(r[mi[f]]||'').trim():''});
+   rec.year=(rec.year.match(/\d{4}/)||[''])[0];
+   return rec;
+ }).filter(function(r){return r.title;});
+ commitRecords(recs);_importBuffer=null;notif('Imported '+recs.length+' records','ok');render();
+}
+function parseRIS(text,nbib){
+ var recs=[];var cur=null;
+ var lines=text.split(/\r?\n/);
+ var tag=nbib?/^([A-Z]{2,4})\s*-\s?(.*)$/:/^([A-Z][A-Z0-9])\s{2}-\s?(.*)$/;
+ lines.forEach(function(ln){
+   var m=ln.match(/^([A-Z][A-Z0-9]{1,3})\s*-\s?(.*)$/);
+   if(m){
+     var t=m[1],v=m[2];
+     if((t==='TY'||t==='PT')&&!cur){cur={id:uid(),source:$('impSrc')?$('impSrc').value:'Imported',status:'pending',title:'',abstract:'',authors:'',year:'',journal:'',doi:'',pmid:''};}
+     if(!cur)cur={id:uid(),source:$('impSrc')?$('impSrc').value:'Imported',status:'pending',title:'',abstract:'',authors:'',year:'',journal:'',doi:'',pmid:''};
+     if(t==='TI'||t==='T1'||t==='TON')cur.title=(cur.title?cur.title+' ':'')+v;
+     else if(t==='AB')cur.abstract=(cur.abstract?cur.abstract+' ':'')+v;
+     else if(t==='AU'||t==='A1'||t==='FAU')cur.authors=(cur.authors?cur.authors+'; ':'')+v;
+     else if(t==='PY'||t==='Y1'||t==='DP'||t==='DA')cur.year=cur.year||(v.match(/\d{4}/)||[''])[0];
+     else if(t==='JO'||t==='JF'||t==='T2'||t==='JA'||t==='TA')cur.journal=cur.journal||v;
+     else if(t==='DO'||t==='LID')cur.doi=cur.doi||(v.match(/10\.\S+/)||[v])[0];
+     else if(t==='PMID')cur.pmid=v;
+     else if(t==='ER'){if(cur&&cur.title)recs.push(cur);cur=null;}
+   }
+ });
+ if(cur&&cur.title)recs.push(cur);
+ return recs;
+}
+function parsePaste(){
+ var t=$('pasteArea').value.trim();if(!t){notif('Nothing pasted','warn');return;}
+ if(/^(TY|PMID|PT)\s*-/m.test(t)){var recs=parseRIS(t,/PMID\s*-/.test(t));if(recs.length){commitRecords(recs);notif('Parsed '+recs.length+' records','ok');render();return;}}
+ try{var wb=XLSX.read(t,{type:'string'});var ws=wb.Sheets[wb.SheetNames[0]];var arr=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});prepMapping(arr);}catch(e){notif('Could not parse: '+e.message,'error');}
+}
+function addManualRecord(){
+ var title=prompt('Title:');if(!title)return;
+ var rec={id:uid(),source:$('impSrc')?$('impSrc').value:'Manual',status:'pending',title:title,abstract:prompt('Abstract (optional):')||'',authors:prompt('Authors (optional):')||'',year:(prompt('Year (optional):')||'').match(/\d{4}/)?RegExp.lastMatch:'',journal:'',doi:'',pmid:''};
+ commitRecords([rec]);render();
+}
+function commitRecords(recs){
+ var src=recs[0]?recs[0].source:'';
+ S.records=S.records.concat(recs);
+ // PRISMA: tally identified by source category
+ recs.forEach(function(r){
+   if(r.source==='ClinicalTrials.gov'||r.source==='Other registry')S.prisma.id_reg++;
+   else if(r.source==='Citation searching')S.prisma.id_other++;
+   else S.prisma.id_db++;
+ });
+ persist();audit('records_imported',recs.length+' from '+src);
+}
+function clearRecords(){if(!confirm('Remove ALL imported records?'))return;S.records=[];S.prisma.id_db=0;S.prisma.id_reg=0;S.prisma.id_other=0;persist();render();}
+function finishImport(){markDone('import');audit('import_complete',S.records.length+' total records');goStage('dedup');}
+/* ====================== STAGE 4: DEDUPLICATION ====================== */
+function normTitle(t){return String(t||'').toLowerCase().replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
+function firstAuthor(a){return String(a||'').split(/[;,]/)[0].toLowerCase().replace(/[^a-z]/g,'').slice(0,8);}
+function levRatio(a,b){
+ if(a===b)return 1;if(!a.length||!b.length)return 0;
+ var la=a.length,lb=b.length;var d=[];for(var i=0;i<=la;i++)d[i]=[i];for(var j=0;j<=lb;j++)d[0][j]=j;
+ for(i=1;i<=la;i++)for(j=1;j<=lb;j++){var c=a[i-1]===b[j-1]?0:1;d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+c);}
+ return 1-d[la][lb]/Math.max(la,lb);
+}
+STAGE_RENDER.dedup=function(){
+ var dups=S.records.filter(function(r){return r.dup}).length;
+ var uniq=S.records.length-dups;
+ return stageHead('Deduplication','Fuzzy matching on DOI, then normalised title + first-author + year. Duplicate counts are tracked in a dedicated PRISMA counter (not derived from filtered arrays), so the flow diagram is always arithmetically exact.')+
+ '<div class="sr"><div class="sc"><div class="sv">'+S.records.length+'</div><div class="sl">Total imported</div></div>'+
+  '<div class="sc"><div class="sv">'+dups+'</div><div class="sl">Duplicates flagged</div></div>'+
+  '<div class="sc"><div class="sv">'+uniq+'</div><div class="sl">Unique records</div></div></div>'+
+ '<div class="card"><div class="ct">Run deduplication</div><div class="cdesc">Adjust the title similarity threshold if needed. Records sharing a DOI are always merged.</div>'+
+ '<div class="cg2"><div class="fg"><label class="fl">Title similarity threshold</label><input type="number" id="dthr" value="0.90" min="0.7" max="1" step="0.01"></div>'+
+ '<div class="fg"><label class="fl">&nbsp;</label><button class="btn bp" onclick="runDedup()" style="width:100%">⧉ Detect duplicates</button></div></div></div>'+
+ (dups?'<div class="card"><div class="ct">Flagged duplicates ('+dups+')</div><div class="cdesc">Review and restore any false positives.</div><div id="dupList">'+renderDupList()+'</div></div>':'')+
+ '<div style="display:flex;gap:8px"><button class="btn bp" onclick="finishDedup()">Confirm & Continue to Screening →</button></div>';
+};
+function renderDupList(){
+ return S.records.filter(function(r){return r.dup}).map(function(r){
+   return '<div class="rowflex" style="border-bottom:1px solid var(--bdr)"><div><div style="font-size:12px;font-weight:600">'+esc(r.title)+'</div><div class="mut mono">dup of: '+esc((S.records.find(function(x){return x.id===r.dupOf})||{}).title||'?').slice(0,70)+'</div></div><button class="btn bs bsm" onclick="undup(\''+r.id+'\')">Not a duplicate</button></div>';
+ }).join('');
+}
+function runDedup(){
+ var thr=parseFloat($('dthr').value)||0.9;
+ S.records.forEach(function(r){r.dup=false;r.dupOf=null;});
+ var seenDoi={};var kept=[];
+ for(var i=0;i<S.records.length;i++){
+   var r=S.records[i];var doi=(r.doi||'').toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//,'').trim();
+   var isDup=false;
+   if(doi&&seenDoi[doi]){r.dup=true;r.dupOf=seenDoi[doi];isDup=true;}
+   if(!isDup){
+     var nt=normTitle(r.title);var fa=firstAuthor(r.authors);
+     for(var k=0;k<kept.length;k++){
+       var o=kept[k];
+       if(normTitle(o.title)===nt){r.dup=true;r.dupOf=o.id;isDup=true;break;}
+       if(nt.length>15&&levRatio(nt,normTitle(o.title))>=thr&&(!r.year||!o.year||r.year===o.year)){r.dup=true;r.dupOf=o.id;isDup=true;break;}
+     }
+   }
+   if(!isDup){kept.push(r);if(doi)seenDoi[doi]=r.id;}
+ }
+ var dups=S.records.filter(function(r){return r.dup}).length;
+ S.prisma.dup_removed=dups;
+ persist();audit('dedup_run','threshold '+thr+', '+dups+' duplicates flagged');render();notif(dups+' duplicates flagged','ok');
+}
+function undup(id){var r=S.records.find(function(x){return x.id===id});if(r){r.dup=false;r.dupOf=null;S.prisma.dup_removed=S.records.filter(function(x){return x.dup}).length;persist();render();}}
+function activeRecords(){return S.records.filter(function(r){return !r.dup});}
+function finishDedup(){
+ S.prisma.dup_removed=S.records.filter(function(r){return r.dup}).length;
+ S.prisma.screened=activeRecords().length;
+ markDone('dedup');audit('dedup_confirmed',activeRecords().length+' unique records to screen');goStage('screen');
+}
+/* ====================== STAGE 5: TITLE/ABSTRACT SCREENING ====================== */
+var _screenFilter='all', _screenAbort=false;
+function screenSchema(){
+ var ids=S.criteria.include.map(function(c){return c.id}).concat(S.criteria.exclude.map(function(c){return c.id})).concat(['NONE']);
+ return {type:'object',properties:{
+   decision:{type:'string',enum:['INCLUDE','EXCLUDE']},
+   criterion_violated:{type:'string',enum:ids},
+   population_match:{type:'string',enum:['yes','no','unclear']},
+   intervention_match:{type:'string',enum:['yes','no','unclear']},
+   comparator_match:{type:'string',enum:['yes','no','unclear']},
+   outcome_match:{type:'string',enum:['yes','no','unclear']},
+   study_design:{type:'string'},
+   confidence:{type:'string',enum:['high','medium','low']},
+   rationale:{type:'string'}
+ },required:['decision','criterion_violated','population_match','intervention_match','comparator_match','outcome_match','study_design','confidence','rationale'],additionalProperties:false};
+}
+function screenSystem(){
+ var inc=S.criteria.include.map(function(c){return '  '+c.id+': '+c.text}).join('\n');
+ var exc=S.criteria.exclude.map(function(c){return '  '+c.id+': '+c.text}).join('\n');
+ return 'You are a senior systematic-review screener performing TITLE/ABSTRACT screening for a '+docTypeName()+', strictly following PRISMA 2020 and the Cochrane Handbook.\n\n'+domainHint()+'\n\n'+
+ 'REVIEW PICO:\n  Population: '+S.pico.p+'\n  Intervention: '+S.pico.i+'\n  Comparator: '+S.pico.c+'\n  Outcomes: '+S.pico.o+'\n  Timeframe: '+tfStr()+'\n  Eligible designs: '+designsStr()+'\n\n'+
+ 'INCLUSION CRITERIA (a record must meet ALL):\n'+inc+'\n\nEXCLUSION CRITERIA (violating ANY excludes):\n'+exc+'\n\n'+
+ 'DECISION RULES — apply EXACTLY and IDENTICALLY to every record:\n'+
+ '1. Use ONLY the information in the supplied title and abstract. Do NOT use outside knowledge about the study, authors, or journal.\n'+
+ '2. Output a BINARY decision: INCLUDE or EXCLUDE. There is no "maybe".\n'+
+ '3. To EXCLUDE, set criterion_violated to the SINGLE most decisive criterion id (e.g. EXC02, or an INC id that is clearly not met). For INCLUDE, set criterion_violated to "NONE".\n'+
+ '4. Conservative retention: if the abstract lacks the information needed to judge a criterion, do NOT exclude on that basis. At title/abstract stage, INCLUDE any record that cannot be confidently excluded, and set confidence to "low" so a human can review it at full text.\n'+
+ '5. Set population/intervention/comparator/outcome match to yes/no/unclear based solely on the abstract.\n'+
+ '6. rationale: one or two sentences citing the specific criterion and the abstract text that drove the decision. Never invent data.\n'+
+ '7. Be deterministic: the same abstract must always yield the same decision.';
+}
+STAGE_RENDER.screen=function(){
+ var recs=activeRecords();
+ var inc=recs.filter(function(r){return r.status==='included'}).length;
+ var exc=recs.filter(function(r){return r.status==='excluded'}).length;
+ var may=recs.filter(function(r){return r.status==='maybe'}).length;
+ var pend=recs.filter(function(r){return r.status==='pending'}).length;
+ var lowconf=recs.filter(function(r){return r.screen&&r.screen.confidence==='low'&&r.status!=='excluded'}).length;
+ return stageHead('Title / Abstract Screening','Each record is screened against your rigid I/E criteria via a strict JSON schema (binary INCLUDE/EXCLUDE + the exact criterion violated + PICO match + confidence). Batched with exponential backoff; progress is saved continuously and is resumable. Override any decision manually — overrides are flagged in the audit trail.')+
+ '<div class="sr"><div class="sc"><div class="sv">'+recs.length+'</div><div class="sl">To screen</div></div>'+
+  '<div class="sc"><div class="sv" style="-webkit-text-fill-color:var(--em);background:none;color:var(--em)">'+inc+'</div><div class="sl">Included</div></div>'+
+  '<div class="sc"><div class="sv" style="-webkit-text-fill-color:var(--ro);background:none;color:var(--ro)">'+exc+'</div><div class="sl">Excluded</div></div>'+
+  '<div class="sc"><div class="sv" style="-webkit-text-fill-color:var(--am);background:none;color:var(--am)">'+may+'</div><div class="sl">Maybe</div></div>'+
+  '<div class="sc"><div class="sv">'+pend+'</div><div class="sl">Pending</div></div></div>'+
+ '<div class="card"><div class="ct">AI screening</div>'+
+ '<div class="pb"><div class="pf" id="scrPF"></div></div><div class="mut" id="scrStat">'+(pend?pend+' records pending':'All screened')+'</div>'+
+ '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+
+   '<button class="btn bp" onclick="screenAll()" '+(apiKey()&&pend?'':'disabled')+'>▶ Screen '+pend+' pending</button>'+
+   '<button class="btn bs bsm" onclick="screenAll(true)" '+(apiKey()&&recs.length?'':'disabled')+'>↻ Re-screen all</button>'+
+   '<button class="btn bs bsm" onclick="_screenAbort=true">⏸ Stop</button>'+
+   (lowconf?'<span class="chip" style="background:rgba(244,63,94,.1);color:var(--ro)">'+lowconf+' low-confidence — review at full text</span>':'')+
+ '</div></div>'+
+ '<div class="card"><div class="tabs">'+
+   [['all','All ('+recs.length+')'],['included','Included ('+inc+')'],['excluded','Excluded ('+exc+')'],['maybe','Maybe ('+may+')'],['pending','Pending ('+pend+')']].map(function(t){return '<button class="tab '+(_screenFilter===t[0]?'on':'')+'" onclick="_screenFilter=\''+t[0]+'\';renderScreenList()">'+t[1]+'</button>'}).join('')+
+ '</div><div id="scrList"></div></div>'+
+ (inc+exc>0?'<div style="display:flex;gap:8px"><button class="btn bp" onclick="finishScreen()">Confirm & Continue to Full-text →</button></div>':'');
+};
+STAGE_AFTER.screen=function(){renderScreenList();};
+function renderScreenList(){
+ var box=$('scrList');if(!box)return;
+ var recs=activeRecords().filter(function(r){return _screenFilter==='all'||r.status===_screenFilter;});
+ if(!recs.length){box.innerHTML='<div class="mut">No records in this view.</div>';return;}
+ box.innerHTML=recs.slice(0,300).map(function(r){
+   var cls=r.status==='included'?'si':r.status==='excluded'?'se':r.status==='maybe'?'sm':'sp';
+   var sc=r.screen;
+   var j=sc?'<div class="scrd-j"><b>'+sc.decision+'</b>'+(sc.criterion_violated&&sc.criterion_violated!=='NONE'?' · violates '+esc(sc.criterion_violated):'')+' · <span class="conf conf-'+sc.confidence+'">'+sc.confidence+'</span> · P:'+sc.population_match+' I:'+sc.intervention_match+' C:'+sc.comparator_match+' O:'+sc.outcome_match+'<br>'+esc(sc.rationale)+(r.override?' <b style="color:var(--am)">[manual override]</b>':'')+'</div>':'';
+   return '<div class="scrd '+cls+'">'+
+     '<div class="scrd-t">'+esc(r.title)+'</div>'+
+     '<div class="scrd-m">'+esc(r.authors||'—').slice(0,60)+' · '+esc(r.year||'n.d.')+' · '+esc(r.journal||'')+' · '+esc(r.source)+'</div>'+
+     (r.abstract?'<div class="scrd-a" onclick="this.classList.toggle(\'exp\')">'+esc(r.abstract)+'</div>':'<div class="mut" style="font-size:10px;margin-bottom:6px">No abstract</div>')+
+     j+
+     '<div class="scrd-btns"><button class="sb sb-i '+(r.status==='included'?'on':'')+'" onclick="setStatus(\''+r.id+'\',\'included\')">Include</button>'+
+     '<button class="sb sb-e '+(r.status==='excluded'?'on':'')+'" onclick="setStatus(\''+r.id+'\',\'excluded\')">Exclude</button>'+
+     '<button class="sb sb-m '+(r.status==='maybe'?'on':'')+'" onclick="setStatus(\''+r.id+'\',\'maybe\')">Maybe</button>'+
+     (apiKey()?'<button class="sb" style="border-color:var(--bl);color:var(--bl)" onclick="screenOne(\''+r.id+'\',true)">⟳ AI</button>':'')+
+     '</div></div>';
+ }).join('')+(recs.length>300?'<div class="mut" style="margin-top:8px">Showing first 300 of '+recs.length+'.</div>':'');
+}
+function setStatus(id,st){var r=S.records.find(function(x){return x.id===id});if(!r)return;r.status=st;r.override=true;recomputeScreenCounts();persist();renderScreenList();audit('screen_override',st+': '+r.title.slice(0,50));}
+function recomputeScreenCounts(){
+ var recs=activeRecords();
+ S.prisma.screened=recs.length;
+ S.prisma.excl_ts=recs.filter(function(r){return r.status==='excluded'}).length;
+}
+async function screenOne(id,rerender){
+ var r=S.records.find(function(x){return x.id===id});if(!r)return;
+ var user='TITLE: '+(r.title||'')+'\n\nABSTRACT: '+(r.abstract||'(no abstract available)');
+ var o=await callClaude({system:screenSystem(),user:user,schema:screenSchema(),maxTokens:700});
+ r.screen=o;
+ r.status=o.decision==='INCLUDE'?(o.confidence==='low'?'maybe':'included'):'excluded';
+ r.override=false;
+ recomputeScreenCounts();persist();
+ if(rerender){renderScreenList();notif('Re-screened','ok');}
+}
+async function screenAll(reset){
+ if(BUSY){notif('Already running','warn');return;}
+ BUSY=true;_screenAbort=false;
+ if(reset){activeRecords().forEach(function(r){r.status='pending';r.screen=null;r.override=false;});}
+ var todo=activeRecords().filter(function(r){return r.status==='pending';});
+ if(!todo.length){BUSY=false;notif('Nothing to screen','warn');return;}
+ audit('screen_batch_start',todo.length+' records, model='+apiModel());
+ var done=0,fail=0;var conc=4;
+ var pf=$('scrPF'),stat=$('scrStat');
+ function upd(){if(pf)pf.style.width=(done/todo.length*100)+'%';if(stat)stat.textContent=done+' / '+todo.length+' screened'+(fail?(' · '+fail+' failed'):'');}
+ var queue=todo.slice();
+ async function worker(){
+   while(queue.length&&!_screenAbort){
+     var r=queue.shift();
+     try{await screenOne(r.id);}catch(e){fail++;r.status='maybe';r.screen={decision:'ERROR',confidence:'low',rationale:'Screening failed: '+e.message,criterion_violated:'NONE',population_match:'unclear',intervention_match:'unclear',comparator_match:'unclear',outcome_match:'unclear',study_design:''};}
+     done++;upd();persist();
+   }
+ }
+ var workers=[];for(var i=0;i<conc;i++)workers.push(worker());
+ await Promise.all(workers);
+ BUSY=false;recomputeScreenCounts();audit('screen_batch_done',done+' screened, '+fail+' failed');
+ render();notif('Screening complete: '+done+' done'+(fail?', '+fail+' failed':''),fail?'warn':'ok');
+}
+function finishScreen(){
+ recomputeScreenCounts();
+ var inc=activeRecords().filter(function(r){return r.status==='included'||r.status==='maybe'}).length;
+ S.prisma.sought=inc;S.prisma.assessed=inc;
+ markDone('screen');audit('screen_confirmed',inc+' records advance to full-text');goStage('fulltext');
+}
+function includedTiAb(){return activeRecords().filter(function(r){return r.status==='included'||r.status==='maybe'});}
+/* ====================== STAGE 6: FULL-TEXT ====================== */
+var _pdfTarget=null;
+STAGE_RENDER.fulltext=function(){
+ var recs=includedTiAb();
+ var retrieved=recs.filter(function(r){return S.fulltext[r.id]}).length;
+ var ftInc=recs.filter(function(r){return r.ftStatus==='included'}).length;
+ var ftExc=recs.filter(function(r){return r.ftStatus==='excluded'}).length;
+ return stageHead('Full-text Retrieval & Eligibility','Upload the full-text PDF for each record that passed title/abstract screening. PDF text is extracted in-browser (PDF.js) and used for full-text eligibility, appraisal and extraction. Full-text exclusions require a structured reason, counted explicitly for the PRISMA diagram.')+
+ '<div class="sr"><div class="sc"><div class="sv">'+recs.length+'</div><div class="sl">Sought</div></div>'+
+  '<div class="sc"><div class="sv">'+retrieved+'</div><div class="sl">PDFs loaded</div></div>'+
+  '<div class="sc"><div class="sv" style="background:none;-webkit-text-fill-color:var(--em);color:var(--em)">'+ftInc+'</div><div class="sl">FT included</div></div>'+
+  '<div class="sc"><div class="sv" style="background:none;-webkit-text-fill-color:var(--ro);color:var(--ro)">'+ftExc+'</div><div class="sl">FT excluded</div></div></div>'+
+ '<div class="info">Without a PDF, full-text eligibility, appraisal and extraction fall back to the abstract and will flag missing data as <b>NOT_REPORTED</b> — upload PDFs for accurate results.</div>'+
+ '<div class="card"><div class="ct">Records for full-text assessment</div>'+
+ '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap"><button class="btn bs bsm" onclick="ftScreenAll()" '+(apiKey()?'':'disabled')+'>▶ AI full-text eligibility (all loaded)</button></div>'+
+ '<div id="ftList"></div></div>'+
+ (ftInc>0?'<div style="display:flex;gap:8px"><button class="btn bp" onclick="finishFulltext()">Confirm & Continue to Appraisal →</button></div>':'');
+};
+STAGE_AFTER.fulltext=function(){renderFtList();};
+function renderFtList(){
+ var box=$('ftList');if(!box)return;
+ var recs=includedTiAb();
+ box.innerHTML=recs.map(function(r){
+   var ft=S.fulltext[r.id];
+   var cls=r.ftStatus==='included'?'si':r.ftStatus==='excluded'?'se':'sp';
+   return '<div class="scrd '+cls+'">'+
+     '<div class="scrd-t">'+esc(r.title)+'</div>'+
+     '<div class="scrd-m">'+esc(r.year||'n.d.')+' · '+esc(r.source)+' · '+(ft?'<span style="color:var(--em)">PDF: '+esc(ft.name)+' ('+ft.pages+'p, '+Math.round(ft.text.length/1000)+'k chars)</span>':'<span style="color:var(--am)">no PDF</span>')+(r.ftReason?' · <span style="color:var(--ro)">excluded: '+esc(r.ftReason)+'</span>':'')+'</div>'+
+     '<div class="scrd-btns">'+
+       '<button class="sb" style="border-color:var(--bl);color:var(--bl)" onclick="uploadPdf(\''+r.id+'\')">⬆ '+(ft?'Replace':'Upload')+' PDF</button>'+
+       '<button class="sb sb-i '+(r.ftStatus==='included'?'on':'')+'" onclick="setFt(\''+r.id+'\',\'included\')">Include</button>'+
+       '<button class="sb sb-e '+(r.ftStatus==='excluded'?'on':'')+'" onclick="excludeFt(\''+r.id+'\')">Exclude…</button>'+
+       (apiKey()?'<button class="sb" style="border-color:var(--vi);color:var(--vi)" onclick="ftScreenOne(\''+r.id+'\',true)">⟳ AI eligibility</button>':'')+
+     '</div></div>';
+ }).join('');
+}
+function uploadPdf(id){_pdfTarget=id;$('pdfInput').click();}
+$('pdfInput').addEventListener('change',async function(e){
+ var files=Array.from(e.target.files||[]);e.target.value='';
+ if(!files.length)return;
+ // single target if set, else try to auto-match by title
+ if(_pdfTarget&&files.length===1){await loadPdfTo(_pdfTarget,files[0]);_pdfTarget=null;renderFtList();return;}
+ for(var i=0;i<files.length;i++){
+   var f=files[i];var match=includedTiAb().find(function(r){return normTitle(r.title).slice(0,30)&&f.name.toLowerCase().indexOf(normTitle(r.title).split(' ')[0])>=0;});
+   if(match)await loadPdfTo(match.id,f);
+ }
+ renderFtList();notif('PDFs processed','ok');
+});
+async function loadPdfTo(id,file){
+ try{
+   notif('Extracting '+file.name+'…','in');
+   var buf=await file.arrayBuffer();
+   var pdf=await pdfjsLib.getDocument({data:buf}).promise;
+   var text='';
+   for(var p=1;p<=pdf.numPages;p++){var page=await pdf.getPage(p);var tc=await page.getTextContent();text+=tc.items.map(function(it){return it.str}).join(' ')+'\n';}
+   S.fulltext[id]={name:file.name,pages:pdf.numPages,text:text.slice(0,180000)};
+   persist();audit('pdf_loaded',file.name+' -> '+id.slice(0,8)+' ('+pdf.numPages+'p)');
+   notif('Loaded '+file.name+' ('+pdf.numPages+' pages)','ok');
+ }catch(e){notif('PDF failed: '+e.message,'error');}
+}
+function docText(r){var ft=S.fulltext[r.id];return ft?ft.text:('TITLE: '+r.title+'\nABSTRACT: '+(r.abstract||'(none)'));}
+function setFt(id,st){var r=S.records.find(function(x){return x.id===id});r.ftStatus=st;if(st==='included')r.ftReason='';recomputeFt();persist();renderFtList();audit('fulltext_decision',st+': '+r.title.slice(0,40));}
+function excludeFt(id){
+ var reasons=['Wrong population','Wrong intervention/device','Wrong comparator','Wrong outcomes','Wrong study design','Wrong publication type (review/editorial)','Duplicate / overlapping cohort','Full text unavailable','Non-English / not retrievable','Insufficient data reported'];
+ var pick=prompt('Exclusion reason:\n'+reasons.map(function(x,i){return (i+1)+'. '+x}).join('\n')+'\n\nEnter number (or type a custom reason):');
+ if(!pick)return;
+ var reason=reasons[parseInt(pick)-1]||pick;
+ var r=S.records.find(function(x){return x.id===id});r.ftStatus='excluded';r.ftReason=reason;
+ recomputeFt();persist();renderFtList();audit('fulltext_excluded',reason+': '+r.title.slice(0,40));
+}
+function recomputeFt(){
+ var recs=includedTiAb();
+ S.prisma.sought=recs.length;
+ S.prisma.not_retrieved=recs.filter(function(r){return !S.fulltext[r.id]&&r.ftStatus==='excluded'&&r.ftReason==='Full text unavailable'}).length;
+ S.prisma.assessed=recs.filter(function(r){return r.ftStatus}).length||recs.length;
+ var reasons={};recs.forEach(function(r){if(r.ftStatus==='excluded'&&r.ftReason!=='Full text unavailable'){reasons[r.ftReason]=(reasons[r.ftReason]||0)+1;}});
+ S.prisma.excl_ft=reasons;
+ S.prisma.included=recs.filter(function(r){return r.ftStatus==='included'}).length;
+}
+function ftSchema(){
+ var ids=S.criteria.include.map(function(c){return c.id}).concat(S.criteria.exclude.map(function(c){return c.id})).concat(['NONE']);
+ return {type:'object',properties:{decision:{type:'string',enum:['INCLUDE','EXCLUDE']},exclusion_reason:{type:'string',enum:['Wrong population','Wrong intervention','Wrong comparator','Wrong outcomes','Wrong study design','Wrong publication type','Duplicate cohort','Insufficient data','NONE']},criterion_violated:{type:'string',enum:ids},rationale:{type:'string'}},required:['decision','exclusion_reason','criterion_violated','rationale'],additionalProperties:false};
+}
+async function ftScreenOne(id,rerender){
+ var r=S.records.find(function(x){return x.id===id});if(!r)return;
+ var o=await callClaude({system:screenSystem()+'\n\nThis is FULL-TEXT eligibility assessment. Apply criteria strictly to the full text provided. Exclude only with a definite reason.',user:'FULL TEXT / AVAILABLE CONTENT:\n'+docText(r).slice(0,120000),schema:ftSchema(),maxTokens:700});
+ r.ftStatus=o.decision==='INCLUDE'?'included':'excluded';
+ r.ftReason=o.decision==='EXCLUDE'?(o.exclusion_reason==='NONE'?'Other':o.exclusion_reason):'';
+ r.ftScreen=o;recomputeFt();persist();
+ if(rerender){renderFtList();notif('Full-text assessed: '+o.decision,'ok');}
+}
+async function ftScreenAll(){
+ if(BUSY){notif('Busy','warn');return;}BUSY=true;
+ var recs=includedTiAb();var done=0;
+ for(var i=0;i<recs.length;i++){try{await ftScreenOne(recs[i].id);}catch(e){}done++;notif('FT '+done+'/'+recs.length,'in');}
+ BUSY=false;render();notif('Full-text eligibility complete','ok');
+}
+function finishFulltext(){recomputeFt();markDone('fulltext');audit('fulltext_confirmed',S.prisma.included+' studies included');goStage('appraise');}
+function includedStudies(){return includedTiAb().filter(function(r){return r.ftStatus==='included'||(!r.ftStatus&&r.status==='included')});}
+/* ====================== STAGE 7: CRITICAL APPRAISAL ====================== */
+var APPRAISAL_TOOLS={
+ RoB2:{
+   name:'Cochrane RoB 2 (randomised trials)',
+   judg:['Low','Some concerns','High'],
+   overall:['Low','Some concerns','High'],
+   domains:['D1 Randomisation process','D2 Deviations from intended interventions','D3 Missing outcome data','D4 Measurement of the outcome','D5 Selection of the reported result'],
+   defs:'Apply the Cochrane Risk-of-Bias 2 tool for individually randomised trials. Judge each domain Low / Some concerns / High using the signalling questions; never default to "Some concerns" when evidence is clear.\n'+
+   'D1 Randomisation process — Was the allocation sequence random and adequately concealed? Were baseline groups balanced? LOW: computer-generated sequence + central/opaque-envelope concealment, balanced baseline. HIGH: non-random/predictable sequence, no concealment, or baseline imbalance suggesting a problem.\n'+
+   'D2 Deviations from intended interventions — Were participants/carers blinded? Were there deviations beyond the trial context, and was analysis appropriate (ITT)? LOW: blinded or deviations balanced + ITT. HIGH: unblinded with non-protocol co-interventions, or per-protocol analysis with substantial non-adherence.\n'+
+   'D3 Missing outcome data — Were outcome data available for ~all participants? LOW: <5% missing or robust sensitivity analysis. HIGH: substantial differential missingness likely related to true outcome.\n'+
+   'D4 Measurement of the outcome — Was the outcome measure appropriate and assessors blinded? LOW: objective outcome or blinded assessor. HIGH: subjective outcome assessed by unblinded assessor likely influenced by group knowledge.\n'+
+   'D5 Selection of the reported result — Was the result selected from multiple measurements/analyses? LOW: pre-registered protocol/SAP and reported as planned. HIGH: no protocol and clear outcome/analysis selective reporting.\n'+
+   'OVERALL: Low only if ALL domains Low. Some concerns if at least one domain Some concerns but none High. High if any domain is High OR multiple domains have Some concerns substantially lowering confidence.\n'+
+   'WORKED EXAMPLE: A double-blind RCT, central randomisation, 2% loss, objective mortality outcome, pre-registered — D1 Low, D2 Low, D3 Low, D4 Low, D5 Low → Overall Low. An open-label trial with patient-reported pain (unblinded) and no protocol — D4 High, D5 Some concerns → Overall High.'
+ },
+ 'ROBINS-I':{
+   name:'ROBINS-I (non-randomised studies of interventions)',
+   judg:['Low','Moderate','Serious','Critical','No information'],
+   overall:['Low','Moderate','Serious','Critical','No information'],
+   domains:['D1 Confounding','D2 Selection of participants','D3 Classification of interventions','D4 Deviations from intended interventions','D5 Missing data','D6 Measurement of outcomes','D7 Selection of the reported result'],
+   defs:'Apply ROBINS-I for non-randomised comparative studies. ROBINS-I benchmarks against a hypothetical target trial. Judge each domain Low / Moderate / Serious / Critical / No information.\n'+
+   'D1 Confounding — Were important confounders controlled (design or analysis: multivariable adjustment, matching, PS methods)? LOW: comparable to a well-conducted RCT, all key confounders controlled. MODERATE: sound but residual confounding plausible. SERIOUS: key confounders uncontrolled. CRITICAL: confounding so severe results are uninterpretable.\n'+
+   'D2 Selection of participants — Could selection into the study (based on post-baseline characteristics) bias results? SERIOUS if prevalent users / immortal-time bias present.\n'+
+   'D3 Classification of interventions — Were intervention groups clearly defined and recorded without knowledge of outcome? SERIOUS if exposure misclassified or defined using post-outcome information.\n'+
+   'D4 Deviations from intended interventions — Were there deviations from usual practice that affected the outcome? Consider co-interventions differing between groups.\n'+
+   'D5 Missing data — Were outcome/exposure/confounder data reasonably complete? SERIOUS if substantial differential missingness without appropriate handling.\n'+
+   'D6 Measurement of outcomes — Could outcome ascertainment differ between groups (assessors aware of intervention)? SERIOUS for subjective outcomes with non-blinded ascertainment differing by group.\n'+
+   'D7 Selection of the reported result — Selective reporting from multiple outcomes/analyses/subgroups.\n'+
+   'OVERALL = the most severe domain rating (Low only if all Low; Moderate if at least one Moderate and none higher; Serious/Critical if any domain reaches that level). Use "No information" only when truly unjudgeable.\n'+
+   'WORKED EXAMPLE: A prospective registry comparing device A vs B, multivariable adjustment for the main confounders but residual confounding plausible, blinded objective endpoint, complete data, pre-specified analysis — D1 Moderate, others Low → Overall Moderate. Same study but unadjusted comparison with strong indication bias → D1 Serious → Overall Serious.'
+ },
+ JBI:{
+   name:'JBI Critical Appraisal (case series / cohort)',
+   judg:['Yes','No','Unclear','Not applicable'],
+   overall:['Low','Moderate','High'],
+   domains:['Q1 Clear inclusion criteria','Q2 Condition measured validly/reliably','Q3 Valid identification of the condition','Q4 Consecutive inclusion','Q5 Complete inclusion','Q6 Clear outcome reporting','Q7 Demographics reported','Q8 Follow-up/results clear','Q9 Site/clinic info','Q10 Appropriate statistics'],
+   defs:'Apply the JBI critical appraisal checklist for case series / single-arm studies. Answer each item Yes / No / Unclear / Not applicable based only on the report. Derive an OVERALL risk-of-bias rating: Low (≥8 Yes), Moderate (5-7 Yes), High (<5 Yes). Be strict — "Unclear" is not "Yes".'
+ },
+ NOS:{
+   name:'Newcastle-Ottawa Scale (cohort / case-control)',
+   judg:['Yes','No','Unclear','Not applicable'],
+   overall:['Low','Moderate','High'],
+   domains:['S1 Representativeness of exposed cohort','S2 Selection of non-exposed','S3 Ascertainment of exposure','S4 Outcome not present at start','C1 Comparability (design/analysis)','O1 Assessment of outcome','O2 Adequate follow-up length','O3 Adequacy of follow-up'],
+   defs:'Apply the Newcastle-Ottawa Scale (cohort version). Award a star (Yes) when the criterion is met across Selection (4), Comparability (2 via C1), and Outcome (3). Map total stars to OVERALL risk of bias: Low (7-9 stars), Moderate (4-6), High (0-3). Mark Yes when a star is awarded.'
+ }
+};
+function appraisalSchema(tool){
+ var t=APPRAISAL_TOOLS[tool];
+ return {type:'object',properties:{
+   domains:{type:'array',items:{type:'object',properties:{
+     name:{type:'string'},judgement:{type:'string',enum:t.judg},support:{type:'string'}
+   },required:['name','judgement','support'],additionalProperties:false}},
+   overall:{type:'string',enum:t.overall},
+   summary:{type:'string'}
+ },required:['domains','overall','summary'],additionalProperties:false};
+}
+STAGE_RENDER.appraise=function(){
+ var recs=includedStudies();
+ var done=recs.filter(function(r){return r.appraisal}).length;
+ var t=APPRAISAL_TOOLS[S.appraisalTool];
+ return stageHead('Critical Appraisal / Risk of Bias','Domain-level appraisal using '+esc(t.name)+'. The full tool definitions and worked examples are passed to the model in the system prompt, and each domain judgement is schema-constrained with a supporting quote — then locked for human review. Change the tool in Setup.')+
+ '<div class="sr"><div class="sc"><div class="sv">'+recs.length+'</div><div class="sl">Included studies</div></div>'+
+  '<div class="sc"><div class="sv">'+done+'</div><div class="sl">Appraised</div></div>'+
+  '<div class="sc"><div class="sv" style="font-size:14px;background:none;-webkit-text-fill-color:var(--t1);color:var(--t1)">'+esc(S.appraisalTool)+'</div><div class="sl">Tool</div></div></div>'+
+ '<div class="card"><div class="ct">Run appraisal</div>'+
+ '<div class="pb"><div class="pf" id="apPF"></div></div><div class="mut" id="apStat">'+(recs.length-done)+' pending</div>'+
+ '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn bp" onclick="appraiseAll()" '+(apiKey()&&recs.length?'':'disabled')+'>⚖ Appraise all ('+S.appraisalTool+')</button></div></div>'+
+ '<div class="card"><div class="ct">Risk-of-bias summary</div><div id="robSummary">'+renderRobSummary()+'</div></div>'+
+ (done?'<div style="display:flex;gap:8px"><button class="btn bp" onclick="markDone(\'appraise\');goStage(\'extract\')">Continue to Extraction →</button></div>':'');
+};
+function robColor(j){if(/^Low$/i.test(j)||/^Yes$/i.test(j))return 'var(--em)';if(/concern|Moderate|Unclear/i.test(j))return 'var(--am)';if(/High|Serious|Critical|^No$/i.test(j))return 'var(--ro)';return 'var(--t3)';}
+function renderRobSummary(){
+ var recs=includedStudies().filter(function(r){return r.appraisal});
+ if(!recs.length)return '<div class="mut">No appraisals yet.</div>';
+ var t=APPRAISAL_TOOLS[S.appraisalTool];
+ var head='<tr><th>Study</th>'+t.domains.map(function(d){return '<th title="'+esc(d)+'">'+esc(d.split(' ')[0])+'</th>'}).join('')+'<th>Overall</th></tr>';
+ var rows=recs.map(function(r){
+   var a=r.appraisal;
+   var cells=t.domains.map(function(dn,i){var dj=(a.domains[i]||{}).judgement||'?';return '<td title="'+esc((a.domains[i]||{}).support||'')+'"><span class="score-badge" style="background:'+robColor(dj)+'22;color:'+robColor(dj)+'">'+esc(dj.slice(0,4))+'</span></td>';}).join('');
+   return '<tr><td style="max-width:200px">'+esc(studyLabel(r))+(a.locked?' 🔒':'')+'</td>'+cells+'<td><span class="score-badge" style="background:'+robColor(a.overall)+'22;color:'+robColor(a.overall)+'">'+esc(a.overall)+'</span> <button class="btn bs" style="padding:2px 7px;font-size:9px" onclick="editAppraisal(\''+r.id+'\')">edit</button></td></tr>';
+ }).join('');
+ return '<div class="tw"><table class="dt"><thead>'+head+'</thead><tbody>'+rows+'</tbody></table></div>';
+}
+function studyLabel(r){var a=(r.authors||'').split(/[;,]/)[0].trim()||'Study';return a+' '+(r.year||'');}
+function appraisalSystem(){var t=APPRAISAL_TOOLS[S.appraisalTool];return 'You are a methodologist performing formal risk-of-bias / critical appraisal for a '+docTypeName()+'.\n\nTOOL: '+t.name+'\n\n'+t.defs+'\n\nRULES: Judge each listed domain in order. Base every judgement ONLY on the provided study text. For each domain give a "support" field quoting or paraphrasing the specific text that justifies the judgement (or stating "No information reported"). Be calibrated and consistent across studies. Return exactly one entry per domain in the given order. domains order: '+t.domains.join(' | ');}
+async function appraiseOne(id){
+ var r=S.records.find(function(x){return x.id===id});if(!r)return;
+ var t=APPRAISAL_TOOLS[S.appraisalTool];
+ var user='STUDY: '+studyLabel(r)+'\nDESIGN (eligible): '+designsStr()+'\n\nDOMAINS TO JUDGE (in order):\n'+t.domains.join('\n')+'\n\nSTUDY TEXT:\n'+docText(r).slice(0,140000);
+ var o=await callClaude({system:appraisalSystem(),user:user,schema:appraisalSchema(S.appraisalTool),maxTokens:2000,thinking:true});
+ o.tool=S.appraisalTool;o.locked=false;
+ r.appraisal=o;persist();
+}
+async function appraiseAll(){
+ if(BUSY){notif('Busy','warn');return;}BUSY=true;
+ var recs=includedStudies().filter(function(r){return !r.appraisal||!r.appraisal.locked;});
+ var done=0,fail=0;var pf=$('apPF'),stat=$('apStat');
+ for(var i=0;i<recs.length;i++){
+   try{await appraiseOne(recs[i].id);}catch(e){fail++;}
+   done++;if(pf)pf.style.width=(done/recs.length*100)+'%';if(stat)stat.textContent=done+'/'+recs.length+(fail?(' · '+fail+' failed'):'');
+ }
+ BUSY=false;audit('appraisal_run',S.appraisalTool+': '+done+' studies');render();notif('Appraisal complete','ok');
+}
+function editAppraisal(id){
+ var r=S.records.find(function(x){return x.id===id});var a=r.appraisal;var t=APPRAISAL_TOOLS[S.appraisalTool];
+ var rows=t.domains.map(function(dn,i){
+   var d=a.domains[i]||{name:dn,judgement:t.judg[0],support:''};
+   return '<div class="fg"><label class="fl">'+esc(dn)+'</label><div style="display:flex;gap:8px"><select id="ap_'+i+'" style="max-width:180px">'+t.judg.map(function(j){return '<option'+(d.judgement===j?' selected':'')+'>'+esc(j)+'</option>'}).join('')+'</select><input type="text" id="aps_'+i+'" value="'+esc(d.support)+'" placeholder="supporting text"></div></div>';
+ }).join('');
+ $('modalBox').innerHTML='<h2>Edit appraisal — '+esc(studyLabel(r))+'</h2>'+rows+
+   '<div class="fg"><label class="fl">Overall</label><select id="ap_ov">'+t.overall.map(function(j){return '<option'+(a.overall===j?' selected':'')+'>'+esc(j)+'</option>'}).join('')+'</select></div>'+
+   '<div class="fg"><label class="fl">Summary</label><textarea id="ap_sum">'+esc(a.summary)+'</textarea></div>'+
+   '<div style="display:flex;gap:8px"><button class="btn bp" onclick="saveAppraisal(\''+id+'\')">Save & 🔒 Lock</button><button class="btn bs" onclick="closeModal()">Cancel</button></div>';
+ $('overlay').classList.add('open');
+}
+function saveAppraisal(id){
+ var r=S.records.find(function(x){return x.id===id});var t=APPRAISAL_TOOLS[S.appraisalTool];
+ r.appraisal.domains=t.domains.map(function(dn,i){return {name:dn,judgement:$('ap_'+i).value,support:$('aps_'+i).value};});
+ r.appraisal.overall=$('ap_ov').value;r.appraisal.summary=$('ap_sum').value;r.appraisal.locked=true;
+ persist();closeModal();render();audit('appraisal_locked',studyLabel(r));notif('Saved & locked','ok');
+}
+/* ====================== STAGE 8: DATA EXTRACTION ====================== */
+function extractionSchema(){
+ var outcome={type:'object',properties:{
+   name:{type:'string'},timepoint:{type:'string'},
+   n_intervention:{type:'string'},n_comparator:{type:'string'},
+   events_intervention:{type:'string'},events_comparator:{type:'string'},
+   mean_intervention:{type:'string'},sd_intervention:{type:'string'},mean_comparator:{type:'string'},sd_comparator:{type:'string'},
+   effect_measure:{type:'string'},effect_value:{type:'string'},ci_lower:{type:'string'},ci_upper:{type:'string'},p_value:{type:'string'},
+   source_quote:{type:'string'}
+ },required:['name','timepoint','n_intervention','n_comparator','events_intervention','events_comparator','mean_intervention','sd_intervention','mean_comparator','sd_comparator','effect_measure','effect_value','ci_lower','ci_upper','p_value','source_quote'],additionalProperties:false};
+ return {type:'object',properties:{
+   study_design:{type:'string'},country:{type:'string'},setting:{type:'string'},funding:{type:'string'},conflicts:{type:'string'},
+   n_total:{type:'string'},population:{type:'string'},intervention:{type:'string'},comparator:{type:'string'},followup:{type:'string'},
+   outcomes:{type:'array',items:outcome},
+   safety:{type:'string'},limitations:{type:'string'}
+ },required:['study_design','country','setting','funding','conflicts','n_total','population','intervention','comparator','followup','outcomes','safety','limitations'],additionalProperties:false};
+}
+function extractionSystem(){
+ return 'You are a data-extraction specialist for a '+docTypeName()+', following PRISMA 2020 and Cochrane data-extraction standards.\n\n'+domainHint()+'\n\n'+
+ 'REVIEW OUTCOMES OF INTEREST: '+S.pico.o+'\nPRIMARY EFFECT MEASURE SOUGHT: '+S.effectMeasure+'\n\n'+
+ 'ABSOLUTE RULES (critical — non-compliance invalidates the extraction):\n'+
+ '1. Extract ONLY values explicitly stated in the provided study text. NEVER infer, estimate, calculate, or fill in a value from prior knowledge.\n'+
+ '2. If a field is not explicitly reported in the text, output the exact string "NOT_REPORTED". Do not guess. Do not leave blank. Do not write 0.\n'+
+ '3. For every numeric value you DO extract, the outcome.source_quote MUST contain the verbatim sentence/table text from which it was taken. If you cannot supply a source quote, the value is NOT_REPORTED.\n'+
+ '4. Capture each reported outcome relevant to the review as a separate item in the outcomes array (with its timepoint). If the study reports no relevant quantitative outcome, return an empty outcomes array.\n'+
+ '5. effect_measure should be one of OR, RR, HR, MD, SMD, proportion, or NOT_REPORTED — matching how the study reports it.\n'+
+ '6. Numbers must be plain (e.g. "1.42", "0.95", "12"). Keep CI bounds separate (ci_lower, ci_upper). p_value as reported (e.g. "0.03", "<0.001", or NOT_REPORTED).\n'+
+ '7. Do not summarise or paraphrase numbers — transcribe exactly.';
+}
+STAGE_RENDER.extract=function(){
+ var recs=includedStudies();
+ var done=recs.filter(function(r){return r.extraction}).length;
+ return stageHead('Data Extraction','Schema-enforced extraction. Every field that is not explicitly stated in the source is returned as <b>NOT_REPORTED</b> — the model is forbidden from inferring or calculating values, and must supply a verbatim source quote for each number. Edit any cell; the meta-analysis reads numeric outcomes directly from this table.')+
+ '<div class="sr"><div class="sc"><div class="sv">'+recs.length+'</div><div class="sl">Studies</div></div>'+
+  '<div class="sc"><div class="sv">'+done+'</div><div class="sl">Extracted</div></div>'+
+  '<div class="sc"><div class="sv">'+outcomeRows().length+'</div><div class="sl">Outcome rows</div></div></div>'+
+ '<div class="card"><div class="ct">Run extraction</div>'+
+ '<div class="pb"><div class="pf" id="exPF"></div></div><div class="mut" id="exStat">'+(recs.length-done)+' pending</div>'+
+ '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn bp" onclick="extractAll()" '+(apiKey()&&recs.length?'':'disabled')+'>⊞ Extract all</button></div></div>'+
+ '<div class="card"><div class="ct">Study characteristics</div><div id="charTbl">'+renderCharTable()+'</div></div>'+
+ '<div class="card"><div class="ct">Quantitative outcomes (editable)</div><div class="cdesc">Tag the rows you want pooled. NOT_REPORTED cells are highlighted; fill or correct them manually.</div><div id="outTbl">'+renderOutcomeTable()+'</div></div>'+
+ (done?'<div style="display:flex;gap:8px"><button class="btn bp" onclick="markDone(\'extract\');goStage(\'meta\')">Continue to Statistics →</button></div>':'');
+};
+async function extractOne(id){
+ var r=S.records.find(function(x){return x.id===id});if(!r)return;
+ var o=await callClaude({system:extractionSystem(),user:'STUDY: '+studyLabel(r)+'\n\nSTUDY TEXT:\n'+docText(r).slice(0,150000),schema:extractionSchema(),maxTokens:3500});
+ r.extraction=o;
+ (o.outcomes||[]).forEach(function(oc){oc._id=uid('o');oc._study=id;oc._pool=isPoolable(oc);});
+ persist();
+}
+function isPoolable(oc){var ev=num(clean(oc.effect_value)),lo=num(clean(oc.ci_lower)),hi=num(clean(oc.ci_upper));return ev!=null&&lo!=null&&hi!=null;}
+function clean(v){return v==='NOT_REPORTED'?'':v;}
+async function extractAll(){
+ if(BUSY){notif('Busy','warn');return;}BUSY=true;
+ var recs=includedStudies().filter(function(r){return !r.extraction;});
+ var done=0,fail=0;var pf=$('exPF'),stat=$('exStat');
+ for(var i=0;i<recs.length;i++){try{await extractOne(recs[i].id);}catch(e){fail++;}done++;if(pf)pf.style.width=(done/recs.length*100)+'%';if(stat)stat.textContent=done+'/'+recs.length+(fail?' · '+fail+' failed':'');}
+ BUSY=false;audit('extraction_run',done+' studies extracted');render();notif('Extraction complete','ok');
+}
+function renderCharTable(){
+ var recs=includedStudies().filter(function(r){return r.extraction;});
+ if(!recs.length)return '<div class="mut">No extractions yet.</div>';
+ var nr=function(v){return v==='NOT_REPORTED'?'<span style="color:var(--ro)">NR</span>':esc(v);};
+ var rows=recs.map(function(r){var e=r.extraction;return '<tr><td>'+esc(studyLabel(r))+'</td><td>'+nr(e.study_design)+'</td><td>'+nr(e.country)+'</td><td>'+nr(e.n_total)+'</td><td style="max-width:160px">'+nr(e.intervention)+'</td><td style="max-width:140px">'+nr(e.comparator)+'</td><td>'+nr(e.followup)+'</td><td style="max-width:140px">'+nr(e.funding)+'</td></tr>';}).join('');
+ return '<div class="tw"><table class="dt"><thead><tr><th>Study</th><th>Design</th><th>Country</th><th>N</th><th>Intervention</th><th>Comparator</th><th>Follow-up</th><th>Funding</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+function outcomeRows(){var rows=[];includedStudies().forEach(function(r){if(r.extraction&&r.extraction.outcomes)r.extraction.outcomes.forEach(function(oc){rows.push({r:r,oc:oc});});});return rows;}
+function renderOutcomeTable(){
+ var rows=outcomeRows();
+ if(!rows.length)return '<div class="mut">No outcomes extracted yet.</div>';
+ var cell=function(oc,f){var v=oc[f];var isNR=v==='NOT_REPORTED'||v===''||v==null;return '<input class="iedit" style="'+(isNR?'border-color:var(--ro);color:var(--ro)':'')+'" value="'+esc(isNR?'':v)+'" onchange="editOutcome(\''+oc._id+'\',\''+f+'\',this.value)">';};
+ var body=rows.map(function(x){var oc=x.oc;return '<tr>'+
+   '<td><input type="checkbox" '+(oc._pool?'checked':'')+' onchange="oc_pool(\''+oc._id+'\',this.checked)"></td>'+
+   '<td style="max-width:130px">'+esc(studyLabel(x.r))+'</td>'+
+   '<td style="max-width:130px"><input class="iedit" style="width:120px" value="'+esc(oc.name||'')+'" onchange="editOutcome(\''+oc._id+'\',\'name\',this.value)"></td>'+
+   '<td>'+cell(oc,'effect_measure')+'</td>'+
+   '<td>'+cell(oc,'effect_value')+'</td><td>'+cell(oc,'ci_lower')+'</td><td>'+cell(oc,'ci_upper')+'</td>'+
+   '<td>'+cell(oc,'n_intervention')+'</td><td>'+cell(oc,'n_comparator')+'</td>'+
+   '<td>'+cell(oc,'p_value')+'</td>'+
+   '<td title="'+esc(oc.source_quote||'')+'" style="max-width:160px;font-size:9px;color:var(--t3)">'+esc((oc.source_quote||'').slice(0,70))+'</td>'+
+   '<td><button class="btn bs" style="padding:2px 6px" onclick="delOutcome(\''+oc._id+'\')">×</button></td>'+
+ '</tr>';}).join('');
+ return '<div class="tw"><table class="dt"><thead><tr><th>Pool</th><th>Study</th><th>Outcome</th><th>Meas</th><th>Effect</th><th>CI low</th><th>CI high</th><th>n(I)</th><th>n(C)</th><th>p</th><th>Source</th><th></th></tr></thead><tbody>'+body+'</tbody></table></div>'+
+   '<button class="btn bs bsm" style="margin-top:8px" onclick="addOutcomeRow()">+ Add outcome row</button>';
+}
+function findOutcome(oid){var f=null;outcomeRows().forEach(function(x){if(x.oc._id===oid)f=x;});return f;}
+function editOutcome(oid,field,val){var x=findOutcome(oid);if(!x)return;x.oc[field]=val;x.oc._pool=isPoolable(x.oc);persist();}
+function oc_pool(oid,on){var x=findOutcome(oid);if(x){x.oc._pool=on;persist();}}
+function delOutcome(oid){var x=findOutcome(oid);if(!x)return;var arr=x.r.extraction.outcomes;arr.splice(arr.indexOf(x.oc),1);persist();render();}
+function addOutcomeRow(){
+ var recs=includedStudies();if(!recs.length)return;
+ var r=recs[0];if(!r.extraction)r.extraction={outcomes:[]};if(!r.extraction.outcomes)r.extraction.outcomes=[];
+ r.extraction.outcomes.push({_id:uid('o'),_study:r.id,name:'New outcome',effect_measure:S.effectMeasure,effect_value:'',ci_lower:'',ci_upper:'',n_intervention:'',n_comparator:'',p_value:'',source_quote:'manual entry',_pool:false});
+ persist();render();
+}
+/* ====================== STAGE 9: STATISTICS & META-ANALYSIS ====================== */
+var _metaResult=null,_metaRatio=false,_metaLabel='',_metaOutcome='__all__';
+function isRatio(m){return ['OR','RR','HR','proportion','PROP'].indexOf((m||'').toUpperCase().replace('PROPORTION','PROP'))>=0||['OR','RR','HR'].indexOf(m)>=0;}
+function distinctOutcomes(){var s={};outcomeRows().forEach(function(x){if(x.oc.name)s[x.oc.name]=1;});return Object.keys(s);}
+function buildMetaStudies(){
+ var rows=outcomeRows().filter(function(x){return x.oc._pool&&isPoolable(x.oc)&&(_metaOutcome==='__all__'||x.oc.name===_metaOutcome);});
+ var measure=rows.length?(rows[0].oc.effect_measure&&rows[0].oc.effect_measure!=='NOT_REPORTED'?rows[0].oc.effect_measure:S.effectMeasure):S.effectMeasure;
+ var ratio=isRatio(measure);
+ var studies=rows.map(function(x){
+   var ev=num(clean(x.oc.effect_value)),lo=num(clean(x.oc.ci_lower)),hi=num(clean(x.oc.ci_upper));
+   if(ev==null||lo==null||hi==null||lo>=hi)return null;
+   var yi,sei;
+   if(ratio){if(ev<=0||lo<=0){return null;}yi=Math.log(ev);sei=(Math.log(hi)-Math.log(lo))/(2*1.96);}
+   else{yi=ev;sei=(hi-lo)/(2*1.96);}
+   return {label:studyLabel(x.r)+(x.oc.timepoint&&x.oc.timepoint!=='NOT_REPORTED'?' ('+x.oc.timepoint+')':''),yi:yi,sei:sei,raw:ev,rlo:lo,rhi:hi};
+ }).filter(Boolean);
+ return {studies:studies,ratio:ratio,measure:measure};
+}
+STAGE_RENDER.meta=function(){
+ var outs=distinctOutcomes();
+ return stageHead('Statistics & Meta-analysis','Random-effects (DerSimonian-Laird) or fixed-effect pooling computed in-browser. Reports the pooled effect, 95% CI, two-sided p, between-study heterogeneity (Q, I², τ²), a 95% prediction interval, and Egger’s test for small-study effects — with forest and funnel plots. Ratio measures are pooled on the log scale.')+
+ '<div class="card"><div class="ct">Pooling options</div><div class="cg">'+
+   '<div class="fg"><label class="fl">Outcome to pool</label><select id="metaOut" onchange="_metaOutcome=this.value;runMeta()"><option value="__all__"'+(_metaOutcome==='__all__'?' selected':'')+'>All selected rows</option>'+outs.map(function(o){return '<option value="'+esc(o)+'"'+(_metaOutcome===o?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select></div>'+
+   '<div class="fg"><label class="fl">Model</label><select id="metaModel" onchange="S.metaMethod=this.value;persist();runMeta()"><option value="DL"'+(S.metaMethod==='DL'?' selected':'')+'>Random-effects (DerSimonian-Laird)</option><option value="FE"'+(S.metaMethod==='FE'?' selected':'')+'>Fixed-effect (inverse variance)</option></select></div>'+
+   '<div class="fg"><label class="fl">&nbsp;</label><button class="btn bp" style="width:100%" onclick="runMeta()">∑ Run meta-analysis</button></div>'+
+ '</div></div>'+
+ '<div id="metaResults"></div>'+
+ '<div style="display:flex;gap:8px"><button class="btn bp" onclick="markDone(\'meta\');goStage(\'prisma\')">Continue to PRISMA →</button></div>';
+};
+STAGE_AFTER.meta=function(){runMeta();};
+function runMeta(){
+ var box=$('metaResults');if(!box)return;
+ var b=buildMetaStudies();
+ if(b.studies.length<2){box.innerHTML='<div class="warn">Need at least 2 poolable outcome rows (effect + CI lower + CI upper). Tag rows with the "Pool" checkbox in Extraction, or add data. Currently '+b.studies.length+' poolable.</div>';_metaResult=null;return;}
+ var res=metaAnalyze(b.studies,S.metaMethod);
+ _metaResult=res;_metaRatio=b.ratio;_metaLabel=b.measure;res.ratio=b.ratio;res.measure=b.measure;res.outcome=_metaOutcome==='__all__'?'Pooled outcome':_metaOutcome;
+ var disp=function(v){return b.ratio?Math.exp(v):v;};
+ var pooled=disp(res.est),plo=disp(res.ciLo),phi=disp(res.ciHi),pilo=disp(res.piLo),pihi=disp(res.piHi);
+ var hetClass=res.I2<30?'b-low':res.I2<60?'b-mod':'b-high';
+ box.innerHTML=
+  '<div class="sr"><div class="sc"><div class="sv">'+fmt(pooled,b.ratio?2:2)+'</div><div class="sl">Pooled '+esc(b.measure)+'</div></div>'+
+   '<div class="sc"><div class="sv" style="font-size:15px;background:none;-webkit-text-fill-color:var(--t1);color:var(--t1)">'+fmt(plo)+' – '+fmt(phi)+'</div><div class="sl">95% CI</div></div>'+
+   '<div class="sc"><div class="sv" style="font-size:18px;background:none;-webkit-text-fill-color:var(--t1);color:var(--t1)">'+(res.p<0.001?'<0.001':fmt(res.p,3))+'</div><div class="sl">p-value</div></div>'+
+   '<div class="sc"><div class="sv" style="background:none;-webkit-text-fill-color:var(--t1);color:var(--t1)">'+fmt(res.I2,0)+'%</div><div class="sl">I²</div></div>'+
+   '<div class="sc"><div class="sv" style="font-size:18px;background:none;-webkit-text-fill-color:var(--t1);color:var(--t1)">'+res.k+'</div><div class="sl">Studies</div></div></div>'+
+  '<div class="split">'+
+   '<div class="card"><div class="ct">Forest plot</div><div class="svgwrap">'+forestSVG(res)+'</div></div>'+
+   '<div class="card"><div class="ct">Funnel plot</div><div class="svgwrap">'+funnelSVG(res)+'</div>'+(res.egger?'<div class="mut" style="margin-top:8px">Egger’s test: intercept '+fmt(res.egger.intercept)+', t='+fmt(res.egger.t)+', p='+fmt(res.egger.p,3)+(res.egger.p<0.1?' — possible small-study effects':' — no strong asymmetry')+'</div>':'')+'</div>'+
+  '</div>'+
+  '<div class="card"><div class="ct">Heterogeneity & inference</div><div class="tw"><table class="dt"><tbody>'+
+   metaRow('Model',res.method==='FE'?'Fixed-effect (IV)':'Random-effects (DL)')+
+   metaRow('Pooled '+b.measure+' (95% CI)',fmt(pooled)+' ('+fmt(plo)+' to '+fmt(phi)+')')+
+   metaRow('95% Prediction interval',fmt(pilo)+' to '+fmt(pihi))+
+   metaRow('Heterogeneity I²','<span class="badge '+hetClass+'">'+fmt(res.I2,0)+'%</span>')+
+   metaRow('Cochran Q (df)',fmt(res.Q)+' ('+res.df+'), p='+(res.pHet<0.001?'<0.001':fmt(res.pHet,3)))+
+   metaRow('Tau² (between-study var.)',fmt(res.tau2,4))+
+   metaRow('Test of overall effect','z='+fmt(res.z)+', p='+(res.p<0.001?'<0.001':fmt(res.p,3)))+
+  '</tbody></table></div>'+
+  '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn bs bsm" onclick="aiInterpretMeta()" '+(apiKey()?'':'disabled')+'>✨ AI interpretation</button><button class="btn bs bsm" onclick="dlForest()">Download forest SVG</button></div>'+
+  '<div id="metaInterp"></div></div>';
+}
+function metaRow(k,v){return '<tr><td style="font-weight:600;width:240px">'+esc(k)+'</td><td>'+v+'</td></tr>';}
+function forestSVG(res){
+ var ratio=res.ratio;var disp=function(v){return ratio?Math.exp(v):v;};
+ var rows=res.rows;var W=560,rowH=24,top=30,H=top+rows.length*rowH+70;
+ var allLo=rows.map(function(r){return r.ciLo}).concat([res.ciLo,res.piLo]);
+ var allHi=rows.map(function(r){return r.ciHi}).concat([res.ciHi,res.piHi]);
+ var mn=Math.min.apply(null,allLo),mx=Math.max.apply(null,allHi);
+ if(ratio){mn=Math.min(mn,Math.log(0.5));mx=Math.max(mx,Math.log(2));}else{var pad=(mx-mn)*0.1||1;}
+ var nameW=150,plotL=nameW+10,plotW=260,plotR=plotL+plotW,valX=plotR+10;
+ function xp(v){return plotL+(v-mn)/(mx-mn)*plotW;}
+ var nullV=ratio?0:0;var nullX=xp(nullV);
+ var s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" font-family="DM Sans,sans-serif" style="max-width:100%">';
+ s+='<line x1="'+nullX+'" y1="'+top+'" x2="'+nullX+'" y2="'+(top+rows.length*rowH+8)+'" stroke="#bbb" stroke-dasharray="3 3"/>';
+ s+='<text x="6" y="20" font-size="11" font-weight="700" fill="#333">Study</text><text x="'+valX+'" y="20" font-size="11" font-weight="700" fill="#333">'+esc(res.measure)+' [95% CI]</text>';
+ rows.forEach(function(r,i){
+   var y=top+i*rowH+rowH/2;
+   var lo=xp(r.ciLo),hi=xp(r.ciHi),pt=xp(r.yi);
+   var sz=4+Math.sqrt(r.w)/2;
+   s+='<text x="6" y="'+(y+3)+'" font-size="10" fill="#333">'+esc(r.label.slice(0,26))+'</text>';
+   s+='<line x1="'+lo+'" y1="'+y+'" x2="'+hi+'" y2="'+y+'" stroke="#3b82f6" stroke-width="1.5"/>';
+   s+='<rect x="'+(pt-sz)+'" y="'+(y-sz)+'" width="'+(sz*2)+'" height="'+(sz*2)+'" fill="#1e40af"/>';
+   s+='<text x="'+valX+'" y="'+(y+3)+'" font-size="9" fill="#444">'+fmt(disp(r.yi))+' ['+fmt(disp(r.ciLo))+', '+fmt(disp(r.ciHi))+']</text>';
+ });
+ var dy=top+rows.length*rowH+20;
+ var dlo=xp(res.ciLo),dhi=xp(res.ciHi),dmid=xp(res.est);
+ s+='<polygon points="'+dmid+','+(dy-7)+' '+dhi+','+dy+' '+dmid+','+(dy+7)+' '+dlo+','+dy+'" fill="#10b981"/>';
+ s+='<text x="6" y="'+(dy+3)+'" font-size="10" font-weight="700" fill="#111">Overall ('+(res.method==='FE'?'FE':'RE')+')</text>';
+ s+='<text x="'+valX+'" y="'+(dy+3)+'" font-size="9" font-weight="700" fill="#111">'+fmt(disp(res.est))+' ['+fmt(disp(res.ciLo))+', '+fmt(disp(res.ciHi))+']</text>';
+ // prediction interval line
+ var py=dy+16;s+='<line x1="'+xp(res.piLo)+'" y1="'+py+'" x2="'+xp(res.piHi)+'" y2="'+py+'" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="2 2"/><text x="6" y="'+(py+3)+'" font-size="8" fill="#b45309">95% PI</text>';
+ var axisY=py+18;s+='<line x1="'+plotL+'" y1="'+axisY+'" x2="'+plotR+'" y2="'+axisY+'" stroke="#999"/>';
+ [mn,(mn+mx)/2,mx].forEach(function(t){s+='<text x="'+xp(t)+'" y="'+(axisY+12)+'" font-size="8" fill="#666" text-anchor="middle">'+fmt(disp(t))+'</text>';});
+ s+='<text x="'+(plotL+plotW/2)+'" y="'+(axisY+26)+'" font-size="9" fill="#666" text-anchor="middle">'+(ratio?'Favours ← '+esc(res.measure)+' → ':esc(res.measure))+'</text>';
+ s+='</svg>';return s;
+}
+function funnelSVG(res){
+ var W=360,H=300,pad=44;var rows=res.rows;
+ var es=rows.map(function(r){return r.yi});var ses=rows.map(function(r){return r.sei});
+ var minE=Math.min.apply(null,es.concat([res.est])),maxE=Math.max.apply(null,es.concat([res.est]));
+ var rng=(maxE-minE)||1;minE-=rng*0.3;maxE+=rng*0.3;
+ var maxSE=Math.max.apply(null,ses)*1.1||1;
+ function xp(e){return pad+(e-minE)/(maxE-minE)*(W-2*pad);}
+ function yp(se){return pad+se/maxSE*(H-2*pad);}
+ var s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" font-family="DM Sans" style="max-width:100%">';
+ var cx=xp(res.est);
+ // pseudo 95% CI funnel
+ s+='<line x1="'+cx+'" y1="'+yp(0)+'" x2="'+cx+'" y2="'+yp(maxSE)+'" stroke="#ccc" stroke-dasharray="3 3"/>';
+ var topY=yp(0),botSE=maxSE;
+ s+='<polygon points="'+cx+','+yp(0)+' '+xp(res.est-1.96*botSE)+','+yp(botSE)+' '+xp(res.est+1.96*botSE)+','+yp(botSE)+'" fill="none" stroke="#bbb" stroke-dasharray="2 2"/>';
+ rows.forEach(function(r){s+='<circle cx="'+xp(r.yi)+'" cy="'+yp(r.sei)+'" r="4" fill="#3b82f6" opacity="0.75"/>';});
+ s+='<line x1="'+pad+'" y1="'+(H-pad)+'" x2="'+(W-pad)+'" y2="'+(H-pad)+'" stroke="#999"/><line x1="'+pad+'" y1="'+pad+'" x2="'+pad+'" y2="'+(H-pad)+'" stroke="#999"/>';
+ s+='<text x="'+(W/2)+'" y="'+(H-10)+'" font-size="9" fill="#666" text-anchor="middle">Effect ('+(res.ratio?'log '+esc(res.measure):esc(res.measure))+')</text>';
+ s+='<text x="12" y="'+(H/2)+'" font-size="9" fill="#666" transform="rotate(-90 12 '+(H/2)+')" text-anchor="middle">Standard error</text>';
+ s+='</svg>';return s;
+}
+function dlForest(){if(!_metaResult)return;dl('forest_plot.svg',forestSVG(_metaResult),'image/svg+xml');}
+async function aiInterpretMeta(){
+ if(!_metaResult){notif('Run meta-analysis first','warn');return;}
+ var box=$('metaInterp');box.innerHTML='<div class="aip"><span class="spin"></span> Interpreting…</div>';
+ var r=_metaResult;var disp=function(v){return r.ratio?Math.exp(v):v;};
+ var ctx='Outcome: '+r.outcome+'\nMeasure: '+r.measure+'\nModel: '+r.method+'\nStudies (k): '+r.k+'\nPooled: '+fmt(disp(r.est))+' (95% CI '+fmt(disp(r.ciLo))+' to '+fmt(disp(r.ciHi))+'), p='+fmt(r.p,4)+'\nI²='+fmt(r.I2,0)+'%, tau²='+fmt(r.tau2,4)+', Q='+fmt(r.Q)+' (df '+r.df+', p='+fmt(r.pHet,3)+')\n95% prediction interval: '+fmt(disp(r.piLo))+' to '+fmt(disp(r.piHi))+(r.egger?'\nEgger intercept p='+fmt(r.egger.p,3):'');
+ try{
+   var t=await callClaude({system:'You are a biostatistician writing the results interpretation for a '+docTypeName()+'. Interpret the pooled estimate, statistical and clinical significance, heterogeneity (I²/tau²/prediction interval), and small-study effects. Be precise, cautious, and use regulatory-grade language. 2-3 short paragraphs. Do not invent numbers beyond those provided.',user:ctx,maxTokens:900,thinking:true});
+   r.interpretation=t;box.innerHTML='<div class="info" style="white-space:pre-wrap">'+esc(t)+'</div>';persist();
+ }catch(e){box.innerHTML='<div class="warn">'+esc(e.message)+'</div>';}
+}
+/* ====================== STAGE 10: PRISMA ====================== */
+function computePrisma(){
+ // Canonical counts derived once from explicit record states (not re-derived ad hoc elsewhere).
+ var p=S.prisma;
+ var bySrc={db:0,reg:0,other:0};
+ S.records.forEach(function(r){if(r.source==='ClinicalTrials.gov'||r.source==='Other registry')bySrc.reg++;else if(r.source==='Citation searching')bySrc.other++;else bySrc.db++;});
+ p.id_db=bySrc.db;p.id_reg=bySrc.reg;p.id_other=bySrc.other;
+ p.dup_removed=S.records.filter(function(r){return r.dup}).length;
+ var active=activeRecords();
+ p.screened=active.length;
+ p.excl_ts=active.filter(function(r){return r.status==='excluded'}).length;
+ var sought=active.filter(function(r){return r.status==='included'||r.status==='maybe'});
+ p.sought=sought.length;
+ p.not_retrieved=sought.filter(function(r){return r.ftStatus==='excluded'&&r.ftReason==='Full text unavailable'}).length;
+ var assessed=sought.filter(function(r){return !(r.ftStatus==='excluded'&&r.ftReason==='Full text unavailable')});
+ p.assessed=assessed.length;
+ var reasons={};assessed.forEach(function(r){if(r.ftStatus==='excluded'&&r.ftReason){reasons[r.ftReason]=(reasons[r.ftReason]||0)+1;}});
+ p.excl_ft=reasons;
+ p.included=assessed.filter(function(r){return r.ftStatus==='included'}).length;
+ // if full-text step not used, included = TiAb-included
+ if(p.included===0&&assessed.length>0&&!S.done.fulltext)p.included=assessed.filter(function(r){return r.status==='included'}).length;
+ persist();return p;
+}
+STAGE_RENDER.prisma=function(){
+ var p=computePrisma();
+ return stageHead('PRISMA 2020 Flow Diagram','Generated directly from the explicit per-stage counters — identification, deduplication, screening, retrieval, eligibility and inclusion all reconcile by construction. Export as SVG for the report.')+
+ '<div class="card"><div class="ct">Flow diagram</div><div class="svgwrap" id="prismaWrap">'+prismaSVG(p)+'</div>'+
+ '<div style="display:flex;gap:8px;margin-top:10px"><button class="btn bs bsm" onclick="dl(\'PRISMA_flow.svg\',prismaSVG(computePrisma()),\'image/svg+xml\')">Download SVG</button><button class="btn bs bsm" onclick="computePrisma();render()">↻ Recompute</button></div></div>'+
+ '<div class="card"><div class="ct">Counts (editable)</div><div class="cdesc">Adjust manual fields (e.g. reports not retrieved). Other counts derive from record states.</div>'+
+ '<div class="cg">'+
+   prismaEdit('id_db','Records from databases',p.id_db)+
+   prismaEdit('id_reg','Records from registers',p.id_reg)+
+   prismaEdit('id_other','Records from other sources',p.id_other)+
+   prismaEdit('dup_removed','Duplicates removed',p.dup_removed)+
+   prismaEdit('not_retrieved','Reports not retrieved',p.not_retrieved)+
+ '</div>'+
+ '<div style="margin-top:10px"><b style="font-size:12px">Full-text exclusion reasons</b>'+(Object.keys(p.excl_ft).length?'<div>'+Object.keys(p.excl_ft).map(function(k){return '<span class="chip">'+esc(k)+': '+p.excl_ft[k]+'</span>'}).join('')+'</div>':'<div class="mut">none recorded</div>')+'</div>'+
+ '</div>'+
+ '<div style="display:flex;gap:8px"><button class="btn bp" onclick="markDone(\'prisma\');goStage(\'report\')">Continue to Report →</button></div>';
+};
+function prismaEdit(k,lbl,v){return '<div class="fg"><label class="fl">'+esc(lbl)+'</label><input type="number" value="'+v+'" onchange="S.prisma.'+k+'=parseInt(this.value)||0;persist();$(\'prismaWrap\').innerHTML=prismaSVG(S.prisma)"></div>';}
+function prismaSVG(p){
+ var totId=p.id_db+p.id_reg+p.id_other;
+ var box=function(x,y,w,h,lines,fill){var s='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="6" fill="'+(fill||'#eef3fb')+'" stroke="#9bb4d6"/>';lines.forEach(function(ln,i){s+='<text x="'+(x+10)+'" y="'+(y+20+i*15)+'" font-size="11" fill="#1a2b45">'+esc(ln)+'</text>';});return s;};
+ var arrow=function(x1,y1,x2,y2){return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#7089aa" stroke-width="1.5" marker-end="url(#ah)"/>';};
+ var W=720,H=560;
+ var s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" font-family="DM Sans" style="max-width:100%"><defs><marker id="ah" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7089aa"/></marker></defs>';
+ var cx=40,cw=320;
+ s+=box(cx,20,cw,60,['Records identified (n = '+totId+'):','  Databases n='+p.id_db+', Registers n='+p.id_reg,'  Other sources n='+p.id_other],'#dbe7fb');
+ s+=box(cx,120,cw,40,['Records screened (title/abstract)','n = '+p.screened]);
+ s+=box(cx,210,cw,40,['Reports sought for retrieval','n = '+p.sought]);
+ s+=box(cx,300,cw,40,['Reports assessed for eligibility','n = '+p.assessed]);
+ s+=box(cx,400,cw,50,['Studies included in review','n = '+p.included],'#dcfce7');
+ // right-side exclusions
+ var rx=440,rw=250;
+ s+=box(rx,90,rw,40,['Duplicate records removed','n = '+p.dup_removed],'#fdeaea');
+ s+=box(rx,165,rw,40,['Records excluded (T/A)','n = '+p.excl_ts],'#fdeaea');
+ s+=box(rx,255,rw,40,['Reports not retrieved','n = '+p.not_retrieved],'#fdeaea');
+ var ftLines=['Reports excluded (n = '+Object.keys(p.excl_ft).reduce(function(a,k){return a+p.excl_ft[k]},0)+'):'];
+ Object.keys(p.excl_ft).slice(0,4).forEach(function(k){ftLines.push('  '+k+' n='+p.excl_ft[k]);});
+ s+=box(rx,345,rw,Math.max(40,18+ftLines.length*15),ftLines,'#fdeaea');
+ // arrows down
+ s+=arrow(cx+cw/2,80,cx+cw/2,120);
+ s+=arrow(cx+cw/2,160,cx+cw/2,210);
+ s+=arrow(cx+cw/2,250,cx+cw/2,300);
+ s+=arrow(cx+cw/2,340,cx+cw/2,400);
+ // arrows right
+ s+=arrow(cx+cw,100,rx,110);
+ s+=arrow(cx+cw,180,rx,185);
+ s+=arrow(cx+cw,270,rx,275);
+ s+=arrow(cx+cw,320,rx,365);
+ s+='</svg>';return s;
+}
+/* ====================== STAGE 11: REPORT ====================== */
+var REPORT_TEMPLATES={
+ CER:{title:'Clinical Evaluation Report (CER)',std:'EU MDR 2017/745 & MEDDEV 2.7/1 Rev 4',
+   sections:['1. Scope of the clinical evaluation','2. Device description and intended purpose','3. Equivalence assessment (if applicable)','4. State of the art and clinical background','5. Literature search and appraisal methodology (PRISMA 2020)','6. Summary and appraisal of clinical performance (clinical benefit)','7. Summary and appraisal of clinical safety','8. Benefit-risk analysis','9. Discussion: residual risks and PMCF needs','10. Conclusions']},
+ PSUR:{title:'Periodic Safety Update Report (PSUR/PBRER)',std:'EU MDR Art. 86 / ICH E2C(R2)',
+   sections:['1. Introduction and worldwide marketing status','2. Estimated exposure (interval and cumulative)','3. Summary of safety data and literature','4. Signal evaluation and emerging risks','5. Benefit-risk evaluation','6. Conclusions and actions']},
+ CSR:{title:'Clinical Study Report (CSR)',std:'ICH E3',
+   sections:['1. Synopsis','2. Objectives','3. Methodology (PRISMA literature synthesis)','4. Efficacy results','5. Safety results','6. Discussion and overall conclusions']},
+ Generic:{title:'Systematic Review Report',std:'PRISMA 2020',
+   sections:['1. Background and rationale','2. Objectives (PICO)','3. Methods (search, screening, appraisal, synthesis)','4. Results (study selection, characteristics, risk of bias, synthesis)','5. Discussion','6. Conclusions']},
+ PMCF:{title:'PMCF Evaluation Report',std:'MDCG 2020-7/8, EU MDR',
+   sections:['1. Scope and objectives','2. PMCF methodology','3. Literature synthesis (PRISMA)','4. Clinical performance and safety findings','5. Benefit-risk update','6. Conclusions and CER impact']},
+ 'State-of-the-Art':{title:'State-of-the-Art Review',std:'MEDDEV 2.7/1 Rev 4',
+   sections:['1. Scope','2. Current knowledge and alternative therapies','3. Literature methodology (PRISMA)','4. Synthesis of evidence','5. Benchmarking against state of the art','6. Conclusions']},
+ SSCP:{title:'Summary of Safety and Clinical Performance (SSCP)',std:'EU MDR Art. 32 / MDCG 2019-9',
+   sections:['1. Device identification and general information','2. Intended purpose and indications','3. Device description and accessories','4. Clinical evaluation summary (literature synthesis)','5. Clinical performance and safety','6. Possible diagnostic/therapeutic alternatives','7. Suggested profile and training for users','8. Conclusions']},
+ PMS:{title:'Post-Market Surveillance Report',std:'EU MDR Art. 85 / MDCG 2022-21',
+   sections:['1. Scope and PMS plan summary','2. Data sources and literature methodology (PRISMA)','3. Complaints, incidents and trend analysis','4. Literature synthesis of safety/performance','5. Benefit-risk and CAPA','6. Conclusions and updates to CER/risk file']},
+ PBRER:{title:'Periodic Benefit-Risk Evaluation Report (PBRER)',std:'ICH E2C(R2)',
+   sections:['1. Introduction','2. Worldwide marketing approval status','3. Estimated cumulative and interval exposure','4. Summary of significant safety findings (literature)','5. Signal and risk evaluation','6. Benefit-risk integrated assessment','7. Conclusions']},
+ DSUR:{title:'Development Safety Update Report (DSUR)',std:'ICH E2F',
+   sections:['1. Introduction','2. Worldwide development status','3. Estimated exposure','4. Summary of safety data and literature','5. Significant findings and signals','6. Integrated benefit-risk','7. Conclusions']},
+ SafetyReview:{title:'Drug Safety / Pharmacovigilance Review',std:'GVP / ICH E2',
+   sections:['1. Background and objectives','2. Methods (search, screening, appraisal — PRISMA)','3. Adverse event and safety synthesis','4. Signal evaluation','5. Benefit-risk discussion','6. Conclusions']},
+ EfficacyReview:{title:'Efficacy / Effectiveness Systematic Review',std:'PRISMA 2020 / Cochrane',
+   sections:['1. Background and rationale','2. Objectives (PICO)','3. Methods','4. Results: study selection, characteristics, risk of bias','5. Synthesis of efficacy outcomes (meta-analysis)','6. Certainty of evidence (GRADE)','7. Discussion and conclusions']},
+ HTA:{title:'HTA Evidence Dossier',std:'PRISMA 2020 / EUnetHTA',
+   sections:['1. Decision problem (PICO)','2. Methods (systematic search and selection)','3. Clinical effectiveness','4. Safety','5. Indirect/network comparisons (if any)','6. Strength and limitations of evidence','7. Conclusions for HTA']},
+ PayerDossier:{title:'Payer / Value Dossier',std:'AMCP Format for Formulary Submissions',
+   sections:['1. Product and disease background','2. Place in therapy','3. Systematic evidence review (PRISMA)','4. Clinical value: efficacy and safety','5. Economic value summary','6. Supporting evidence and conclusions']},
+ Equivalence:{title:'Device Equivalence Assessment',std:'MDCG 2020-5 / EU MDR',
+   sections:['1. Subject and equivalent device(s)','2. Clinical equivalence','3. Technical equivalence','4. Biological equivalence','5. Literature supporting equivalence (PRISMA)','6. Equivalence conclusion and gaps']}
+};
+function reportContext(){
+ var p=computePrisma();
+ var studies=includedStudies();
+ var chars=studies.filter(function(r){return r.extraction;}).map(function(r){var e=r.extraction;return studyLabel(r)+' | design='+e.study_design+' | N='+e.n_total+' | '+e.intervention+' vs '+e.comparator+' | follow-up='+e.followup;}).join('\n');
+ var appr=studies.filter(function(r){return r.appraisal;}).map(function(r){return studyLabel(r)+': overall RoB '+r.appraisal.overall+' ('+S.appraisalTool+')';}).join('\n');
+ var outcomes=outcomeRows().filter(function(x){return isPoolable(x.oc);}).map(function(x){return studyLabel(x.r)+' — '+x.oc.name+': '+x.oc.effect_measure+' '+x.oc.effect_value+' ('+x.oc.ci_lower+'–'+x.oc.ci_upper+'), p='+x.oc.p_value;}).join('\n');
+ var meta='';
+ if(_metaResult){var r=_metaResult;var d=function(v){return r.ratio?Math.exp(v):v;};meta='Meta-analysis ('+r.outcome+', '+r.method+', '+r.measure+'): pooled '+fmt(d(r.est))+' (95% CI '+fmt(d(r.ciLo))+'–'+fmt(d(r.ciHi))+'), p='+fmt(r.p,4)+', I²='+fmt(r.I2,0)+'%, '+r.k+' studies. 95% PI '+fmt(d(r.piLo))+'–'+fmt(d(r.piHi))+'.'+(r.interpretation?'\nInterpretation: '+r.interpretation:'');}
+ return 'PROJECT: '+S.project+'\nPIPELINE: '+dom().label+' SLR\nREVIEW/REPORT TYPE: '+S.documentType+'\n\nPICO:\n  P: '+S.pico.p+'\n  I: '+S.pico.i+'\n  C: '+S.pico.c+'\n  O: '+S.pico.o+'\n  Timeframe: '+tfStr()+'\n  Eligible designs: '+designsStr()+'\n\nSEARCH: databases = '+S.databases.join(', ')+'\n\nPRISMA: identified='+(p.id_db+p.id_reg+p.id_other)+', duplicates removed='+p.dup_removed+', screened='+p.screened+', excluded (T/A)='+p.excl_ts+', sought='+p.sought+', assessed='+p.assessed+', full-text excluded='+Object.keys(p.excl_ft).map(function(k){return k+' ('+p.excl_ft[k]+')'}).join(', ')+', INCLUDED='+p.included+'\n\nINCLUDED STUDY CHARACTERISTICS:\n'+(chars||'(extraction pending)')+'\n\nRISK OF BIAS ('+S.appraisalTool+'):\n'+(appr||'(appraisal pending)')+'\n\nKEY OUTCOMES:\n'+(outcomes||'(no quantitative outcomes)')+'\n\n'+meta;
+}
+function reportSystem(){
+ var t=REPORT_TEMPLATES[S.documentType]||REPORT_TEMPLATES.Generic;
+ var cerExtra=S.domain==='device'?'\nDEVICE framing (EU MDR 2017/745 / MEDDEV 2.7/1 Rev 4): distinguish CLINICAL PERFORMANCE (clinical benefit) from CLINICAL SAFETY; explicitly address EQUIVALENCE where relevant; provide a structured BENEFIT-RISK determination against pre-defined acceptability criteria; identify residual risks and PMCF/PMS needs; benchmark against the state of the art. Use cautious, regulator-facing language ("the available clinical evidence demonstrates/does not demonstrate", "acceptable benefit-risk profile").':'\nDRUG framing (ICH E3/E2C, GVP): distinguish EFFICACY/EFFECTIVENESS from SAFETY (ADRs, ADEs); present exposure context where relevant; integrate a benefit-risk evaluation and any signals; use GRADE-style certainty language and cautious pharmacovigilance wording.';
+ return 'You are a senior medical writer producing a '+t.title+' compliant with '+t.std+'. Write a rigorous, evidence-based narrative synthesis — NOT a generic summary.\n\nSTRUCTURE — use exactly these section headings (as <h2>):\n'+t.sections.map(function(s){return '  '+s}).join('\n')+'\n\nRULES:\n1. Base EVERY statement on the supplied synthesised data (PRISMA counts, study characteristics, risk-of-bias ratings, outcome data, meta-analysis). Never invent studies, numbers, or citations.\n2. Where data are insufficient, state it explicitly and discuss limitations and uncertainty — do not paper over gaps.\n3. Integrate the risk-of-bias findings into the strength-of-evidence discussion (e.g. GRADE-style certainty language).\n4. Quantify clinical benefit and safety using the pooled/extracted effect estimates with their confidence intervals and heterogeneity.\n5. Output clean semantic HTML only (use <h1>,<h2>,<h3>,<p>,<ul>,<li>,<table>,<blockquote>). No markdown, no <html>/<head>/<body> wrappers, no commentary before/after.'+cerExtra;
+}
+STAGE_RENDER.report=function(){
+ var t=REPORT_TEMPLATES[S.documentType]||REPORT_TEMPLATES.Generic;
+ return stageHead('Report Generation — '+t.title,'A '+esc(t.std)+'-structured narrative synthesis generated from your screened, appraised and extracted dataset. The system prompt enforces the regulatory section structure and benefit-risk framing so the output is document-specific, not generic.')+
+ '<div class="card"><div class="ct">Generate report</div><div class="cdesc">Sections: '+t.sections.map(esc).join(' · ')+'</div>'+
+ '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn bp" onclick="genReport()" '+(apiKey()?'':'disabled')+'>✎ Generate '+esc(S.documentType)+' report</button>'+
+ (S.report?'<button class="btn bs bsm" onclick="dlReportDoc()">⬇ Download .doc</button><button class="btn bs bsm" onclick="dlReportHTML()">⬇ Download .html</button>':'')+'</div></div>'+
+ '<div class="card"><div class="ct">Preview</div><div id="reportBox">'+(S.report?'<div class="rp" contenteditable="true" id="reportRp" oninput="S.report=this.innerHTML">'+S.report+'</div>':'<div class="mut">No report generated yet. The preview is editable after generation.</div>')+'</div></div>'+
+ '<div style="display:flex;gap:8px"><button class="btn bp" onclick="markDone(\'report\');goStage(\'export\')">Continue to Export →</button></div>';
+};
+async function genReport(){
+ if(BUSY){notif('Busy','warn');return;}
+ var box=$('reportBox');box.innerHTML='<div class="aip"><span class="spin"></span> Drafting '+esc(S.documentType)+' report — this can take a minute…</div>';
+ try{
+   var html=await callClaude({system:reportSystem(),user:'Write the full '+S.documentType+' narrative synthesis from this dataset:\n\n'+reportContext()+'\n\nInclude a study characteristics table and a results/benefit-risk table where appropriate.',maxTokens:16000,thinking:true});
+   html=html.replace(/```html/gi,'').replace(/```/g,'').trim();
+   S.report=html;persist();audit('report_generated',S.documentType+' ('+html.length+' chars)');render();notif('Report generated','ok');
+ }catch(e){box.innerHTML='<div class="warn">Failed: '+esc(e.message)+'</div>';notif('Report failed: '+e.message,'error');}
+}
+function reportDocHTML(){
+ return '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>'+esc(S.project)+'</title>'+
+ '<style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;line-height:1.5;color:#1a1a1a;max-width:800px;margin:auto}h1{font-size:18pt}h2{font-size:14pt;border-bottom:1px solid #ccc;padding-bottom:3px}h3{font-size:12pt}table{border-collapse:collapse;width:100%}th,td{border:1px solid #999;padding:5px 8px;font-size:10pt}th{background:#eef}</style></head><body>'+
+ '<h1>'+esc(REPORT_TEMPLATES[S.documentType].title)+'</h1><p><b>'+esc(S.project)+'</b> · '+esc(REPORT_TEMPLATES[S.documentType].std)+' · Generated '+nowStamp()+'</p>'+S.report+
+ '<hr><p style="font-size:8pt;color:#888">Generated with EvidenceOS. AI-assisted synthesis — requires expert review and verification before regulatory use.</p></body></html>';
+}
+function dlReportDoc(){if(!S.report){notif('Generate first','warn');return;}dl(S.project.replace(/\s+/g,'_')+'_'+S.documentType+'.doc',reportDocHTML(),'application/msword');}
+function dlReportHTML(){if(!S.report){notif('Generate first','warn');return;}dl(S.project.replace(/\s+/g,'_')+'_'+S.documentType+'.html',reportDocHTML(),'text/html');}
+/* ====================== STAGE 12: EXPORT ====================== */
+STAGE_RENDER.export=function(){
+ var p=computePrisma();
+ return stageHead('Export & Deliverables','Download every artefact of the review — the regulatory report, PRISMA diagram, forest plot, full data workbook, audit trail, and a complete JSON checkpoint for reproducibility.')+
+ '<div class="cg">'+
+   exportCard('📄','Report (.doc)','Word-compatible '+S.documentType+' report','dlReportDoc()',!!S.report)+
+   exportCard('▦','PRISMA diagram (.svg)','PRISMA 2020 flow','dl(\'PRISMA_flow.svg\',prismaSVG(computePrisma()),\'image/svg+xml\')',true)+
+   exportCard('∑','Forest plot (.svg)','Meta-analysis forest plot','dlForest()',!!_metaResult)+
+   exportCard('⊞','Data workbook (.xlsx)','Records, extraction, appraisal','exportWorkbook()',S.records.length>0)+
+   exportCard('📋','Audit trail (.csv)','Full reproducibility log','exportAudit()',true)+
+   exportCard('💾','Checkpoint (.json)','Complete project state','saveCheckpoint()',true)+
+ '</div>'+
+ '<div class="card"><div class="ct">Review summary</div><div class="tw"><table class="dt"><tbody>'+
+   metaRow('Project',esc(S.project))+metaRow('Document type',esc(S.documentType))+
+   metaRow('Records identified',(p.id_db+p.id_reg+p.id_other))+
+   metaRow('After de-duplication',p.screened)+
+   metaRow('Studies included',p.included)+
+   metaRow('Appraisal tool',esc(S.appraisalTool))+
+   metaRow('Meta-analysis',_metaResult?(_metaResult.k+' studies, I²='+fmt(_metaResult.I2,0)+'%'):'not run')+
+   metaRow('Report',S.report?'generated ('+Math.round(S.report.length/1000)+'k chars)':'not generated')+
+ '</tbody></table></div></div>'+
+ '<div class="info">⚖ <b>Important:</b> EvidenceOS is an AI-assisted accelerator. All AI screening, appraisal, extraction and synthesis must be verified by a qualified reviewer before regulatory submission (EU MDR, ICH, FDA). The audit trail and source quotes support that verification.</div>';
+};
+function exportCard(ico,title,desc,fn,enabled){
+ return '<div class="card" style="text-align:center;'+(enabled?'':'opacity:.5')+'"><div style="font-size:30px;margin-bottom:6px">'+ico+'</div><div style="font-weight:700;font-size:13px;margin-bottom:3px">'+esc(title)+'</div><div class="mut" style="margin-bottom:10px">'+esc(desc)+'</div><button class="btn '+(enabled?'bp':'bs')+' bsm" '+(enabled?'onclick="'+fn+'"':'disabled')+'>Download</button></div>';
+}
+function exportWorkbook(){
+ var wb=XLSX.utils.book_new();
+ var recs=S.records.map(function(r){return {Title:r.title,Authors:r.authors,Year:r.year,Journal:r.journal,DOI:r.doi,Source:r.source,Duplicate:r.dup?'yes':'',TiAb_decision:r.status,Criterion:r.screen?r.screen.criterion_violated:'',Confidence:r.screen?r.screen.confidence:'',FullText:r.ftStatus||'',FT_reason:r.ftReason||''};});
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(recs),'Records');
+ var ext=[];includedStudies().forEach(function(r){if(r.extraction){var e=r.extraction;(e.outcomes||[]).forEach(function(oc){ext.push({Study:studyLabel(r),Design:e.study_design,N:e.n_total,Outcome:oc.name,Timepoint:oc.timepoint,Measure:oc.effect_measure,Effect:oc.effect_value,CI_low:oc.ci_lower,CI_high:oc.ci_upper,p:oc.p_value,Source:oc.source_quote});});}});
+ if(ext.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ext),'Extraction');
+ var apr=[];includedStudies().forEach(function(r){if(r.appraisal){var row={Study:studyLabel(r),Tool:S.appraisalTool,Overall:r.appraisal.overall};r.appraisal.domains.forEach(function(d){row[d.name.split(' ')[0]]=d.judgement;});apr.push(row);}});
+ if(apr.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(apr),'Appraisal');
+ XLSX.writeFile(wb,S.project.replace(/\s+/g,'_')+'_data.xlsx');
+ audit('export_workbook','xlsx');
+}
+
+/* ====================== AUTOPILOT ====================== */
+var AUTO_STEPS=[
+ {id:'dedup',n:'Deduplicate records',fn:autoDedup},
+ {id:'screen',n:'Title/abstract screening',fn:autoScreen},
+ {id:'fulltext',n:'Full-text eligibility (loaded PDFs)',fn:autoFulltext},
+ {id:'appraise',n:'Critical appraisal',fn:autoAppraise},
+ {id:'extract',n:'Data extraction',fn:autoExtract},
+ {id:'meta',n:'Meta-analysis',fn:autoMeta},
+ {id:'prisma',n:'PRISMA diagram',fn:autoPrisma},
+ {id:'report',n:'Report generation',fn:autoReport}
+];
+function autopilotModal(){
+ return '<h2>⚡ Autopilot</h2><div class="info">Runs the full pipeline on your imported records: deduplicate → screen → full-text → appraise → extract → meta-analyse → PRISMA → report. Each step uses the same strict schemas as manual mode. Upload full-text PDFs first for accurate appraisal/extraction (otherwise abstracts are used and missing data is marked NOT_REPORTED).</div>'+
+ (apiKey()?'':'<div class="warn">Set your API key in Settings first.</div>')+
+ (S.records.length?'':'<div class="warn">Import records first (Stage 3).</div>')+
+ '<div id="autoSteps">'+AUTO_STEPS.map(function(st){return '<div class="auto-step pend" id="as_'+st.id+'"><div class="as-ico">○</div><div class="as-nm">'+esc(st.n)+'</div><div class="as-st" id="ast_'+st.id+'"></div></div>';}).join('')+'</div>'+
+ '<div style="display:flex;gap:8px;margin-top:14px"><button class="btn bp" onclick="runAutopilot()" '+(apiKey()&&S.records.length?'':'disabled')+'>▶ Run Autopilot</button><button class="btn bs" onclick="closeModal()">Close</button></div>';
+}
+function autoMark(id,state,stat){var el=$('as_'+id);if(el){el.className='auto-step '+state;el.querySelector('.as-ico').textContent=state==='done'?'✓':state==='run'?'…':state==='err'?'×':'○';}if($('ast_'+id))$('ast_'+id).textContent=stat||'';}
+async function runAutopilot(){
+ if(BUSY){notif('Already running','warn');return;}
+ audit('autopilot_start','');
+ for(var i=0;i<AUTO_STEPS.length;i++){
+   var st=AUTO_STEPS[i];autoMark(st.id,'run','running…');
+   try{var msg=await st.fn();autoMark(st.id,'done',msg||'done');S.done[st.id]=true;persist();}
+   catch(e){autoMark(st.id,'err',e.message);notif('Autopilot stopped at '+st.id+': '+e.message,'error');audit('autopilot_error',st.id+': '+e.message);return;}
+ }
+ audit('autopilot_done','');notif('Autopilot complete — review results','ok');renderNav();
+}
+function autoDedup(){runDedup_silent();return activeRecords().length+' unique';}
+function runDedup_silent(){var saved=$('dthr');var thr=saved?parseFloat(saved.value)||0.9:0.9;S.records.forEach(function(r){r.dup=false;});var seen={},kept=[];S.records.forEach(function(r){var doi=(r.doi||'').toLowerCase();var dup=false;if(doi&&seen[doi]){r.dup=true;dup=true;}if(!dup){var nt=normTitle(r.title);for(var k=0;k<kept.length;k++){if(normTitle(kept[k].title)===nt||(nt.length>15&&levRatio(nt,normTitle(kept[k].title))>=thr)){r.dup=true;dup=true;break;}}}if(!dup){kept.push(r);if(doi)seen[doi]=1;}});S.prisma.dup_removed=S.records.filter(function(r){return r.dup}).length;persist();}
+async function autoScreen(){activeRecords().forEach(function(r){if(!r.screen)r.status='pending';});await screenAll();return activeRecords().filter(function(r){return r.status==='included'||r.status==='maybe'}).length+' advanced';}
+async function autoFulltext(){var loaded=includedTiAb().filter(function(r){return S.fulltext[r.id]});if(!loaded.length){includedTiAb().forEach(function(r){if(!r.ftStatus)r.ftStatus='included';});recomputeFt();return 'no PDFs — kept on abstracts';}for(var i=0;i<loaded.length;i++){try{await ftScreenOne(loaded[i].id);}catch(e){}}includedTiAb().forEach(function(r){if(!r.ftStatus)r.ftStatus='included';});recomputeFt();return includedStudies().length+' included';}
+async function autoAppraise(){var recs=includedStudies();for(var i=0;i<recs.length;i++){try{await appraiseOne(recs[i].id);}catch(e){}}return recs.length+' appraised';}
+async function autoExtract(){var recs=includedStudies();for(var i=0;i<recs.length;i++){try{await extractOne(recs[i].id);}catch(e){}}return outcomeRows().length+' outcome rows';}
+async function autoMeta(){var b=buildMetaStudies();if(b.studies.length<2)return 'skipped (<2 poolable)';_metaResult=metaAnalyze(b.studies,S.metaMethod);_metaRatio=b.ratio;_metaResult.ratio=b.ratio;_metaResult.measure=b.measure;_metaResult.outcome='Pooled';try{await aiInterpretMetaSilent();}catch(e){}return _metaResult.k+' studies pooled';}
+async function aiInterpretMetaSilent(){var r=_metaResult;var d=function(v){return r.ratio?Math.exp(v):v;};var ctx='Pooled '+r.measure+'='+fmt(d(r.est))+' (CI '+fmt(d(r.ciLo))+'-'+fmt(d(r.ciHi))+'), p='+fmt(r.p,4)+', I²='+fmt(r.I2,0)+'%, k='+r.k;r.interpretation=await callClaude({system:'Biostatistician. Interpret this meta-analysis in 2 short paragraphs for a '+docTypeName()+'. No invented numbers.',user:ctx,maxTokens:600});persist();}
+function autoPrisma(){computePrisma();return S.prisma.included+' included';}
+async function autoReport(){var html=await callClaude({system:reportSystem(),user:'Write the full '+S.documentType+' synthesis from this dataset:\n\n'+reportContext(),maxTokens:16000,thinking:true});S.report=html.replace(/```html/gi,'').replace(/```/g,'').trim();persist();return Math.round(S.report.length/1000)+'k chars';}
+
+/* ====================== CHECKPOINT LOAD ====================== */
+$('ckptInput').addEventListener('change',function(e){
+ var f=e.target.files[0];if(!f)return;var rd=new FileReader();
+ rd.onload=function(ev){try{var p=JSON.parse(ev.target.result);if(p&&(p.v===8||p.v===7)){var key=S._key;S=Object.assign(DEFAULT_STATE(),p);S.v=8;S._key=key;persist();CUR='setup';render();notif('Checkpoint loaded','ok');audit('checkpoint_loaded',f.name);}else notif('Not a valid EvidenceOS checkpoint','error');}catch(err){notif('Load failed: '+err.message,'error');}};
+ rd.readAsText(f);e.target.value='';
+});
+
+/* ====================== MODE TOGGLE ====================== */
+function setMode(m){
+ S.mode=m;persist();
+ if($('modeStep'))$('modeStep').classList.toggle('on',m==='stepwise');
+ if($('modeAuto'))$('modeAuto').classList.toggle('on',m==='autopilot');
+ if(m==='autopilot'){openModal('autopilot');}
+ audit('mode_set',m);
+}
+/* ====================== ERROR BOUNDARY ====================== */
+function showFatal(msg){
+ var mp=$('mainPanel');
+ if(mp)mp.innerHTML='<div class="errbar"><b>⚠ Something went wrong rendering this view.</b><br>'+esc(msg)+'<br><br>Your data is safe (auto-saved). Try <button class="btn bs bsm" onclick="goStage(\'setup\')">go to Setup</button> or <button class="btn bs bsm" onclick="location.reload()">reload</button>. If it persists, use 💾 Save to export a checkpoint and report the message above.</div>';
+}
+window.addEventListener('error',function(e){try{showFatal((e&&e.message)||'Unknown error');}catch(_){} });
+window.addEventListener('unhandledrejection',function(e){try{notif('Async error: '+((e.reason&&e.reason.message)||e.reason||'unknown'),'error');}catch(_){} });
+
+/* ====================== INIT ====================== */
+function init(){
+ try{ restore(); }catch(e){}
+ try{
+   var th=document.documentElement.getAttribute('data-theme');
+   if($('themeBtn'))$('themeBtn').textContent=th==='light'?'🌙':'☀️';
+   if($('domBadge'))$('domBadge').textContent=dom().badge;
+   if($('modeStep'))$('modeStep').classList.toggle('on',S.mode!=='autopilot');
+   if($('modeAuto'))$('modeAuto').classList.toggle('on',S.mode==='autopilot');
+   setApiStatus(apiKey()?'on':'off');
+   render();
+   if(!apiKey()&&S.records.length===0){setTimeout(function(){notif('Welcome to EvidenceOS — open ⚙ Settings to add your Claude API key, then pick Device or Drug pipeline.','in');},600);}
+ }catch(e){ showFatal(e.message); }
+}
+init();
+/* end EvidenceOS */
+</script>
+</body>
+</html>
